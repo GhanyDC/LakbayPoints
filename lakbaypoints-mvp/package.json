@@ -1,0 +1,23 @@
+{
+  "name": "lakbaypoints-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "apps/dashboard",
+    "packages/shared"
+  ],
+  "scripts": {
+    "bootstrap": "npm install",
+    "mobile": "npm run start -w @lakbaypoints/mobile",
+    "dashboard": "npm run dev -w @lakbaypoints/dashboard",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.4",
+    "typescript": "~6.0.3"
+  }
+}

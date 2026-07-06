@@ -1,0 +1,21 @@
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Next.js
+.next/
+out/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment files
+.env
+.env*.local
+
+# OS/editor files
+.DS_Store
+Thumbs.db

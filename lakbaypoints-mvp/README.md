@@ -11,6 +11,7 @@
 **EDSA–MRT3 Guadalupe to Cubao Sustainable Trip Chain Corridor**
 
 Selected station access zones:
+
 - Guadalupe
 - Boni
 - Shaw Boulevard
@@ -42,11 +43,47 @@ lakbaypoints-mvp/
     codex-prompt-01-repo-setup.md
 ```
 
+## Local Development
+
+Install dependencies from the monorepo root:
+
+```bash
+cd lakbaypoints-mvp
+npm install
+```
+
+Run the Expo mobile app:
+
+```bash
+npm run mobile
+```
+
+Run the Next.js dashboard app:
+
+```bash
+npm run dashboard
+```
+
+Useful workspace checks:
+
+```bash
+npm run typecheck
+npm run format:check
+```
+
+Package summary:
+
+- `apps/mobile` is the Expo React Native TypeScript app.
+- `apps/dashboard` is the Next.js TypeScript dashboard app.
+- `packages/shared` is the placeholder shared TypeScript package.
+- `data/routes`, `data/traces`, and `data/seed` are reserved for MVP demo data.
+
 ## Build Principle
 
 This is a **competition MVP**, not full production.
 
 The MVP must prove one loop:
+
 1. Commuter selects a sustainable Guadalupe → Cubao route.
 2. Trip is verified using a rule-based classifier.
 3. User earns Lakbay Score and campaign-based Lakbay Points.

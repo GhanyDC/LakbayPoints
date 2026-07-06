@@ -1,0 +1,8 @@
+docs/**
+apps/**/README.md
+data/**/README.md
+packages/**/README.md
+node_modules/
+.next/
+.expo/
+dist/

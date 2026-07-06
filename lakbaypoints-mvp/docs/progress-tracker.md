@@ -10,8 +10,8 @@ Update this file after every meaningful change.
 
 | Module | Status | Owner | Notes |
 |---|---|---|---|
-| Repo setup | Not started | TBD | Monorepo setup needed |
-| Docs setup | Ready | Team | Initial docs created |
+| Repo setup | Done | TBD | npm workspace monorepo foundation added |
+| Docs setup | Done | Team | Initial docs preserved |
 | Mobile route search | Not started | TBD | |
 | Route comparison | Not started | TBD | |
 | Route detail | Not started | TBD | |
@@ -29,6 +29,12 @@ Update this file after every meaningful change.
 | Demo script | Not started | TBD | |
 
 ## Change Log
+
+### 2026-07-07
+
+- Set up the npm workspace monorepo foundation.
+- Added Expo, Next.js, and shared TypeScript package starters.
+- Preserved existing planning documents and updated tracker status.
 
 ### YYYY-MM-DD
 
@@ -66,8 +72,4 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Set up the monorepo.
-2. Install mobile and dashboard starters.
-3. Add shared TypeScript types.
-4. Add static demo route data.
-5. Build route comparison screen.
+1. Build static route data and route comparison screen.
