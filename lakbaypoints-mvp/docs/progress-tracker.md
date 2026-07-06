@@ -13,7 +13,8 @@ Update this file after every meaningful change.
 | Repo setup | Done | TBD | npm workspace monorepo foundation added |
 | Docs setup | Done | Team | Initial docs preserved |
 | Mobile route search | Not started | TBD | |
-| Route comparison | Not started | TBD | |
+| Static route data | Done | TBD | Guadalupe to Cubao demo route options added |
+| Mobile route comparison | Done | TBD | Three static route cards in Expo starter |
 | Route detail | Not started | TBD | |
 | Trip playback | Not started | TBD | |
 | Classifier | Not started | TBD | |
@@ -32,6 +33,9 @@ Update this file after every meaningful change.
 
 ### 2026-07-07
 
+- Added static Guadalupe to Cubao route data for the private baseline, recommended sustainable trip, and Phase 2 preview.
+- Added shared route types and exported demo route options.
+- Replaced the mobile starter screen with the route comparison screen.
 - Set up the npm workspace monorepo foundation.
 - Added Expo, Next.js, and shared TypeScript package starters.
 - Preserved existing planning documents and updated tracker status.
@@ -46,7 +50,7 @@ Update this file after every meaningful change.
 ## MVP Demo Readiness Checklist
 
 - [ ] Can search Guadalupe to Cubao route
-- [ ] Can compare private baseline vs sustainable trip
+- [x] Can compare private baseline vs sustainable trip
 - [ ] Can open sustainable route details
 - [ ] Can play sample trip trace
 - [ ] Can show classifier confidence score
@@ -72,4 +76,4 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Build static route data and route comparison screen.
+1. Build route detail screen and trip playback placeholder.

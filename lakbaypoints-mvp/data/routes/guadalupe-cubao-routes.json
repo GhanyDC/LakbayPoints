@@ -1,0 +1,124 @@
+[
+  {
+    "id": "private-vehicle-baseline",
+    "name": "Private Vehicle Baseline",
+    "type": "private_baseline",
+    "origin": "Guadalupe",
+    "destination": "Cubao / Araneta Center",
+    "tripChainLabel": "Private vehicle via EDSA",
+    "estimatedTimeMin": 46,
+    "estimatedCostPhp": 210,
+    "accessScore": "Poor",
+    "trafficCondition": "Heavy",
+    "co2eBaselineKg": 3.4,
+    "notes": [
+      "Comparison only",
+      "No Lakbay Score or Lakbay Points for this baseline"
+    ],
+    "segments": [
+      {
+        "id": "private-edsa-guadalupe-cubao",
+        "mode": "private_vehicle",
+        "label": "Drive via EDSA",
+        "startName": "Guadalupe",
+        "endName": "Cubao / Araneta Center",
+        "distanceKm": 8.4,
+        "estimatedTimeMin": 46
+      }
+    ]
+  },
+  {
+    "id": "recommended-sustainable-trip",
+    "name": "Recommended Sustainable Trip",
+    "type": "sustainable",
+    "origin": "Guadalupe",
+    "destination": "Cubao / Araneta Center",
+    "tripChainLabel": "Walk -> MRT3 -> Walk",
+    "estimatedTimeMin": 32,
+    "estimatedCostPhp": 28,
+    "accessScore": "Good",
+    "estimatedCo2eAvoidedKg": 2.8,
+    "lakbayScoreReward": 120,
+    "campaignPointsReward": 40,
+    "notes": [
+      "Recommended MVP route",
+      "Sustainable Trip Chain using MRT3 and walking access segments"
+    ],
+    "segments": [
+      {
+        "id": "walk-guadalupe-origin-station",
+        "mode": "walk",
+        "label": "Walk to Guadalupe MRT3 station",
+        "startName": "Guadalupe area",
+        "endName": "Guadalupe MRT3",
+        "distanceKm": 0.45,
+        "estimatedTimeMin": 7
+      },
+      {
+        "id": "mrt3-guadalupe-cubao",
+        "mode": "mrt",
+        "label": "Ride MRT3 to Araneta Center-Cubao",
+        "startName": "Guadalupe MRT3",
+        "endName": "Araneta Center-Cubao MRT3",
+        "distanceKm": 7.2,
+        "estimatedTimeMin": 19
+      },
+      {
+        "id": "walk-cubao-station-destination",
+        "mode": "walk",
+        "label": "Walk to Cubao / Araneta Center",
+        "startName": "Araneta Center-Cubao MRT3",
+        "endName": "Cubao / Araneta Center",
+        "distanceKm": 0.35,
+        "estimatedTimeMin": 6
+      }
+    ]
+  },
+  {
+    "id": "phase-2-multimodal-preview",
+    "name": "Phase 2 Multimodal Preview",
+    "type": "phase2_preview",
+    "origin": "Guadalupe",
+    "destination": "Cubao / Araneta Center",
+    "tripChainLabel": "Walk / e-bike connector -> transit/ferry connector -> Walk",
+    "estimatedTimeMin": 38,
+    "estimatedCostPhp": 45,
+    "accessScore": "Fair",
+    "estimatedCo2eAvoidedKg": 2.4,
+    "phaseLabel": "Phase 2 Preview",
+    "futureIntegrationNote": "Requires future partner/data integration",
+    "notes": [
+      "Future extendability preview",
+      "Not the MVP live route for this pilot corridor"
+    ],
+    "segments": [
+      {
+        "id": "phase2-walk-ebike-connector",
+        "mode": "ebike",
+        "label": "Walk / e-bike connector to transfer point",
+        "startName": "Guadalupe area",
+        "endName": "Future connector point",
+        "distanceKm": 1.1,
+        "estimatedTimeMin": 9
+      },
+      {
+        "id": "phase2-transit-ferry-connector",
+        "mode": "ferry",
+        "label": "Transit/ferry connector preview",
+        "startName": "Future connector point",
+        "endName": "Cubao connector area",
+        "distanceKm": 6.8,
+        "estimatedTimeMin": 23
+      },
+      {
+        "id": "phase2-walk-destination",
+        "mode": "walk",
+        "label": "Walk to Cubao / Araneta Center",
+        "startName": "Cubao connector area",
+        "endName": "Cubao / Araneta Center",
+        "distanceKm": 0.4,
+        "estimatedTimeMin": 6
+      }
+    ]
+  }
+]
