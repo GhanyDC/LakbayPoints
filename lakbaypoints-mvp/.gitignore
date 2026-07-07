@@ -11,6 +11,7 @@ out/
 
 # TypeScript
 *.tsbuildinfo
+.classifier-check/
 
 # Environment files
 .env

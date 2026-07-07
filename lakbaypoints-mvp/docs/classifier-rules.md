@@ -120,3 +120,16 @@ Create two traces:
 2. `suspicious_trace_rejected.json`
    - should return Suspicious pattern or Unverified trip
    - target confidence: below 60
+
+## Implemented MVP Simplifications
+
+The current classifier implementation is intentionally lightweight for the competition MVP:
+
+- uses approximate demo coordinates for the EDSA-MRT3 Guadalupe to Cubao corridor;
+- checks whether most trace points stay inside a simple pilot-corridor bounding area;
+- checks station/access proximity against seeded MRT3 access points;
+- checks speed patterns using reported speed plus computed point-to-point speed;
+- treats very short traces, teleport-like jumps, impossible speeds, and missing walking segments as suspicious;
+- uses phone activity labels only as a supporting signal, not as the sole basis for rewards.
+
+This is not real map matching, real GPS tracking, a full NCR routing engine, or a trained ML model.

@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "ignoreDeprecations": "6.0",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "outDir": ".classifier-check",
+    "rootDir": "."
+  },
+  "include": [
+    "scripts/check-classifier.ts",
+    "packages/shared/src/**/*.ts",
+    "data/traces/*.json"
+  ]
+}

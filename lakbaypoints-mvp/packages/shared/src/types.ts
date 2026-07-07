@@ -51,3 +51,56 @@ export type RouteOption = {
   phaseLabel?: string;
   futureIntegrationNote?: string;
 };
+
+export type GpsTraceActivity = "walking" | "still" | "in_vehicle" | "unknown";
+
+export type GpsTracePoint = {
+  timestamp: string;
+  latitude: number;
+  longitude: number;
+  speedKph?: number;
+  activity?: GpsTraceActivity;
+};
+
+export type RewardEligibility = "Full" | "Reduced" | "None";
+
+export type VerificationResultLabel =
+  | "Verified sustainable trip chain"
+  | "Partially verified trip"
+  | "Unverified trip"
+  | "Suspicious pattern";
+
+export type ClassifierSignalChecklist = {
+  routeMatch: boolean;
+  speedPatternValid: boolean;
+  walkingSegmentsDetected: boolean;
+  stationDwellDetected: boolean;
+  proximityValid: boolean;
+  impossibleMovementDetected: boolean;
+  suspiciousPattern: boolean;
+  activityRecognitionSupport?: boolean;
+};
+
+export type ClassifierResult = {
+  confidenceScore: number;
+  result: VerificationResultLabel;
+  rewardEligibility: RewardEligibility;
+  signals: ClassifierSignalChecklist;
+  explanation: string[];
+};
+
+export type StationAccessPoint = {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type ClassifySustainableTripChainInput = {
+  selectedRoute: RouteOption | string;
+  gpsTrace: GpsTracePoint[];
+  expectedRoute?: RouteOption;
+  routeOptions?: RouteOption[];
+  stationAccessPoints?: StationAccessPoint[];
+  activityLabels?: GpsTraceActivity[];
+};

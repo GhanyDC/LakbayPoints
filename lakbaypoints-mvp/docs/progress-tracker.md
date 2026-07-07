@@ -16,10 +16,10 @@ Update this file after every meaningful change.
 | Static route data | Done | TBD | Guadalupe to Cubao demo route options added |
 | Mobile route comparison | Done | TBD | Three static route cards in Expo starter |
 | Route detail | Done | TBD | Recommended sustainable route detail screen added |
-| Trip playback | Done | TBD | Placeholder playback and verification result state added |
-| Classifier | Not started | TBD | |
-| Valid GPS trace | Not started | TBD | Collect or seed |
-| Suspicious GPS trace | Not started | TBD | For anti-cheating demo |
+| Trip playback | Done | TBD | Connected to shared classifier result |
+| Classifier | Done | TBD | Rule-based Sustainable Trip Chain Classifier added |
+| Valid GPS trace | Done | TBD | Seeded Guadalupe to Cubao sustainable trace |
+| Suspicious GPS trace | Done | TBD | Seeded rejected anti-cheating trace |
 | Reward screen | Not started | TBD | Lakbay Score + Points |
 | Access report form | Not started | TBD | |
 | Dashboard layout | Not started | TBD | |
@@ -33,9 +33,12 @@ Update this file after every meaningful change.
 
 ### 2026-07-08
 
+- Implemented the rule-based Sustainable Trip Chain Classifier.
+- Added valid and suspicious sample GPS traces.
+- Connected mobile trip verification to classifier output with a suspicious-trace demo path.
 - Added a route detail flow from the recommended sustainable route CTA.
 - Added a trip playback placeholder with progress state and a static verification result.
-- Kept verification as a placeholder for the future classifier task.
+- Initially kept verification as a placeholder before the classifier task.
 
 ### 2026-07-07
 
@@ -60,7 +63,7 @@ Update this file after every meaningful change.
 - [x] Can open sustainable route details
 - [x] Can play sample trip trace
 - [x] Can show classifier confidence score
-- [ ] Can reject suspicious trace
+- [x] Can reject suspicious trace
 - [ ] Can show Lakbay Score and campaign points
 - [ ] Can submit access-barrier report
 - [ ] Can view report in dashboard
@@ -82,4 +85,4 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Implement Sustainable Trip Chain Classifier with valid and suspicious sample traces.
+1. Build Lakbay Score and campaign points reward result screen.

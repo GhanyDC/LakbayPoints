@@ -10,9 +10,14 @@ import {
   View,
 } from "react-native";
 import {
+  classifySustainableTripChain,
   guadalupeCubaoRoutes,
+  suspiciousTraceRejected,
+  type ClassifierResult,
+  type ClassifierSignalChecklist,
   type RouteOption,
   type RouteSegment,
+  validSustainableGuadalupeCubaoTrace,
 } from "@lakbaypoints/shared";
 
 const arrow = "\u2192";
@@ -21,6 +26,7 @@ const sustainableRoute =
   guadalupeCubaoRoutes[0];
 
 type ScreenName = "comparison" | "detail" | "playback";
+type TraceMode = "valid" | "suspicious";
 
 type PlaybackStep = {
   segmentId: string;
@@ -41,14 +47,6 @@ const playbackSteps: PlaybackStep[] = [
     status: "Approaching destination",
   },
 ];
-
-const verificationSignals = [
-  ["Route match", "Passed"],
-  ["Speed pattern", "Passed"],
-  ["Walking segments", "Passed"],
-  ["Station proximity", "Passed"],
-  ["Suspicious movement", "Not detected"],
-] as const;
 
 function readableTripChain(route: RouteOption) {
   return (
@@ -86,6 +84,29 @@ function segmentStepTitle(segment: RouteSegment, index: number) {
   }
 
   return segment.label;
+}
+
+function classifierSignalRows(signals: ClassifierSignalChecklist) {
+  return [
+    ["Route match", signals.routeMatch ? "Passed" : "Needs review"],
+    ["Speed pattern", signals.speedPatternValid ? "Passed" : "Needs review"],
+    [
+      "Walking segments",
+      signals.walkingSegmentsDetected ? "Passed" : "Needs review",
+    ],
+    ["Station proximity", signals.proximityValid ? "Passed" : "Needs review"],
+    ["Station dwell", signals.stationDwellDetected ? "Passed" : "Needs review"],
+    [
+      "Activity recognition",
+      signals.activityRecognitionSupport ? "Supported" : "Limited",
+    ],
+    [
+      "Suspicious movement",
+      signals.suspiciousPattern || signals.impossibleMovementDetected
+        ? "Flagged"
+        : "Not detected",
+    ],
+  ] as const;
 }
 
 function RouteCard({
@@ -401,11 +422,28 @@ function TripPlaybackScreen({
   route: RouteOption;
   onBackToDetail: () => void;
 }) {
-  const [resultVisible, setResultVisible] = useState(false);
+  const [traceMode, setTraceMode] = useState<TraceMode>("valid");
+  const [classifierResult, setClassifierResult] =
+    useState<ClassifierResult | null>(null);
+  const resultVisible = classifierResult !== null;
   const activeIndex = resultVisible ? route.segments.length - 1 : 1;
   const currentSegment = route.segments[activeIndex];
   const currentStatus =
     playbackSteps[activeIndex]?.status ?? "Trip segment in progress";
+  const runVerification = (mode: TraceMode) => {
+    const gpsTrace =
+      mode === "valid"
+        ? validSustainableGuadalupeCubaoTrace
+        : suspiciousTraceRejected;
+
+    setTraceMode(mode);
+    setClassifierResult(
+      classifySustainableTripChain({
+        selectedRoute: route,
+        gpsTrace,
+      }),
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -427,6 +465,11 @@ function TripPlaybackScreen({
         </Text>
         <Text style={styles.statusBody}>{currentStatus}</Text>
       </View>
+
+      <Text style={styles.classifierNote}>
+        For MVP, verification uses a rule-based confidence engine based on
+        multiple trip signals.
+      </Text>
 
       <View style={styles.stepList}>
         {route.segments.map((segment, index) => (
@@ -453,24 +496,44 @@ function TripPlaybackScreen({
         ))}
       </View>
 
-      {resultVisible ? (
+      {classifierResult ? (
         <View style={[styles.card, styles.resultCard]}>
           <Text style={styles.sectionKicker}>
-            Placeholder verification result
+            Sustainable Trip Chain Classifier
+          </Text>
+          <Text style={styles.traceModeText}>
+            Demo trace:{" "}
+            {traceMode === "valid"
+              ? "Valid sustainable trip"
+              : "Suspicious trace"}
           </Text>
           <Text style={styles.resultLabel}>Confidence Score</Text>
-          <Text style={styles.resultScore}>87%</Text>
-          <Text style={styles.resultTitle}>
-            Result: Verified sustainable trip chain
+          <Text style={styles.resultScore}>
+            {classifierResult.confidenceScore}%
           </Text>
-          <Text style={styles.resultBody}>Reward Eligibility: Full</Text>
+          <Text style={styles.resultTitle}>
+            Result: {classifierResult.result}
+          </Text>
+          <Text style={styles.resultBody}>
+            Reward Eligibility: {classifierResult.rewardEligibility}
+          </Text>
           <Text style={styles.sectionKicker}>Signal checklist</Text>
           <View style={styles.signalList}>
-            {verificationSignals.map(([label, value]) => (
-              <View style={styles.signalRow} key={label}>
-                <Text style={styles.signalLabel}>{label}</Text>
-                <Text style={styles.signalValue}>{value}</Text>
-              </View>
+            {classifierSignalRows(classifierResult.signals).map(
+              ([label, value]) => (
+                <View style={styles.signalRow} key={label}>
+                  <Text style={styles.signalLabel}>{label}</Text>
+                  <Text style={styles.signalValue}>{value}</Text>
+                </View>
+              ),
+            )}
+          </View>
+          <Text style={styles.sectionKicker}>Explanation</Text>
+          <View style={styles.explanationList}>
+            {classifierResult.explanation.slice(0, 5).map((message) => (
+              <Text style={styles.explanationText} key={message}>
+                {message}
+              </Text>
             ))}
           </View>
         </View>
@@ -479,10 +542,17 @@ function TripPlaybackScreen({
       <View style={styles.actionRow}>
         <Pressable
           accessibilityRole="button"
-          onPress={() => setResultVisible(true)}
+          onPress={() => runVerification("valid")}
           style={styles.primaryAction}
         >
           <Text style={styles.primaryActionText}>Complete Trip & Verify</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => runVerification("suspicious")}
+          style={styles.warningAction}
+        >
+          <Text style={styles.warningActionText}>Test suspicious trace</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -822,6 +892,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "800",
   },
+  warningAction: {
+    alignItems: "center",
+    backgroundColor: "#fef3c7",
+    borderColor: "#f59e0b",
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingVertical: 13,
+  },
+  warningActionText: {
+    color: "#92400e",
+    fontSize: 16,
+    fontWeight: "800",
+  },
   secondaryAction: {
     alignItems: "center",
     backgroundColor: "#ffffff",
@@ -900,6 +983,18 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 23,
   },
+  classifierNote: {
+    backgroundColor: "#eff6ff",
+    borderColor: "#bfdbfe",
+    borderRadius: 8,
+    borderWidth: 1,
+    color: "#1e3a8a",
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+    marginBottom: 12,
+    padding: 14,
+  },
   playbackStepCard: {
     backgroundColor: "#ffffff",
     borderColor: "#d9e2ea",
@@ -927,6 +1022,13 @@ const styles = StyleSheet.create({
     fontSize: 44,
     fontWeight: "800",
     lineHeight: 50,
+  },
+  traceModeText: {
+    color: "#334155",
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+    marginBottom: 12,
   },
   resultLabel: {
     color: "#475569",
@@ -972,5 +1074,15 @@ const styles = StyleSheet.create({
     color: "#0f766e",
     fontSize: 14,
     fontWeight: "800",
+  },
+  explanationList: {
+    gap: 7,
+    marginTop: 4,
+  },
+  explanationText: {
+    color: "#475569",
+    fontSize: 13,
+    fontWeight: "600",
+    lineHeight: 18,
   },
 });
