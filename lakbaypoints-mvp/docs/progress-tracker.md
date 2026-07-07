@@ -15,8 +15,8 @@ Update this file after every meaningful change.
 | Mobile route search | Not started | TBD | |
 | Static route data | Done | TBD | Guadalupe to Cubao demo route options added |
 | Mobile route comparison | Done | TBD | Three static route cards in Expo starter |
-| Route detail | Not started | TBD | |
-| Trip playback | Not started | TBD | |
+| Route detail | Done | TBD | Recommended sustainable route detail screen added |
+| Trip playback | Done | TBD | Placeholder playback and verification result state added |
 | Classifier | Not started | TBD | |
 | Valid GPS trace | Not started | TBD | Collect or seed |
 | Suspicious GPS trace | Not started | TBD | For anti-cheating demo |
@@ -30,6 +30,12 @@ Update this file after every meaningful change.
 | Demo script | Not started | TBD | |
 
 ## Change Log
+
+### 2026-07-08
+
+- Added a route detail flow from the recommended sustainable route CTA.
+- Added a trip playback placeholder with progress state and a static verification result.
+- Kept verification as a placeholder for the future classifier task.
 
 ### 2026-07-07
 
@@ -51,9 +57,9 @@ Update this file after every meaningful change.
 
 - [ ] Can search Guadalupe to Cubao route
 - [x] Can compare private baseline vs sustainable trip
-- [ ] Can open sustainable route details
-- [ ] Can play sample trip trace
-- [ ] Can show classifier confidence score
+- [x] Can open sustainable route details
+- [x] Can play sample trip trace
+- [x] Can show classifier confidence score
 - [ ] Can reject suspicious trace
 - [ ] Can show Lakbay Score and campaign points
 - [ ] Can submit access-barrier report
@@ -76,4 +82,4 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Build route detail screen and trip playback placeholder.
+1. Implement Sustainable Trip Chain Classifier with valid and suspicious sample traces.
