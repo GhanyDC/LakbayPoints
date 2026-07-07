@@ -10,11 +10,14 @@ import {
   View,
 } from "react-native";
 import {
+  calculateTripRewards,
   classifySustainableTripChain,
+  demoUserRewardState,
   guadalupeCubaoRoutes,
   suspiciousTraceRejected,
   type ClassifierResult,
   type ClassifierSignalChecklist,
+  type RewardResult,
   type RouteOption,
   type RouteSegment,
   validSustainableGuadalupeCubaoTrace,
@@ -25,8 +28,12 @@ const sustainableRoute =
   guadalupeCubaoRoutes.find((route) => route.type === "sustainable") ??
   guadalupeCubaoRoutes[0];
 
-type ScreenName = "comparison" | "detail" | "playback";
+type ScreenName = "comparison" | "detail" | "playback" | "rewards";
 type TraceMode = "valid" | "suspicious";
+type VerifiedTripState = {
+  classifierResult: ClassifierResult;
+  traceMode: TraceMode;
+};
 
 type PlaybackStep = {
   segmentId: string;
@@ -418,9 +425,14 @@ function ProgressIndicator({
 function TripPlaybackScreen({
   route,
   onBackToDetail,
+  onViewRewards,
 }: {
   route: RouteOption;
   onBackToDetail: () => void;
+  onViewRewards: (
+    classifierResult: ClassifierResult,
+    traceMode: TraceMode,
+  ) => void;
 }) {
   const [traceMode, setTraceMode] = useState<TraceMode>("valid");
   const [classifierResult, setClassifierResult] =
@@ -540,6 +552,15 @@ function TripPlaybackScreen({
       ) : null}
 
       <View style={styles.actionRow}>
+        {classifierResult ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onViewRewards(classifierResult, traceMode)}
+            style={styles.primaryAction}
+          >
+            <Text style={styles.primaryActionText}>View Rewards</Text>
+          </Pressable>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           onPress={() => runVerification("valid")}
@@ -566,9 +587,123 @@ function TripPlaybackScreen({
   );
 }
 
+function RewardMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.metric}>
+      <Text style={styles.metricLabel}>{label}</Text>
+      <Text style={styles.metricValue}>{value}</Text>
+    </View>
+  );
+}
+
+function RewardResultScreen({
+  route,
+  verifiedTrip,
+  onBackToRoutes,
+}: {
+  route: RouteOption;
+  verifiedTrip: VerifiedTripState;
+  onBackToRoutes: () => void;
+}) {
+  const rewardResult: RewardResult = useMemo(
+    () =>
+      calculateTripRewards({
+        classifierResult: verifiedTrip.classifierResult,
+        selectedRoute: route,
+        currentUserRewardState: demoUserRewardState,
+      }),
+    [route, verifiedTrip.classifierResult],
+  );
+  const traceLabel =
+    verifiedTrip.traceMode === "valid"
+      ? "Valid sustainable trip"
+      : "Suspicious trace";
+
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <AppHeader eyebrow="Reward the Shift" title="Reward the Shift" />
+
+      <View style={[styles.card, styles.rewardHeroCard]}>
+        <Text style={styles.sectionKicker}>Verification result summary</Text>
+        <Text style={styles.detailTitle}>
+          {verifiedTrip.classifierResult.result}
+        </Text>
+        <Text style={styles.traceModeText}>
+          {traceLabel} - Confidence Score:{" "}
+          {verifiedTrip.classifierResult.confidenceScore}%
+        </Text>
+        <Text style={styles.resultBody}>
+          Reward Eligibility: {verifiedTrip.classifierResult.rewardEligibility}
+        </Text>
+      </View>
+
+      <View style={styles.metricGrid}>
+        <RewardMetric
+          label="Lakbay Score earned"
+          value={`+${rewardResult.lakbayScoreEarned}`}
+        />
+        <RewardMetric
+          label="Lakbay Points earned"
+          value={`+${rewardResult.campaignPointsEarned}`}
+        />
+        <RewardMetric
+          label="Updated Lakbay Points"
+          value={`${rewardResult.updatedCampaignPoints}`}
+        />
+        <RewardMetric
+          label="Updated Lakbay Score"
+          value={`${rewardResult.updatedLakbayScore}`}
+        />
+        <RewardMetric
+          label="Campaign cap remaining"
+          value={`${rewardResult.campaignCapRemaining} points`}
+        />
+        <RewardMetric
+          label="Estimated CO2e avoided"
+          value={`${rewardResult.estimatedCo2eAvoidedKg} kg`}
+        />
+      </View>
+
+      <View style={styles.statusCard}>
+        <Text style={styles.sectionKicker}>Reward message</Text>
+        <Text style={styles.statusBody}>{rewardResult.rewardMessage}</Text>
+      </View>
+
+      <Text style={styles.infoNote}>
+        Lakbay Score is a non-cash progress meter. Lakbay Points are capped,
+        campaign-based incentives for verified sustainable trip chains.
+      </Text>
+
+      <View style={styles.actionRow}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => undefined}
+          style={styles.primaryAction}
+        >
+          <Text style={styles.primaryActionText}>Report an Access Barrier</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBackToRoutes}
+          style={styles.secondaryAction}
+        >
+          <Text style={styles.secondaryActionText}>Back to Routes</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
+}
+
 export default function App() {
   const [screen, setScreen] = useState<ScreenName>("comparison");
+  const [verifiedTrip, setVerifiedTrip] = useState<VerifiedTripState | null>(
+    null,
+  );
   const route = useMemo(() => sustainableRoute, []);
+  const backToRoutes = () => {
+    setVerifiedTrip(null);
+    setScreen("comparison");
+  };
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -587,6 +722,17 @@ export default function App() {
         <TripPlaybackScreen
           route={route}
           onBackToDetail={() => setScreen("detail")}
+          onViewRewards={(classifierResult, traceMode) => {
+            setVerifiedTrip({ classifierResult, traceMode });
+            setScreen("rewards");
+          }}
+        />
+      ) : null}
+      {screen === "rewards" && verifiedTrip ? (
+        <RewardResultScreen
+          route={route}
+          verifiedTrip={verifiedTrip}
+          onBackToRoutes={backToRoutes}
         />
       ) : null}
     </SafeAreaView>
@@ -1016,6 +1162,10 @@ const styles = StyleSheet.create({
   resultCard: {
     borderColor: "#0f766e",
     marginTop: 16,
+  },
+  rewardHeroCard: {
+    borderColor: "#0f766e",
+    marginBottom: 14,
   },
   resultScore: {
     color: "#0f766e",

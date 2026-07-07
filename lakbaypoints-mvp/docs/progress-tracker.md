@@ -20,7 +20,8 @@ Update this file after every meaningful change.
 | Classifier | Done | TBD | Rule-based Sustainable Trip Chain Classifier added |
 | Valid GPS trace | Done | TBD | Seeded Guadalupe to Cubao sustainable trace |
 | Suspicious GPS trace | Done | TBD | Seeded rejected anti-cheating trace |
-| Reward screen | Not started | TBD | Lakbay Score + Points |
+| Reward logic | Done | TBD | Shared Lakbay Score and campaign cap calculation added |
+| Reward screen | Done | TBD | Reward the Shift mobile screen added |
 | Access report form | Not started | TBD | |
 | Dashboard layout | Not started | TBD | |
 | Report queue | Not started | TBD | |
@@ -33,6 +34,9 @@ Update this file after every meaningful change.
 
 ### 2026-07-08
 
+- Added shared Lakbay Score and capped campaign points reward logic.
+- Added demo commuter reward state for the MVP reward result.
+- Connected mobile verification output to the Reward the Shift screen.
 - Implemented the rule-based Sustainable Trip Chain Classifier.
 - Added valid and suspicious sample GPS traces.
 - Connected mobile trip verification to classifier output with a suspicious-trace demo path.
@@ -64,7 +68,7 @@ Update this file after every meaningful change.
 - [x] Can play sample trip trace
 - [x] Can show classifier confidence score
 - [x] Can reject suspicious trace
-- [ ] Can show Lakbay Score and campaign points
+- [x] Can show Lakbay Score and campaign points
 - [ ] Can submit access-barrier report
 - [ ] Can view report in dashboard
 - [ ] Can update report status
@@ -85,4 +89,4 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Build Lakbay Score and campaign points reward result screen.
+1. Build Report Access Barriers form and confirmation screen.

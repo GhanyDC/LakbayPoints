@@ -9,11 +9,11 @@
     "ignoreDeprecations": "6.0",
     "types": ["node"],
     "skipLibCheck": true,
-    "outDir": ".classifier-check",
+    "outDir": ".check-output",
     "rootDir": "."
   },
   "include": [
-    "scripts/check-classifier.ts",
+    "scripts/*.ts",
     "packages/shared/src/**/*.ts",
     "data/traces/*.json"
   ]

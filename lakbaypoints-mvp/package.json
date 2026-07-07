@@ -13,7 +13,8 @@
     "dashboard": "npm run dev -w @lakbaypoints/dashboard",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "check:classifier": "tsc -p tsconfig.check.json && node .classifier-check/scripts/check-classifier.js",
+    "check:classifier": "tsc -p tsconfig.check.json && node .check-output/scripts/check-classifier.js",
+    "check:rewards": "tsc -p tsconfig.check.json && node .check-output/scripts/check-rewards.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

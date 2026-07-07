@@ -104,3 +104,48 @@ export type ClassifySustainableTripChainInput = {
   stationAccessPoints?: StationAccessPoint[];
   activityLabels?: GpsTraceActivity[];
 };
+
+export type UserRewardState = {
+  userId: string;
+  lakbayScore: number;
+  campaignPoints: number;
+  campaignPointsCap: number;
+  verifiedTrips: number;
+  estimatedCo2eAvoidedKg: number;
+};
+
+export type LakbayScoreReward = {
+  earned: number;
+  updatedTotal: number;
+  nonCash: true;
+};
+
+export type CampaignPointsReward = {
+  earned: number;
+  updatedTotal: number;
+  cap: number;
+  capRemaining: number;
+  capped: boolean;
+};
+
+export type RewardResult = {
+  rewardEligibility: RewardEligibility;
+  lakbayScoreEarned: number;
+  campaignPointsEarned: number;
+  updatedLakbayScore: number;
+  updatedCampaignPoints: number;
+  campaignPointsCap: number;
+  campaignCapRemaining: number;
+  estimatedCo2eAvoidedKg: number;
+  rewardMessage: string;
+  lakbayScore: LakbayScoreReward;
+  campaignPoints: CampaignPointsReward;
+  updatedUserRewardState: UserRewardState;
+};
+
+export type CalculateTripRewardsInput = {
+  classifierResult: ClassifierResult;
+  selectedRoute: RouteOption;
+  currentUserRewardState: UserRewardState;
+  campaignPointsCap?: number;
+};

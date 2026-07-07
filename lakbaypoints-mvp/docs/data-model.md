@@ -87,6 +87,41 @@ type UserRewardState = {
 };
 ```
 
+## RewardResult
+
+Lakbay Score is a non-cash progress meter. Lakbay Points are capped, campaign-based incentives for verified sustainable trip chains.
+
+```ts
+type LakbayScoreReward = {
+  earned: number;
+  updatedTotal: number;
+  nonCash: true;
+};
+
+type CampaignPointsReward = {
+  earned: number;
+  updatedTotal: number;
+  cap: number;
+  capRemaining: number;
+  capped: boolean;
+};
+
+type RewardResult = {
+  rewardEligibility: "Full" | "Reduced" | "None";
+  lakbayScoreEarned: number;
+  campaignPointsEarned: number;
+  updatedLakbayScore: number;
+  updatedCampaignPoints: number;
+  campaignPointsCap: number;
+  campaignCapRemaining: number;
+  estimatedCo2eAvoidedKg: number;
+  rewardMessage: string;
+  lakbayScore: LakbayScoreReward;
+  campaignPoints: CampaignPointsReward;
+  updatedUserRewardState: UserRewardState;
+};
+```
+
 ## AccessBarrierReport
 
 ```ts
