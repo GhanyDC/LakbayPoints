@@ -22,7 +22,9 @@ Update this file after every meaningful change.
 | Suspicious GPS trace | Done | TBD | Seeded rejected anti-cheating trace |
 | Reward logic | Done | TBD | Shared Lakbay Score and campaign cap calculation added |
 | Reward screen | Done | TBD | Reward the Shift mobile screen added |
-| Access report form | Not started | TBD | |
+| Access report form | Done | TBD | Mobile report form added after the reward result screen |
+| Report confirmation screen | Done | TBD | Submitted report confirmation and dashboard preview placeholder added |
+| Seed access-barrier reports | Done | TBD | Prototype/sample corridor reports seeded |
 | Dashboard layout | Not started | TBD | |
 | Report queue | Not started | TBD | |
 | Dashboard map | Not started | TBD | |
@@ -31,6 +33,12 @@ Update this file after every meaningful change.
 | Demo script | Not started | TBD | |
 
 ## Change Log
+
+### 2026-07-10
+
+- Added shared access-barrier report types for category, severity, status, and report records.
+- Added prototype/sample access-barrier report seed data for the Guadalupe to Cubao corridor.
+- Added the mobile Report Access Barriers form, validation, confirmation screen, and MMDA dashboard preview placeholder.
 
 ### 2026-07-08
 
@@ -69,7 +77,7 @@ Update this file after every meaningful change.
 - [x] Can show classifier confidence score
 - [x] Can reject suspicious trace
 - [x] Can show Lakbay Score and campaign points
-- [ ] Can submit access-barrier report
+- [x] Can submit access-barrier report
 - [ ] Can view report in dashboard
 - [ ] Can update report status
 - [ ] Can show basic dashboard metrics
@@ -89,4 +97,4 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Build Report Access Barriers form and confirmation screen.
+1. Build MMDA Dashboard overview and report queue.

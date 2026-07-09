@@ -149,3 +149,27 @@ export type CalculateTripRewardsInput = {
   currentUserRewardState: UserRewardState;
   campaignPointsCap?: number;
 };
+
+export type AccessBarrierCategory =
+  | "sidewalk_obstruction"
+  | "unsafe_crossing"
+  | "flooding"
+  | "illegal_parking_or_loading_obstruction"
+  | "damaged_walkway_or_access_path";
+
+export type ReportSeverity = "Low" | "Medium" | "High";
+
+export type ReportStatus =
+  "Submitted" | "Under Review" | "Verified" | "Assigned" | "Resolved";
+
+export type AccessBarrierReport = {
+  id: string;
+  category: AccessBarrierCategory;
+  severity: ReportSeverity;
+  description: string;
+  latitude: number;
+  longitude: number;
+  photoUrl?: string;
+  status: ReportStatus;
+  createdAt: string;
+};

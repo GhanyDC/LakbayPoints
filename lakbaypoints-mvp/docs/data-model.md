@@ -125,23 +125,37 @@ type RewardResult = {
 ## AccessBarrierReport
 
 ```ts
-type AccessBarrierReport = {
-  id: string;
-  category:
+type AccessBarrierCategory =
     | "sidewalk_obstruction"
     | "unsafe_crossing"
     | "flooding"
     | "illegal_parking_or_loading_obstruction"
     | "damaged_walkway_or_access_path";
-  severity: "Low" | "Medium" | "High";
+
+type ReportSeverity = "Low" | "Medium" | "High";
+
+type ReportStatus =
+  | "Submitted"
+  | "Under Review"
+  | "Verified"
+  | "Assigned"
+  | "Resolved";
+
+type AccessBarrierReport = {
+  id: string;
+  category: AccessBarrierCategory;
+  severity: ReportSeverity;
   description: string;
   latitude: number;
   longitude: number;
   photoUrl?: string;
-  status: "Submitted" | "Under Review" | "Verified" | "Assigned" | "Resolved";
+  status: ReportStatus;
   createdAt: string;
 };
 ```
+
+Seeded access-barrier report coordinates are approximate prototype/sample data
+for the Guadalupe to Cubao pilot corridor.
 
 ## DashboardMetric
 

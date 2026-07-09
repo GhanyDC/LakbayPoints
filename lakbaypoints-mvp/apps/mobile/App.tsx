@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import {
@@ -15,9 +16,12 @@ import {
   demoUserRewardState,
   guadalupeCubaoRoutes,
   suspiciousTraceRejected,
+  type AccessBarrierCategory,
+  type AccessBarrierReport,
   type ClassifierResult,
   type ClassifierSignalChecklist,
   type RewardResult,
+  type ReportSeverity,
   type RouteOption,
   type RouteSegment,
   validSustainableGuadalupeCubaoTrace,
@@ -28,11 +32,31 @@ const sustainableRoute =
   guadalupeCubaoRoutes.find((route) => route.type === "sustainable") ??
   guadalupeCubaoRoutes[0];
 
-type ScreenName = "comparison" | "detail" | "playback" | "rewards";
+type ScreenName =
+  | "comparison"
+  | "detail"
+  | "playback"
+  | "rewards"
+  | "report"
+  | "reportConfirmation"
+  | "dashboardPreview";
 type TraceMode = "valid" | "suspicious";
 type VerifiedTripState = {
   classifierResult: ClassifierResult;
   traceMode: TraceMode;
+};
+type ReportCategoryOption = {
+  label: string;
+  value: AccessBarrierCategory;
+};
+type DemoReportLocation = {
+  label: string;
+  latitude: number;
+  longitude: number;
+};
+type SubmittedReportState = AccessBarrierReport & {
+  categoryLabel: string;
+  locationLabel: string;
 };
 
 type PlaybackStep = {
@@ -52,6 +76,54 @@ const playbackSteps: PlaybackStep[] = [
   {
     segmentId: "walk-cubao-station-destination",
     status: "Approaching destination",
+  },
+];
+
+const reportCategories: ReportCategoryOption[] = [
+  {
+    label: "Sidewalk obstruction",
+    value: "sidewalk_obstruction",
+  },
+  {
+    label: "Unsafe crossing",
+    value: "unsafe_crossing",
+  },
+  {
+    label: "Flooding",
+    value: "flooding",
+  },
+  {
+    label: "Illegal parking / loading obstruction",
+    value: "illegal_parking_or_loading_obstruction",
+  },
+  {
+    label: "Damaged walkway or access path",
+    value: "damaged_walkway_or_access_path",
+  },
+];
+
+const reportSeverityOptions: ReportSeverity[] = ["Low", "Medium", "High"];
+
+const demoReportLocations: DemoReportLocation[] = [
+  {
+    label: "Guadalupe Station access area",
+    latitude: 14.5664,
+    longitude: 121.0455,
+  },
+  {
+    label: "Shaw Boulevard access area",
+    latitude: 14.5818,
+    longitude: 121.0531,
+  },
+  {
+    label: "Ortigas Station access area",
+    latitude: 14.5868,
+    longitude: 121.056,
+  },
+  {
+    label: "Cubao Station access area",
+    latitude: 14.6196,
+    longitude: 121.051,
   },
 ];
 
@@ -599,10 +671,12 @@ function RewardMetric({ label, value }: { label: string; value: string }) {
 function RewardResultScreen({
   route,
   verifiedTrip,
+  onReportAccessBarrier,
   onBackToRoutes,
 }: {
   route: RouteOption;
   verifiedTrip: VerifiedTripState;
+  onReportAccessBarrier: () => void;
   onBackToRoutes: () => void;
 }) {
   const rewardResult: RewardResult = useMemo(
@@ -677,10 +751,300 @@ function RewardResultScreen({
       <View style={styles.actionRow}>
         <Pressable
           accessibilityRole="button"
-          onPress={() => undefined}
+          onPress={onReportAccessBarrier}
           style={styles.primaryAction}
         >
           <Text style={styles.primaryActionText}>Report an Access Barrier</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBackToRoutes}
+          style={styles.secondaryAction}
+        >
+          <Text style={styles.secondaryActionText}>Back to Routes</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
+}
+
+function OptionButton({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={[styles.optionButton, selected && styles.optionButtonSelected]}
+    >
+      <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function ReportAccessBarrierScreen({
+  onSubmitReport,
+  onBackToRoutes,
+}: {
+  onSubmitReport: (report: SubmittedReportState) => void;
+  onBackToRoutes: () => void;
+}) {
+  const [category, setCategory] = useState<ReportCategoryOption | null>(null);
+  const [severity, setSeverity] = useState<ReportSeverity | null>(null);
+  const [location, setLocation] = useState<DemoReportLocation | null>(null);
+  const [description, setDescription] = useState("");
+  const [validationMessage, setValidationMessage] = useState("");
+  const submitReport = () => {
+    const cleanDescription = description.trim();
+
+    if (!category || !severity || !location || cleanDescription.length === 0) {
+      setValidationMessage(
+        "Choose a category, severity, demo location, and add a short description.",
+      );
+      return;
+    }
+
+    setValidationMessage("");
+    onSubmitReport({
+      id: `prototype-report-${Date.now()}`,
+      category: category.value,
+      categoryLabel: category.label,
+      severity,
+      description: cleanDescription,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      locationLabel: location.label,
+      photoUrl: "prototype-photo-placeholder",
+      status: "Submitted",
+      createdAt: new Date().toISOString(),
+    });
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <AppHeader
+        eyebrow="Improve the Road"
+        title="LakbayPoints"
+        subtitle="Report Access Barriers"
+      />
+
+      <View style={[styles.card, styles.reportIntroCard]}>
+        <Text style={styles.statusBody}>
+          Help MMDA identify access barriers that make walking, public
+          transport, and sustainable commuting harder.
+        </Text>
+        <Text style={styles.helperNote}>
+          Reports support validation and prioritization. The MVP does not
+          automate enforcement or dispatch.
+        </Text>
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.fieldLabel}>Category</Text>
+        <View style={styles.optionGrid}>
+          {reportCategories.map((option) => (
+            <OptionButton
+              key={option.value}
+              label={option.label}
+              selected={category?.value === option.value}
+              onPress={() => setCategory(option)}
+            />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.fieldLabel}>Severity</Text>
+        <View style={styles.optionGrid}>
+          {reportSeverityOptions.map((option) => (
+            <OptionButton
+              key={option}
+              label={option}
+              selected={severity === option}
+              onPress={() => setSeverity(option)}
+            />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.fieldLabel}>Location</Text>
+        <Text style={styles.fieldHelp}>
+          Prototype uses selectable demo locations near the pilot corridor.
+        </Text>
+        <View style={styles.optionGrid}>
+          {demoReportLocations.map((option) => (
+            <OptionButton
+              key={option.label}
+              label={option.label}
+              selected={location?.label === option.label}
+              onPress={() => setLocation(option)}
+            />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.fieldLabel}>Description</Text>
+        <TextInput
+          multiline
+          onChangeText={setDescription}
+          placeholder="Briefly describe the access barrier."
+          placeholderTextColor="#94a3b8"
+          style={styles.textInput}
+          textAlignVertical="top"
+          value={description}
+        />
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.fieldLabel}>Photo placeholder</Text>
+        <View style={styles.photoPlaceholder}>
+          <Text style={styles.photoPlaceholderText}>
+            Photo upload placeholder only - camera upload is not enabled in this
+            prototype.
+          </Text>
+        </View>
+      </View>
+
+      {validationMessage ? (
+        <Text style={styles.validationText}>{validationMessage}</Text>
+      ) : null}
+
+      <View style={styles.actionRow}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={submitReport}
+          style={styles.primaryAction}
+        >
+          <Text style={styles.primaryActionText}>Submit Report</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBackToRoutes}
+          style={styles.secondaryAction}
+        >
+          <Text style={styles.secondaryActionText}>Back to Routes</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
+}
+
+function ConfirmationRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.confirmationRow}>
+      <Text style={styles.confirmationLabel}>{label}</Text>
+      <Text style={styles.confirmationValue}>{value}</Text>
+    </View>
+  );
+}
+
+function ReportConfirmationScreen({
+  report,
+  onDashboardPreview,
+  onBackToRoutes,
+}: {
+  report: SubmittedReportState;
+  onDashboardPreview: () => void;
+  onBackToRoutes: () => void;
+}) {
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <AppHeader
+        eyebrow="Improve the Road"
+        title="Report submitted"
+        subtitle="Access barrier report"
+      />
+
+      <View style={[styles.card, styles.reportIntroCard]}>
+        <Text style={styles.statusBody}>
+          Your report has been added to the MMDA dashboard queue for validation
+          in this prototype.
+        </Text>
+      </View>
+
+      <View style={styles.card}>
+        <ConfirmationRow label="Category" value={report.categoryLabel} />
+        <ConfirmationRow label="Severity" value={report.severity} />
+        <ConfirmationRow label="Location" value={report.locationLabel} />
+        <ConfirmationRow label="Status" value={report.status} />
+      </View>
+
+      <View style={styles.actionRow}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onDashboardPreview}
+          style={styles.primaryAction}
+        >
+          <Text style={styles.primaryActionText}>
+            View MMDA Dashboard Preview
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBackToRoutes}
+          style={styles.secondaryAction}
+        >
+          <Text style={styles.secondaryActionText}>Back to Routes</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
+}
+
+function DashboardPreviewPlaceholderScreen({
+  report,
+  onBackToConfirmation,
+  onBackToRoutes,
+}: {
+  report: SubmittedReportState | null;
+  onBackToConfirmation: () => void;
+  onBackToRoutes: () => void;
+}) {
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <AppHeader
+        eyebrow="MMDA Dashboard"
+        title="Dashboard Preview"
+        subtitle="Report queue placeholder"
+      />
+
+      <View style={[styles.card, styles.dashboardPlaceholderCard]}>
+        <Text style={styles.sectionKicker}>
+          Coming next: MMDA Dashboard Preview
+        </Text>
+        <Text style={styles.statusBody}>
+          This placeholder shows where the submitted report will appear in the
+          dashboard queue. Full dashboard integration is not part of this mobile
+          slice.
+        </Text>
+      </View>
+
+      {report ? (
+        <View style={styles.card}>
+          <ConfirmationRow label="Queued report" value={report.id} />
+          <ConfirmationRow label="Category" value={report.categoryLabel} />
+          <ConfirmationRow label="Location" value={report.locationLabel} />
+          <ConfirmationRow label="Status" value={report.status} />
+        </View>
+      ) : null}
+
+      <View style={styles.actionRow}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBackToConfirmation}
+          style={styles.primaryAction}
+        >
+          <Text style={styles.primaryActionText}>Back to Confirmation</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -699,9 +1063,12 @@ export default function App() {
   const [verifiedTrip, setVerifiedTrip] = useState<VerifiedTripState | null>(
     null,
   );
+  const [submittedReport, setSubmittedReport] =
+    useState<SubmittedReportState | null>(null);
   const route = useMemo(() => sustainableRoute, []);
   const backToRoutes = () => {
     setVerifiedTrip(null);
+    setSubmittedReport(null);
     setScreen("comparison");
   };
 
@@ -732,6 +1099,30 @@ export default function App() {
         <RewardResultScreen
           route={route}
           verifiedTrip={verifiedTrip}
+          onReportAccessBarrier={() => setScreen("report")}
+          onBackToRoutes={backToRoutes}
+        />
+      ) : null}
+      {screen === "report" ? (
+        <ReportAccessBarrierScreen
+          onSubmitReport={(report) => {
+            setSubmittedReport(report);
+            setScreen("reportConfirmation");
+          }}
+          onBackToRoutes={backToRoutes}
+        />
+      ) : null}
+      {screen === "reportConfirmation" && submittedReport ? (
+        <ReportConfirmationScreen
+          report={submittedReport}
+          onDashboardPreview={() => setScreen("dashboardPreview")}
+          onBackToRoutes={backToRoutes}
+        />
+      ) : null}
+      {screen === "dashboardPreview" ? (
+        <DashboardPreviewPlaceholderScreen
+          report={submittedReport}
+          onBackToConfirmation={() => setScreen("reportConfirmation")}
           onBackToRoutes={backToRoutes}
         />
       ) : null}
@@ -1026,6 +1417,128 @@ const styles = StyleSheet.create({
   actionRow: {
     gap: 10,
     marginTop: 18,
+  },
+  optionButton: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#cbd5e1",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexGrow: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  optionButtonSelected: {
+    backgroundColor: "#ccfbf1",
+    borderColor: "#0f766e",
+  },
+  optionText: {
+    color: "#334155",
+    fontSize: 14,
+    fontWeight: "800",
+    lineHeight: 19,
+    textAlign: "center",
+  },
+  optionTextSelected: {
+    color: "#0f766e",
+  },
+  reportIntroCard: {
+    borderColor: "#0f766e",
+    marginBottom: 16,
+  },
+  helperNote: {
+    color: "#475569",
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 19,
+    marginTop: 12,
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  fieldLabel: {
+    color: "#0f172a",
+    fontSize: 16,
+    fontWeight: "800",
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  fieldHelp: {
+    color: "#64748b",
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  optionGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  textInput: {
+    backgroundColor: "#ffffff",
+    borderColor: "#cbd5e1",
+    borderRadius: 8,
+    borderWidth: 1,
+    color: "#0f172a",
+    fontSize: 15,
+    fontWeight: "600",
+    lineHeight: 21,
+    minHeight: 112,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  photoPlaceholder: {
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderColor: "#cbd5e1",
+    borderRadius: 8,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 86,
+    padding: 14,
+  },
+  photoPlaceholderText: {
+    color: "#64748b",
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+    textAlign: "center",
+  },
+  validationText: {
+    backgroundColor: "#fef2f2",
+    borderColor: "#fecaca",
+    borderRadius: 8,
+    borderWidth: 1,
+    color: "#991b1b",
+    fontSize: 14,
+    fontWeight: "800",
+    lineHeight: 20,
+    marginTop: 2,
+    padding: 12,
+  },
+  confirmationRow: {
+    borderBottomColor: "#e2e8f0",
+    borderBottomWidth: 1,
+    gap: 4,
+    paddingVertical: 10,
+  },
+  confirmationLabel: {
+    color: "#64748b",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  confirmationValue: {
+    color: "#0f172a",
+    fontSize: 16,
+    fontWeight: "800",
+    lineHeight: 22,
+  },
+  dashboardPlaceholderCard: {
+    borderColor: "#1d4ed8",
+    marginBottom: 14,
   },
   primaryAction: {
     alignItems: "center",
