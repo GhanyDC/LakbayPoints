@@ -11,10 +11,12 @@
     "bootstrap": "npm install",
     "mobile": "npm run start -w @lakbaypoints/mobile",
     "dashboard": "npm run dev -w @lakbaypoints/dashboard",
+    "dashboard:build": "npm run build -w @lakbaypoints/dashboard",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "check:classifier": "tsc -p tsconfig.check.json && node .check-output/scripts/check-classifier.js",
     "check:rewards": "tsc -p tsconfig.check.json && node .check-output/scripts/check-rewards.js",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run check:classifier && npm run check:rewards",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

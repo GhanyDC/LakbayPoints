@@ -10,7 +10,7 @@ Update this file after every meaningful change.
 
 | Module | Status | Owner | Notes |
 |---|---|---|---|
-| Repo setup | Done | TBD | npm workspace monorepo foundation added |
+| Repo setup | Done | TBD | npm workspace monorepo foundation moved to repository root |
 | Docs setup | Done | Team | Initial docs preserved |
 | Mobile route search | Not started | TBD | |
 | Static route data | Done | TBD | Guadalupe to Cubao demo route options added |
@@ -33,6 +33,12 @@ Update this file after every meaningful change.
 | Demo script | Not started | TBD | |
 
 ## Change Log
+
+### 2026-07-14
+
+- Moved the monorepo from the nested `lakbaypoints-mvp/` folder to the repository root for cleaner GitHub collaboration.
+- Replaced the placeholder root README with project setup, structure, and collaboration notes.
+- Added contributor guidance, editor defaults, and a root `verify` script for pre-PR checks.
 
 ### 2026-07-10
 
