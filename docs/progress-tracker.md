@@ -36,9 +36,11 @@ Update this file after every meaningful change.
 
 ### 2026-07-16
 
-- Updated Expo SDK 57 patch dependencies so Expo Doctor passes.
+- Aligned the mobile workspace with Expo SDK 54 and Expo Go 54.0.8 on Android.
+- Pinned the monorepo to React 19.1 and React Native 0.81.5 to prevent duplicate native runtimes.
+- Removed an invalid `expo-status-bar` config plugin entry so Expo config loads correctly.
 - Added Expo Go LAN, tunnel, and cache-clear scripts for mobile testing.
-- Documented when to use tunnel mode for testing across different phones or networks.
+- Documented SDK compatibility and when to use tunnel mode across phones or networks.
 
 ### 2026-07-14
 

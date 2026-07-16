@@ -2,6 +2,10 @@
   "name": "lakbaypoints-mvp",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
+  },
   "workspaces": [
     "apps/mobile",
     "apps/dashboard",
@@ -25,6 +29,9 @@
   },
   "devDependencies": {
     "prettier": "^3.9.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
     "typescript": "~6.0.3"
   }
 }

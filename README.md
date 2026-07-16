@@ -46,6 +46,10 @@ npm run mobile
 
 Expo Go testing:
 
+The mobile workspace is intentionally pinned to Expo SDK 54 and is compatible
+with Expo Go 54.0.8 on Android. Use the same Expo Go version on each Android
+test phone. SDK 54 supports Android 7 and newer.
+
 ```bash
 npm run mobile:lan
 ```
@@ -61,11 +65,19 @@ Use tunnel when testing across different phones, mobile data, guest Wi-Fi,
 school Wi-Fi, or any network where the phone cannot reach the computer's local
 IP address.
 
+If tunnel startup reports `remote gone away`, retry and confirm that Windows
+Firewall or antivirus software allows ngrok. Tunnel connectivity is provided by
+a third party and can fail even when the local Metro server is healthy.
+
 If Expo Go opens an old bundle, clear Metro cache:
 
 ```bash
 npm run mobile:clear
 ```
+
+Physical iPhones cannot sideload an older Expo Go release. Use an Android
+device, an iOS simulator with the SDK 54 client, or a dedicated development
+build when Expo Go 54 is unavailable from the iOS App Store.
 
 Run the Next.js dashboard app:
 

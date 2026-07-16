@@ -1,5 +1,6 @@
 docs/**
 apps/**/README.md
+apps/dashboard/next-env.d.ts
 data/**/README.md
 packages/**/README.md
 node_modules/
