@@ -34,6 +34,12 @@ Update this file after every meaningful change.
 
 ## Change Log
 
+### 2026-07-16
+
+- Updated Expo SDK 57 patch dependencies so Expo Doctor passes.
+- Added Expo Go LAN, tunnel, and cache-clear scripts for mobile testing.
+- Documented when to use tunnel mode for testing across different phones or networks.
+
 ### 2026-07-14
 
 - Moved the monorepo from the nested `lakbaypoints-mvp/` folder to the repository root for cleaner GitHub collaboration.

@@ -10,6 +10,9 @@
   "scripts": {
     "bootstrap": "npm install",
     "mobile": "npm run start -w @lakbaypoints/mobile",
+    "mobile:lan": "npm run start -w @lakbaypoints/mobile -- --lan",
+    "mobile:tunnel": "npm run start -w @lakbaypoints/mobile -- --tunnel",
+    "mobile:clear": "npm run start -w @lakbaypoints/mobile -- --clear",
     "dashboard": "npm run dev -w @lakbaypoints/dashboard",
     "dashboard:build": "npm run build -w @lakbaypoints/dashboard",
     "typecheck": "npm run typecheck --workspaces --if-present",

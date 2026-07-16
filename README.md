@@ -44,6 +44,29 @@ Run the Expo mobile app:
 npm run mobile
 ```
 
+Expo Go testing:
+
+```bash
+npm run mobile:lan
+```
+
+Use LAN when the computer and phone are on the same Wi-Fi network and the
+network allows device-to-device traffic.
+
+```bash
+npm run mobile:tunnel
+```
+
+Use tunnel when testing across different phones, mobile data, guest Wi-Fi,
+school Wi-Fi, or any network where the phone cannot reach the computer's local
+IP address.
+
+If Expo Go opens an old bundle, clear Metro cache:
+
+```bash
+npm run mobile:clear
+```
+
 Run the Next.js dashboard app:
 
 ```bash
