@@ -16,12 +16,13 @@ Update this file after every meaningful change.
 | Plan Trip | Done | TBD | Uses shared segments and derived totals; CTA opens Route Comparison |
 | Mobile route comparison | Done | TBD | Shared recommended route plus pending private baseline and non-live Phase 2 preview |
 | Route detail | Done | TBD | Uses the same shared access points, segments, statuses, and totals |
+| Mobile navigation state | Done | TBD | Typed destinations keep retained tab labels, selected state, screen transitions, and Android back behavior aligned |
 | Trip playback | Partial | TBD | Displays final route labels; progression and final route-bound traces remain pending |
 | Classifier | Partial | TBD | Rule-based prototype exists, but route binding and hardening still target legacy corridor assumptions |
 | GPS traces | Partial | TBD | Valid and suspicious fixtures exist for the legacy corridor; final route fixtures are pending |
 | Reward logic | Partial | TBD | Shared calculation exists; boundary stabilization remains pending |
 | Reward result screen | Partial | TBD | Existing prototype screen is connected; calibrated CO2e and reward boundaries remain pending |
-| Rewards tab cleanup | Pending | TBD | Out-of-scope XP, levels, streaks, and redemption concepts require a separate cleanup task |
+| Rewards tab cleanup | Done | TBD | Verification-gated overview uses shared seed/route data; unsupported gamification and reward catalog were removed |
 | Access report form | Done | TBD | Prototype mobile form and confirmation flow exist |
 | Seed access-barrier reports | Done | TBD | Approximate prototype/sample reports are seeded |
 | Dashboard layout | Not started | TBD | Agency preview only; no live integration |
@@ -46,6 +47,15 @@ Update this file after every meaningful change.
   official-endorsement implications.
 - Added route arithmetic, ordered-mode, pending-state, eligibility, JSON-mirror,
   Plan Trip, unsupported-label, and CTA-navigation coverage.
+- Repaired the retained bottom tabs so Home, Trips, Rewards, Report, and Profile
+  reach truthful destinations and derive their selected state from the screen.
+- Added explicit Android hardware-back destinations and tab accessibility roles,
+  labels, selected states, contrast, and minimum touch height.
+- Replaced the hardcoded Rewards catalog, XP, levels, streaks, and unrelated
+  balances with a verification-gated overview backed by shared demo state and
+  the shared route's potential reward values.
+- Preserved a verified result across tab interruption so Rewards returns to the
+  verification-derived result rather than an unrelated dashboard.
 - Classifier final-route binding, reward-boundary fixes, playback progression,
   dashboard functionality, backend work, and live APIs remain pending.
 
@@ -111,6 +121,8 @@ Update this file after every meaningful change.
 - [x] Can open the five-segment shared Route Detail
 - [x] Can show derived time, distance, and known/pending fare
 - [x] Can show ferry fare and CO2e as pending
+- [x] Every retained bottom tab reaches its named destination
+- [x] Rewards remains verification-gated and contains no reward catalog
 - [ ] Has final route-bound playback progression and GPS fixtures
 - [ ] Has classifier rules hardened and bound to the final route
 - [ ] Has reward boundaries stabilized
@@ -135,4 +147,4 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Complete navigation consistency and the out-of-scope Rewards-tab cleanup.
+1. Reject malformed and ineligible trip traces before classifier route binding.

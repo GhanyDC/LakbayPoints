@@ -27,7 +27,8 @@ Avoid:
 
 - possessive language such as “MMDA's LakbayPoints”
 - claims of MMDA ownership, operation, integration, or endorsement
-- carbon credits, cash rewards, XP, levels, or streaks on route screens
+- carbon credits, cash rewards, XP, levels, streaks, or a reward-product catalog
+  in the active Phase 0A interface
 - live traffic, heatmap, crowd-density, service-frequency, or route-safety
   claims without supporting data
 - full NCR routing or official-looking pending values

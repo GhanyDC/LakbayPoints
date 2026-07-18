@@ -70,6 +70,12 @@ and the campaign cap applies. Do not show cash redemption, XP, levels, streaks,
 transit credits, QR tickets, merchant discounts, or raffle products on route
 screens.
 
+The retained Rewards tab opens a verification-gated overview when the current
+session has no result. It may show clearly labeled seeded balances, the shared
+route's potential reward, the campaign cap, and reward rules, but it does not
+issue a result. After verification, the Rewards tab returns to the calculated
+result for that session.
+
 ### Step 7: Report Access Barrier
 
 The user can submit a prototype report for sidewalk obstruction, unsafe
@@ -80,6 +86,20 @@ access path.
 
 The report can appear in a non-live institutional preview. This does not imply
 an official MMDA workflow, integration, operation, or endorsement.
+
+## Persistent Navigation
+
+- **Home** opens the Phase 0A welcome and shared route summary.
+- **Trips** opens Plan Trip.
+- **Rewards** opens the verification-gated overview or current verified result.
+- **Report** opens the access-barrier form.
+- **Profile** opens a session-only prototype disclosure rather than a live
+  account.
+
+The active tab is derived from the current screen. Tab changes preserve a
+verified result for the current session, while explicit “Back to Routes” actions
+reset verification/report state. Android hardware back follows a documented
+screen-destination map and exits normally from top-level Home or Plan Trip.
 
 ## Key UX Rule
 
