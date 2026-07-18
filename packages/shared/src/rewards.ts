@@ -53,7 +53,7 @@ export function calculateTripRewards({
     estimatedCo2eAvoidedKg = selectedRoute.estimatedCo2eAvoidedKg ?? 0;
     rewardMessage =
       campaignPointsEarned < fullCampaignPoints
-        ? "Verified sustainable trip chain. Lakbay Points were limited by the campaign cap."
+        ? "Verified sustainable trip chain. campaign Points were limited by the campaign cap."
         : "Full reward earned for a verified sustainable trip chain.";
   } else if (classifierResult.rewardEligibility === "Reduced") {
     lakbayScoreEarned = Math.round(fullLakbayScore * 0.5);

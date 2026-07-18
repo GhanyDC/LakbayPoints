@@ -1,12 +1,14 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import {
+  demoUserRewardState,
   formatRouteCo2e,
   formatRouteDistance,
   formatRouteFare,
   formatRouteTime,
   getRouteAccessPointLabel,
   getRouteTotals,
+  phase0APilotRoute,
   type RouteOption,
 } from "@lakbaypoints/shared";
 import {
@@ -16,156 +18,109 @@ import {
   User,
   Bell,
   Star,
-  Flame,
-  CreditCard,
-  QrCode,
-  Percent,
-  Ticket,
-  MapPin,
 } from "lucide-react-native";
 
-export function RewardsDashboardScreen() {
+export function RewardsOverviewScreen({
+  onPlanTrip,
+}: {
+  onPlanTrip: () => void;
+}) {
+  const campaignCapRemaining = Math.max(
+    0,
+    demoUserRewardState.campaignPointsCap - demoUserRewardState.campaignPoints,
+  );
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
-        <Text style={styles.topBarTitle}>My Rewards</Text>
+        <Text style={styles.topBarTitle}>Rewards Overview</Text>
         <Bell color="#0f766e" size={24} />
       </View>
 
-      <View style={styles.xpCard}>
-        <View style={styles.xpCardHeader}>
-          <Text style={styles.xpCardTitle}>EDSA Explorer</Text>
-          <View style={styles.levelBadge}>
-            <Text style={styles.levelBadgeText}>Level 12</Text>
-          </View>
-        </View>
-        <Text style={styles.xpProgressText}>2,350 / 3,000 XP to Level 13</Text>
-        <View style={styles.xpProgressBarBg}>
-          <View style={[styles.xpProgressBarFill, { width: "78%" }]} />
-        </View>
-        <View style={styles.xpIconContainer}>
-          <View style={styles.starIconBg}>
-            <Star fill="#fff" color="#fff" size={24} />
-          </View>
-          <View style={styles.starRibbonLeft} />
-          <View style={styles.starRibbonRight} />
-        </View>
+      <View style={styles.rewardStatusCard}>
+        <Text style={styles.rewardStatusLabel}>Verification required</Text>
+        <Text style={styles.rewardStatusTitle}>
+          No verified trip selected in this session
+        </Text>
+        <Text style={styles.rewardStatusBody}>
+          Potential rewards become results only after the trip verification
+          flow. This overview does not issue rewards.
+        </Text>
       </View>
 
-      <View style={styles.pointsRow}>
-        <View style={styles.pointsBox}>
-          <Text style={styles.pointsBoxTitle}>Lakbay Points</Text>
-          <Text style={styles.pointsBoxValue}>2,450</Text>
-          <Text style={styles.pointsBoxSubtitle}>Total Points</Text>
-        </View>
-        <View style={styles.pointsBox}>
-          <Text style={styles.pointsBoxTitle}>This Week</Text>
-          <Text style={[styles.pointsBoxValue, { color: "#10b981" }]}>
-            +150
+      <View style={styles.rewardBalanceGrid}>
+        <View style={styles.rewardBalanceCard}>
+          <Text style={styles.rewardBalanceLabel}>Lakbay Score</Text>
+          <Text style={styles.rewardBalanceValue}>
+            {demoUserRewardState.lakbayScore}
           </Text>
-          <Text style={styles.pointsBoxSubtitle}>Points Earned</Text>
-        </View>
-      </View>
-
-      <View style={styles.streakCard}>
-        <View style={styles.streakIconBg}>
-          <Flame fill="#fbbf24" color="#fbbf24" size={32} />
-        </View>
-        <View style={styles.streakInfo}>
-          <Text style={styles.streakTitle}>7-Day Commute Streak</Text>
-          <Text style={styles.streakSubtitle}>
-            Keep it up! 1 more day to earn{" "}
-            <Text style={{ color: "#3b82f6", fontWeight: "bold" }}>50</Text>{" "}
-            bonus points.
+          <Text style={styles.rewardBalanceNote}>
+            Seeded non-cash prototype balance
           </Text>
         </View>
-        <View style={styles.streakCircle}>
-          <Text style={styles.streakCircleValue}>7</Text>
-          <View style={styles.streakCircleDivider} />
-          <Text style={styles.streakCircleTotal}>7</Text>
+        <View style={styles.rewardBalanceCard}>
+          <Text style={styles.rewardBalanceLabel}>campaign Points</Text>
+          <Text style={styles.rewardBalanceValue}>
+            {demoUserRewardState.campaignPoints} /{" "}
+            {demoUserRewardState.campaignPointsCap}
+          </Text>
+          <Text style={styles.rewardBalanceNote}>
+            {campaignCapRemaining} Points below the campaign cap
+          </Text>
+        </View>
+        <View style={styles.rewardBalanceCardWide}>
+          <Text style={styles.rewardBalanceLabel}>Verified trip history</Text>
+          <Text style={styles.rewardBalanceValue}>
+            {demoUserRewardState.verifiedTrips}
+          </Text>
+          <Text style={styles.rewardBalanceNote}>
+            Seeded demonstration history, not a live account record
+          </Text>
         </View>
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Achievement Badges</Text>
-        <Text style={styles.viewAllText}>View All</Text>
+      <View style={styles.rewardPotentialSummary}>
+        <Text style={styles.rewardPotentialSummaryLabel}>
+          Current route potential
+        </Text>
+        <Text style={styles.rewardPotentialSummaryTitle}>
+          {phase0APilotRoute.name}
+        </Text>
+        <Text style={styles.rewardPotentialSummaryValue}>
+          +{phase0APilotRoute.lakbayScoreReward} Lakbay Score · up to +
+          {phase0APilotRoute.campaignPointsReward} campaign Points
+        </Text>
+        <Text style={styles.rewardPotentialSummaryNote}>
+          Subject to full trip verification. The campaign cap applies.
+        </Text>
       </View>
 
-      <View style={styles.badgeGrid}>
-        <View style={styles.badgeItem}>
-          <View style={[styles.badgeIconWrap, { borderColor: "#3b82f6" }]}>
-            <View style={[styles.badgeIconBg, { backgroundColor: "#3b82f6" }]}>
-              <User color="#fff" size={24} />
-            </View>
-            <View style={styles.badgeCheck}>
-              <Text style={styles.badgeCheckText}>✓</Text>
-            </View>
-          </View>
-          <Text style={styles.badgeName}>First Step</Text>
-        </View>
-        <View style={styles.badgeItem}>
-          <View style={[styles.badgeIconWrap, { borderColor: "#10b981" }]}>
-            <View style={[styles.badgeIconBg, { backgroundColor: "#10b981" }]}>
-              <MapIcon color="#fff" size={24} />
-            </View>
-            <View style={styles.badgeCheck}>
-              <Text style={styles.badgeCheckText}>✓</Text>
-            </View>
-          </View>
-          <Text style={styles.badgeName}>Transit Rider</Text>
-        </View>
-        <View style={styles.badgeItem}>
-          <View style={[styles.badgeIconWrap, { borderColor: "#fbbf24" }]}>
-            <View style={[styles.badgeIconBg, { backgroundColor: "#fbbf24" }]}>
-              <MapPin color="#fff" size={24} />
-            </View>
-            <View style={styles.badgeCheck}>
-              <Text style={styles.badgeCheckText}>✓</Text>
-            </View>
-          </View>
-          <Text style={styles.badgeName}>Explorer</Text>
-        </View>
-        <View style={styles.badgeItem}>
-          <View style={[styles.badgeIconWrap, { borderColor: "#d1d5db" }]}>
-            <View style={[styles.badgeIconBg, { backgroundColor: "#9ca3af" }]}>
-              <Shield color="#fff" size={24} />
-            </View>
-            <View style={[styles.badgeCheck, { backgroundColor: "#d1d5db" }]}>
-              <Text style={styles.badgeCheckText}>🔒</Text>
-            </View>
-          </View>
-          <Text style={styles.badgeName}>Commuter Pro</Text>
-          <Text style={styles.badgeSubtitle}>Level 15</Text>
-        </View>
+      <View style={styles.rewardRulesCard}>
+        <Text style={styles.rewardRulesTitle}>How Phase 0A rewards work</Text>
+        <Text style={styles.rewardRule}>• Lakbay Score is non-cash.</Text>
+        <Text style={styles.rewardRule}>
+          • Campaign Points are capped incentives for verified trips.
+        </Text>
+        <Text style={styles.rewardRule}>
+          • Suspicious or unverified trips receive no reward.
+        </Text>
+        <Text style={styles.rewardRule}>
+          • Only the defined score and capped campaign Points are in scope.
+        </Text>
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Redeem Rewards</Text>
-        <Text style={styles.viewAllText}>View All</Text>
-      </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPlanTrip}
+        style={styles.rewardPlanButton}
+      >
+        <Text style={styles.rewardPlanButtonText}>Plan a Trip to Verify</Text>
+      </Pressable>
 
-      <View style={styles.redeemGrid}>
-        <View style={styles.redeemItem}>
-          <CreditCard color="#3b82f6" size={32} style={styles.redeemIcon} />
-          <Text style={styles.redeemName}>Transit Credits</Text>
-          <Text style={styles.redeemCost}>100 pts</Text>
-        </View>
-        <View style={styles.redeemItem}>
-          <QrCode color="#0f766e" size={32} style={styles.redeemIcon} />
-          <Text style={styles.redeemName}>QR Ticket</Text>
-          <Text style={styles.redeemCost}>150 pts</Text>
-        </View>
-        <View style={styles.redeemItem}>
-          <Percent color="#f59e0b" size={32} style={styles.redeemIcon} />
-          <Text style={styles.redeemName}>Merchant Discount</Text>
-          <Text style={styles.redeemCost}>200 pts</Text>
-        </View>
-        <View style={styles.redeemItem}>
-          <Ticket color="#8b5cf6" size={32} style={styles.redeemIcon} />
-          <Text style={styles.redeemName}>Raffle Entry</Text>
-          <Text style={styles.redeemCost}>250 pts</Text>
-        </View>
-      </View>
+      <Text style={styles.rewardDisclaimer}>
+        Static seeded demonstration data. No live account, wallet, or payment
+        integration is connected.
+      </Text>
     </ScrollView>
   );
 }
@@ -322,83 +277,53 @@ export function PlanTripScreen({
   );
 }
 
+export type BottomTabName = "home" | "trips" | "rewards" | "report" | "profile";
+
+const bottomTabItems: {
+  name: BottomTabName;
+  label: string;
+  Icon: typeof Home;
+}[] = [
+  { name: "home", label: "Home", Icon: Home },
+  { name: "trips", label: "Trips", Icon: MapIcon },
+  { name: "rewards", label: "Rewards", Icon: Star },
+  { name: "report", label: "Report", Icon: Shield },
+  { name: "profile", label: "Profile", Icon: User },
+];
+
 export function BottomTabBar({
   activeTab,
   onTabSelect,
 }: {
-  activeTab: string;
-  onTabSelect: (t: string) => void;
+  activeTab: BottomTabName;
+  onTabSelect: (tab: BottomTabName) => void;
 }) {
   return (
-    <View style={styles.tabBar}>
-      <Pressable style={styles.tabItem} onPress={() => onTabSelect("home")}>
-        <Home color={activeTab === "home" ? "#1e3a8a" : "#9ca3af"} size={24} />
-        <Text
-          style={[
-            styles.tabLabel,
-            activeTab === "home" && styles.tabLabelActive,
-          ]}
-        >
-          Home
-        </Text>
-      </Pressable>
-      <Pressable style={styles.tabItem} onPress={() => onTabSelect("trips")}>
-        <MapIcon
-          color={activeTab === "trips" ? "#1e3a8a" : "#9ca3af"}
-          size={24}
-        />
-        <Text
-          style={[
-            styles.tabLabel,
-            activeTab === "trips" && styles.tabLabelActive,
-          ]}
-        >
-          Trips
-        </Text>
-      </Pressable>
-      <Pressable style={styles.tabItem} onPress={() => onTabSelect("rewards")}>
-        <Star
-          fill={activeTab === "rewards" ? "#1e3a8a" : "transparent"}
-          color={activeTab === "rewards" ? "#1e3a8a" : "#9ca3af"}
-          size={24}
-        />
-        <Text
-          style={[
-            styles.tabLabel,
-            activeTab === "rewards" && styles.tabLabelActive,
-          ]}
-        >
-          Rewards
-        </Text>
-      </Pressable>
-      <Pressable style={styles.tabItem} onPress={() => onTabSelect("report")}>
-        <Shield
-          color={activeTab === "report" ? "#1e3a8a" : "#9ca3af"}
-          size={24}
-        />
-        <Text
-          style={[
-            styles.tabLabel,
-            activeTab === "report" && styles.tabLabelActive,
-          ]}
-        >
-          Report
-        </Text>
-      </Pressable>
-      <Pressable style={styles.tabItem} onPress={() => onTabSelect("profile")}>
-        <User
-          color={activeTab === "profile" ? "#1e3a8a" : "#9ca3af"}
-          size={24}
-        />
-        <Text
-          style={[
-            styles.tabLabel,
-            activeTab === "profile" && styles.tabLabelActive,
-          ]}
-        >
-          Profile
-        </Text>
-      </Pressable>
+    <View accessibilityRole="tablist" style={styles.tabBar}>
+      {bottomTabItems.map(({ name, label, Icon }) => {
+        const selected = activeTab === name;
+        const color = selected ? "#1e3a8a" : "#64748b";
+
+        return (
+          <Pressable
+            accessibilityLabel={`${label} tab`}
+            accessibilityRole="tab"
+            accessibilityState={{ selected }}
+            key={name}
+            onPress={() => onTabSelect(name)}
+            style={styles.tabItem}
+          >
+            <Icon
+              color={color}
+              fill={name === "rewards" && selected ? color : "transparent"}
+              size={24}
+            />
+            <Text style={[styles.tabLabel, selected && styles.tabLabelActive]}>
+              {label}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -422,280 +347,148 @@ const styles = StyleSheet.create({
     marginLeft: "auto",
     marginRight: "auto",
   },
-  xpCard: {
-    backgroundColor: "#1e3a8a",
+  rewardStatusCard: {
+    backgroundColor: "#eff6ff",
+    borderColor: "#bfdbfe",
+    borderWidth: 1,
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    position: "relative",
-    overflow: "hidden",
-  },
-  xpCardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  xpCardTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginRight: 10,
-  },
-  levelBadge: {
-    backgroundColor: "#fbbf24",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  levelBadgeText: {
-    color: "#1e3a8a",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-  xpProgressText: {
-    color: "#cbd5e1",
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  xpProgressBarBg: {
-    backgroundColor: "#3b82f6",
-    height: 8,
-    borderRadius: 4,
-    width: "75%",
-  },
-  xpProgressBarFill: {
-    backgroundColor: "#fbbf24",
-    height: 8,
-    borderRadius: 4,
-  },
-  xpIconContainer: {
-    position: "absolute",
-    right: 15,
-    top: 25,
-    alignItems: "center",
-  },
-  starIconBg: {
-    backgroundColor: "#3b82f6",
-    padding: 10,
-    borderRadius: 24,
-    zIndex: 2,
-  },
-  starRibbonLeft: {
-    position: "absolute",
-    bottom: -10,
-    left: 5,
-    width: 15,
-    height: 20,
-    backgroundColor: "#fbbf24",
-    transform: [{ rotate: "15deg" }],
-    zIndex: 1,
-  },
-  starRibbonRight: {
-    position: "absolute",
-    bottom: -10,
-    right: 5,
-    width: 15,
-    height: 20,
-    backgroundColor: "#fbbf24",
-    transform: [{ rotate: "-15deg" }],
-    zIndex: 1,
-  },
-  pointsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  pointsBox: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    alignItems: "flex-start",
-    marginHorizontal: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  pointsBoxTitle: {
-    color: "#1e3a8a",
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  pointsBoxValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  pointsBoxSubtitle: {
-    color: "#6b7280",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  streakCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  streakIconBg: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#fef3c7",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  streakInfo: {
-    flex: 1,
-  },
-  streakTitle: {
-    color: "#1e3a8a",
-    fontWeight: "bold",
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  streakSubtitle: {
-    color: "#6b7280",
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  streakCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 3,
-    borderColor: "#fbbf24",
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 12,
-  },
-  streakCircleValue: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#111827",
-    marginBottom: -2,
-  },
-  streakCircleDivider: {
-    width: 16,
-    height: 1,
-    backgroundColor: "#9ca3af",
-  },
-  streakCircleTotal: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginTop: -2,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    padding: 18,
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1e3a8a",
+  rewardStatusLabel: {
+    color: "#1d4ed8",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    marginBottom: 6,
   },
-  viewAllText: {
-    color: "#3b82f6",
-    fontSize: 14,
-    fontWeight: "600",
+  rewardStatusTitle: {
+    color: "#172554",
+    fontSize: 19,
+    fontWeight: "800",
+    lineHeight: 25,
+    marginBottom: 6,
   },
-  badgeGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 24,
+  rewardStatusBody: {
+    color: "#334155",
+    fontSize: 13,
+    lineHeight: 20,
   },
-  badgeItem: {
-    alignItems: "center",
-    width: "23%",
-  },
-  badgeIconWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-    position: "relative",
-  },
-  badgeIconBg: {
-    width: 46,
-    height: 46,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  badgeCheck: {
-    position: "absolute",
-    bottom: -6,
-    right: -6,
-    backgroundColor: "#10b981",
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  badgeCheckText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  badgeName: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#111827",
-    textAlign: "center",
-  },
-  badgeSubtitle: {
-    fontSize: 10,
-    color: "#6b7280",
-    textAlign: "center",
-    marginTop: 2,
-  },
-  redeemGrid: {
+  rewardBalanceGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    marginBottom: 6,
   },
-  redeemItem: {
+  rewardBalanceCard: {
     width: "48%",
     backgroundColor: "#fff",
-    padding: 16,
     borderRadius: 12,
-    alignItems: "center",
-    marginBottom: 16,
+    padding: 14,
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: 8,
     elevation: 2,
   },
-  redeemIcon: {
-    marginBottom: 12,
+  rewardBalanceCardWide: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  redeemName: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  redeemCost: {
+  rewardBalanceLabel: {
+    color: "#475569",
     fontSize: 12,
-    color: "#6b7280",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  rewardBalanceValue: {
+    color: "#1e3a8a",
+    fontSize: 24,
+    fontWeight: "800",
+  },
+  rewardBalanceNote: {
+    color: "#64748b",
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 4,
+  },
+  rewardPotentialSummary: {
+    backgroundColor: "#f0fdf4",
+    borderColor: "#bbf7d0",
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+  },
+  rewardPotentialSummaryLabel: {
+    color: "#15803d",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    marginBottom: 5,
+  },
+  rewardPotentialSummaryTitle: {
+    color: "#14532d",
+    fontSize: 17,
+    fontWeight: "800",
+    lineHeight: 23,
+    marginBottom: 7,
+  },
+  rewardPotentialSummaryValue: {
+    color: "#166534",
+    fontSize: 15,
+    fontWeight: "700",
+    lineHeight: 21,
+  },
+  rewardPotentialSummaryNote: {
+    color: "#166534",
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
+  },
+  rewardRulesCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+  },
+  rewardRulesTitle: {
+    color: "#1e3a8a",
+    fontSize: 16,
+    fontWeight: "800",
+    marginBottom: 8,
+  },
+  rewardRule: {
+    color: "#475569",
+    fontSize: 13,
+    lineHeight: 21,
+  },
+  rewardPlanButton: {
+    minHeight: 48,
+    backgroundColor: "#1e3a8a",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  rewardPlanButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  rewardDisclaimer: {
+    color: "#64748b",
+    fontSize: 11,
+    lineHeight: 17,
+    textAlign: "center",
+    marginTop: 12,
   },
 
   /* Plan Trip Styles */
@@ -958,12 +751,13 @@ const styles = StyleSheet.create({
   },
   tabItem: {
     flex: 1,
+    minHeight: 52,
     alignItems: "center",
     justifyContent: "center",
   },
   tabLabel: {
     fontSize: 10,
-    color: "#9ca3af",
+    color: "#64748b",
     marginTop: 4,
     fontWeight: "500",
   },

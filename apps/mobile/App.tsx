@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   type DimensionValue,
+  BackHandler,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -34,15 +35,17 @@ import {
   validSustainableGuadalupeCubaoTrace,
 } from "@lakbaypoints/shared";
 import {
-  RewardsDashboardScreen,
-  PlanTripScreen,
   BottomTabBar,
+  type BottomTabName,
+  PlanTripScreen,
+  RewardsOverviewScreen,
 } from "./NewScreens";
 
 const arrow = "\u2192";
 const sustainableRoute = phase0APilotRoute;
 
 type ScreenName =
+  | "home"
   | "comparison"
   | "detail"
   | "playback"
@@ -50,10 +53,10 @@ type ScreenName =
   | "report"
   | "reportConfirmation"
   | "dashboardPreview"
-  | "rewardsDashboard"
+  | "rewardsOverview"
+  | "profile"
   | "planTrip";
 
-type TabName = "home" | "trips" | "rewards" | "report" | "profile";
 type TraceMode = "valid" | "suspicious";
 type VerifiedTripState = {
   classifierResult: ClassifierResult;
@@ -76,6 +79,40 @@ type SubmittedReportState = AccessBarrierReport & {
 type PlaybackStep = {
   segmentId: string;
   status: string;
+};
+
+const tabDestinations: Record<BottomTabName, ScreenName> = {
+  home: "home",
+  trips: "planTrip",
+  rewards: "rewardsOverview",
+  report: "report",
+  profile: "profile",
+};
+
+const screenTabs: Record<ScreenName, BottomTabName> = {
+  home: "home",
+  planTrip: "trips",
+  comparison: "trips",
+  detail: "trips",
+  playback: "trips",
+  rewards: "rewards",
+  rewardsOverview: "rewards",
+  report: "report",
+  reportConfirmation: "report",
+  dashboardPreview: "report",
+  profile: "profile",
+};
+
+const hardwareBackDestinations: Partial<Record<ScreenName, ScreenName>> = {
+  comparison: "planTrip",
+  detail: "comparison",
+  playback: "detail",
+  rewards: "playback",
+  rewardsOverview: "planTrip",
+  report: "planTrip",
+  reportConfirmation: "report",
+  dashboardPreview: "reportConfirmation",
+  profile: "home",
 };
 
 const playbackSteps: PlaybackStep[] = [
@@ -348,7 +385,7 @@ function MetricGrid({ route }: { route: RouteOption }) {
       </View>
       {route.lakbayScoreReward ? (
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Lakbay Score</Text>
+          <Text style={styles.metricLabel}>Potential Lakbay Score</Text>
           <Text style={styles.metricValue}>+{route.lakbayScoreReward}</Text>
         </View>
       ) : null}
@@ -748,11 +785,11 @@ function RewardResultScreen({
           value={`+${rewardResult.lakbayScoreEarned}`}
         />
         <RewardMetric
-          label="Lakbay Points earned"
+          label="campaign Points earned"
           value={`+${rewardResult.campaignPointsEarned}`}
         />
         <RewardMetric
-          label="Updated Lakbay Points"
+          label="Updated campaign Points"
           value={`${rewardResult.updatedCampaignPoints}`}
         />
         <RewardMetric
@@ -765,7 +802,11 @@ function RewardResultScreen({
         />
         <RewardMetric
           label="Estimated CO2e avoided"
-          value={`${rewardResult.estimatedCo2eAvoidedKg} kg`}
+          value={
+            route.estimatedCo2eAvoidedKg === null
+              ? "Pending pilot calibration"
+              : `${rewardResult.estimatedCo2eAvoidedKg} kg`
+          }
         />
       </View>
 
@@ -775,7 +816,7 @@ function RewardResultScreen({
       </View>
 
       <Text style={styles.infoNote}>
-        Lakbay Score is a non-cash progress meter. Lakbay Points are capped,
+        Lakbay Score is a non-cash progress meter. campaign Points are capped,
         campaign-based incentives for verified sustainable trip chains.
       </Text>
 
@@ -1089,33 +1130,144 @@ function DashboardPreviewPlaceholderScreen({
   );
 }
 
+function HomeScreen({
+  route,
+  onPlanTrip,
+  onCompareRoutes,
+}: {
+  route: RouteOption;
+  onPlanTrip: () => void;
+  onCompareRoutes: () => void;
+}) {
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <AppHeader
+        eyebrow="Guide the Trip. Verify the Shift. Improve Access."
+        subtitle="A Verified Multimodal Mode-Shift Platform for Metro Manila"
+      />
+
+      <View style={[styles.card, styles.homeHeroCard]}>
+        <Text style={styles.sectionKicker}>Phase 0A pilot</Text>
+        <Text style={styles.detailTitle}>Welcome to LakbayPoints</Text>
+        <Text style={styles.statusBody}>
+          Review the static multimodal pilot journey, compare qualified route
+          options, and continue to prototype verification.
+        </Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionKicker}>Recommended journey</Text>
+        <Text style={styles.detailTitle}>{route.name}</Text>
+        <Text style={styles.detailChain}>{readableTripChain(route)}</Text>
+        <MetricGrid route={route} />
+      </View>
+
+      <Text style={styles.infoNote}>
+        {route.dataStatusLabel}. {route.disclaimer}
+      </Text>
+
+      <View style={styles.actionRow}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onPlanTrip}
+          style={styles.primaryAction}
+        >
+          <Text style={styles.primaryActionText}>Plan the Pilot Trip</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onCompareRoutes}
+          style={styles.secondaryAction}
+        >
+          <Text style={styles.secondaryActionText}>Compare Route Options</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
+}
+
+function ProfileScreen({ onPlanTrip }: { onPlanTrip: () => void }) {
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <AppHeader
+        eyebrow="Prototype Profile"
+        title="Profile Preview"
+        subtitle="Session-only Phase 0A experience"
+      />
+
+      <View style={[styles.card, styles.profileCard]}>
+        <Text style={styles.sectionKicker}>No live account connected</Text>
+        <Text style={styles.detailTitle}>Prototype commuter profile</Text>
+        <Text style={styles.statusBody}>
+          Authentication, persistent trip history, personal wallets, and live
+          profile services are outside the Phase 0A prototype.
+        </Text>
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPlanTrip}
+        style={styles.primaryAction}
+      >
+        <Text style={styles.primaryActionText}>Go to Trip Planning</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
 export default function App() {
   const [screen, setScreen] = useState<ScreenName>("planTrip");
-  const [activeTab, setActiveTab] = useState<TabName>("trips");
   const [verifiedTrip, setVerifiedTrip] = useState<VerifiedTripState | null>(
     null,
   );
   const [submittedReport, setSubmittedReport] =
     useState<SubmittedReportState | null>(null);
   const route = useMemo(() => sustainableRoute, []);
+  const activeTab = screenTabs[screen];
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        const destination = hardwareBackDestinations[screen];
+        if (!destination) {
+          return false;
+        }
+
+        setScreen(destination);
+        return true;
+      },
+    );
+
+    return () => subscription.remove();
+  }, [screen]);
+
   const backToRoutes = () => {
     setVerifiedTrip(null);
     setSubmittedReport(null);
     setScreen("comparison");
   };
 
-  const handleTabSelect = (tab: TabName) => {
-    setActiveTab(tab);
-    if (tab === "rewards") setScreen("rewardsDashboard");
-    else if (tab === "trips") setScreen("planTrip");
-    else if (tab === "report") setScreen("comparison");
-    else setScreen("comparison"); // fallback for home/profile
+  const handleTabSelect = (tab: BottomTabName) => {
+    if (tab === "rewards" && verifiedTrip) {
+      setScreen("rewards");
+      return;
+    }
+
+    setScreen(tabDestinations[tab]);
   };
 
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
       <View style={{ flex: 1 }}>
+        {screen === "home" ? (
+          <HomeScreen
+            route={route}
+            onPlanTrip={() => setScreen("planTrip")}
+            onCompareRoutes={() => setScreen("comparison")}
+          />
+        ) : null}
         {screen === "comparison" ? (
           <RouteComparisonScreen onStartTrip={() => setScreen("detail")} />
         ) : null}
@@ -1167,7 +1319,12 @@ export default function App() {
             onBackToRoutes={backToRoutes}
           />
         ) : null}
-        {screen === "rewardsDashboard" ? <RewardsDashboardScreen /> : null}
+        {screen === "rewardsOverview" ? (
+          <RewardsOverviewScreen onPlanTrip={() => setScreen("planTrip")} />
+        ) : null}
+        {screen === "profile" ? (
+          <ProfileScreen onPlanTrip={() => setScreen("planTrip")} />
+        ) : null}
         {screen === "planTrip" ? (
           <PlanTripScreen
             route={route}
@@ -1175,10 +1332,7 @@ export default function App() {
           />
         ) : null}
       </View>
-      <BottomTabBar
-        activeTab={activeTab}
-        onTabSelect={(t) => handleTabSelect(t as TabName)}
-      />
+      <BottomTabBar activeTab={activeTab} onTabSelect={handleTabSelect} />
     </SafeAreaView>
   );
 }
@@ -1366,6 +1520,15 @@ const styles = StyleSheet.create({
   },
   detailHeroCard: {
     borderColor: "#0f766e",
+    marginBottom: 18,
+  },
+  homeHeroCard: {
+    backgroundColor: "#eff6ff",
+    borderColor: "#bfdbfe",
+    marginBottom: 14,
+  },
+  profileCard: {
+    backgroundColor: "#f8fafc",
     marginBottom: 18,
   },
   sectionKicker: {

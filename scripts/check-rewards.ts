@@ -62,8 +62,8 @@ assert.equal(cappedRewards.campaignPoints.capped, true);
 
 console.log("Reward check passed");
 console.log(
-  `Valid rewards: +${validRewards.lakbayScoreEarned} Lakbay Score, +${validRewards.campaignPointsEarned} Lakbay Points, ${validRewards.campaignCapRemaining} cap remaining`,
+  `Valid rewards: +${validRewards.lakbayScoreEarned} Lakbay Score, +${validRewards.campaignPointsEarned} campaign Points, ${validRewards.campaignCapRemaining} cap remaining`,
 );
 console.log(
-  `Suspicious rewards: +${suspiciousRewards.lakbayScoreEarned} Lakbay Score, +${suspiciousRewards.campaignPointsEarned} Lakbay Points`,
+  `Suspicious rewards: +${suspiciousRewards.lakbayScoreEarned} Lakbay Score, +${suspiciousRewards.campaignPointsEarned} campaign Points`,
 );
