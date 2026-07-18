@@ -54,7 +54,9 @@ export function RewardsDashboardScreen() {
         </View>
         <View style={styles.pointsBox}>
           <Text style={styles.pointsBoxTitle}>This Week</Text>
-          <Text style={[styles.pointsBoxValue, { color: "#10b981" }]}>+150</Text>
+          <Text style={[styles.pointsBoxValue, { color: "#10b981" }]}>
+            +150
+          </Text>
           <Text style={styles.pointsBoxSubtitle}>Points Earned</Text>
         </View>
       </View>
@@ -65,7 +67,11 @@ export function RewardsDashboardScreen() {
         </View>
         <View style={styles.streakInfo}>
           <Text style={styles.streakTitle}>7-Day Commute Streak</Text>
-          <Text style={styles.streakSubtitle}>Keep it up! 1 more day to earn <Text style={{color: "#3b82f6", fontWeight: "bold"}}>50</Text> bonus points.</Text>
+          <Text style={styles.streakSubtitle}>
+            Keep it up! 1 more day to earn{" "}
+            <Text style={{ color: "#3b82f6", fontWeight: "bold" }}>50</Text>{" "}
+            bonus points.
+          </Text>
         </View>
         <View style={styles.streakCircle}>
           <Text style={styles.streakCircleValue}>7</Text>
@@ -78,7 +84,7 @@ export function RewardsDashboardScreen() {
         <Text style={styles.sectionTitle}>Achievement Badges</Text>
         <Text style={styles.viewAllText}>View All</Text>
       </View>
-      
+
       <View style={styles.badgeGrid}>
         <View style={styles.badgeItem}>
           <View style={[styles.badgeIconWrap, { borderColor: "#3b82f6" }]}>
@@ -86,7 +92,7 @@ export function RewardsDashboardScreen() {
               <User color="#fff" size={24} />
             </View>
             <View style={styles.badgeCheck}>
-               <Text style={styles.badgeCheckText}>✓</Text>
+              <Text style={styles.badgeCheckText}>✓</Text>
             </View>
           </View>
           <Text style={styles.badgeName}>First Step</Text>
@@ -97,7 +103,7 @@ export function RewardsDashboardScreen() {
               <MapIcon color="#fff" size={24} />
             </View>
             <View style={styles.badgeCheck}>
-               <Text style={styles.badgeCheckText}>✓</Text>
+              <Text style={styles.badgeCheckText}>✓</Text>
             </View>
           </View>
           <Text style={styles.badgeName}>Transit Rider</Text>
@@ -108,7 +114,7 @@ export function RewardsDashboardScreen() {
               <MapPin color="#fff" size={24} />
             </View>
             <View style={styles.badgeCheck}>
-               <Text style={styles.badgeCheckText}>✓</Text>
+              <Text style={styles.badgeCheckText}>✓</Text>
             </View>
           </View>
           <Text style={styles.badgeName}>Explorer</Text>
@@ -118,8 +124,8 @@ export function RewardsDashboardScreen() {
             <View style={[styles.badgeIconBg, { backgroundColor: "#9ca3af" }]}>
               <Shield color="#fff" size={24} />
             </View>
-            <View style={[styles.badgeCheck, { backgroundColor: "#d1d5db"}]}>
-               <Text style={styles.badgeCheckText}>🔒</Text>
+            <View style={[styles.badgeCheck, { backgroundColor: "#d1d5db" }]}>
+              <Text style={styles.badgeCheckText}>🔒</Text>
             </View>
           </View>
           <Text style={styles.badgeName}>Commuter Pro</Text>
@@ -170,7 +176,11 @@ export function PlanTripScreen() {
         <View style={styles.tripInputRow}>
           <View style={styles.inputDotOrigin} />
           <Text style={styles.tripInputText}>Guadalupe Station</Text>
-          <TrendingUp color="#9ca3af" size={20} style={{marginLeft: 'auto'}}/>
+          <TrendingUp
+            color="#9ca3af"
+            size={20}
+            style={{ marginLeft: "auto" }}
+          />
         </View>
         <View style={styles.tripInputDivider} />
         <View style={styles.tripInputRow}>
@@ -178,14 +188,18 @@ export function PlanTripScreen() {
           <Text style={styles.tripInputText}>Cubao Station</Text>
         </View>
         <View style={styles.swapIconContainer}>
-          <Text style={{color: '#6b7280'}}>↑↓</Text>
+          <Text style={{ color: "#6b7280" }}>↑↓</Text>
         </View>
       </View>
 
       <View style={styles.tripTabs}>
         <View style={[styles.tripTab, styles.tripTabActive]}>
-          <Text style={[styles.tripTabText, styles.tripTabTextActive]}>Best Route</Text>
-          <Text style={[styles.tripTabSub, styles.tripTabSubActive]}>Recommended</Text>
+          <Text style={[styles.tripTabText, styles.tripTabTextActive]}>
+            Best Route
+          </Text>
+          <Text style={[styles.tripTabSub, styles.tripTabSubActive]}>
+            Recommended
+          </Text>
         </View>
         <View style={styles.tripTab}>
           <Text style={styles.tripTabText}>Fastest</Text>
@@ -199,47 +213,88 @@ export function PlanTripScreen() {
 
       <View style={styles.mapPlaceholder}>
         <Text style={styles.mapTitle}>Transit Heatmap</Text>
-        <Text style={styles.mapSubtitle}>See public transport access and commuter density</Text>
-        
+        <Text style={styles.mapSubtitle}>
+          See public transport access and commuter density
+        </Text>
+
         {/* Pseudo Map Background */}
         <View style={styles.pseudoMapBg}>
-          <Text style={{position: 'absolute', top: 10, left: 10, color: '#9ca3af', fontSize: 10, fontWeight: 'bold'}}>KAMUNING</Text>
-          <Text style={{position: 'absolute', top: 50, right: 10, color: '#9ca3af', fontSize: 10, fontWeight: 'bold'}}>CUBAO</Text>
-          <Text style={{position: 'absolute', bottom: 50, left: 10, color: '#9ca3af', fontSize: 10, fontWeight: 'bold'}}>MANDALUYONG</Text>
-          
+          <Text
+            style={{
+              position: "absolute",
+              top: 10,
+              left: 10,
+              color: "#9ca3af",
+              fontSize: 10,
+              fontWeight: "bold",
+            }}
+          >
+            KAMUNING
+          </Text>
+          <Text
+            style={{
+              position: "absolute",
+              top: 50,
+              right: 10,
+              color: "#9ca3af",
+              fontSize: 10,
+              fontWeight: "bold",
+            }}
+          >
+            CUBAO
+          </Text>
+          <Text
+            style={{
+              position: "absolute",
+              bottom: 50,
+              left: 10,
+              color: "#9ca3af",
+              fontSize: 10,
+              fontWeight: "bold",
+            }}
+          >
+            MANDALUYONG
+          </Text>
+
           <View style={styles.mapLineContainer}>
-             <View style={styles.mapStation}>
-               <MapPin fill="#fff" color="#0f766e" size={20} />
-               <Text style={styles.mapStationText}>Guadalupe Station</Text>
-             </View>
-             
-             <View style={styles.mapLineSegment}>
-                <View style={styles.dottedLine} />
-                <View style={styles.walkIconSmall}><User color="#fff" size={10} /></View>
-             </View>
+            <View style={styles.mapStation}>
+              <MapPin fill="#fff" color="#0f766e" size={20} />
+              <Text style={styles.mapStationText}>Guadalupe Station</Text>
+            </View>
 
-             <View style={styles.mrtLineContainer}>
-                <View style={styles.mrtLine} />
-                <View style={styles.mrtBadge}><Text style={styles.mrtBadgeText}>MRT-3</Text></View>
-             </View>
-             
-             <View style={styles.mapLineSegment}>
-                <View style={styles.dottedLine} />
-                <View style={styles.walkIconSmall}><User color="#fff" size={10} /></View>
-             </View>
+            <View style={styles.mapLineSegment}>
+              <View style={styles.dottedLine} />
+              <View style={styles.walkIconSmall}>
+                <User color="#fff" size={10} />
+              </View>
+            </View>
 
-             <View style={styles.mapStation}>
-               <MapPin fill="#fff" color="#0f766e" size={20} />
-               <Text style={styles.mapStationText}>Cubao Station</Text>
-             </View>
+            <View style={styles.mrtLineContainer}>
+              <View style={styles.mrtLine} />
+              <View style={styles.mrtBadge}>
+                <Text style={styles.mrtBadgeText}>MRT-3</Text>
+              </View>
+            </View>
+
+            <View style={styles.mapLineSegment}>
+              <View style={styles.dottedLine} />
+              <View style={styles.walkIconSmall}>
+                <User color="#fff" size={10} />
+              </View>
+            </View>
+
+            <View style={styles.mapStation}>
+              <MapPin fill="#fff" color="#0f766e" size={20} />
+              <Text style={styles.mapStationText}>Cubao Station</Text>
+            </View>
           </View>
-          
+
           <View style={styles.heatmapLegendMap}>
             <Text style={styles.heatmapLegendText}>Commuter Density</Text>
             <View style={styles.heatmapBarContainer}>
-               <Text style={styles.heatmapLegendLabel}>Low</Text>
-               <View style={styles.heatmapGradient} />
-               <Text style={styles.heatmapLegendLabel}>High</Text>
+              <Text style={styles.heatmapLegendLabel}>Low</Text>
+              <View style={styles.heatmapGradient} />
+              <Text style={styles.heatmapLegendLabel}>High</Text>
             </View>
           </View>
         </View>
@@ -249,7 +304,9 @@ export function PlanTripScreen() {
         <View style={styles.routeDetailsHeader}>
           <View>
             <Text style={styles.routeDetailsTitle}>Recommended Route</Text>
-            <Text style={styles.routeDetailsSub}>Incl. 12 min walk • 1 transfer</Text>
+            <Text style={styles.routeDetailsSub}>
+              Incl. 12 min walk • 1 transfer
+            </Text>
           </View>
           <Text style={styles.routeTotalTime}>44 min</Text>
         </View>
@@ -257,7 +314,9 @@ export function PlanTripScreen() {
         <View style={styles.segmentList}>
           <View style={styles.segmentRow}>
             <View style={styles.segmentIconContainer}>
-              <View style={styles.segmentIconBg}><User color="#fff" size={16} /></View>
+              <View style={styles.segmentIconBg}>
+                <User color="#fff" size={16} />
+              </View>
               <View style={styles.segmentDash} />
             </View>
             <View style={styles.segmentInfo}>
@@ -269,11 +328,19 @@ export function PlanTripScreen() {
 
           <View style={styles.segmentRow}>
             <View style={styles.segmentIconContainer}>
-              <View style={[styles.segmentIconBg, {backgroundColor: '#1e3a8a'}]}><MapIcon color="#fff" size={16} /></View>
+              <View
+                style={[styles.segmentIconBg, { backgroundColor: "#1e3a8a" }]}
+              >
+                <MapIcon color="#fff" size={16} />
+              </View>
               <View style={styles.segmentDash} />
             </View>
             <View style={styles.segmentInfo}>
-              <Text style={styles.segmentName}><Text style={styles.boldBlue}>MRT-3</Text> Guadalupe <ArrowRight size={14} color="#000" style={{marginTop: 4}}/> Cubao Station</Text>
+              <Text style={styles.segmentName}>
+                <Text style={styles.boldBlue}>MRT-3</Text> Guadalupe{" "}
+                <ArrowRight size={14} color="#000" style={{ marginTop: 4 }} />{" "}
+                Cubao Station
+              </Text>
               <Text style={styles.segmentDesc}>6 stops • Every 3-4 min</Text>
             </View>
             <Text style={styles.segmentTime}>26 min</Text>
@@ -281,7 +348,9 @@ export function PlanTripScreen() {
 
           <View style={styles.segmentRow}>
             <View style={styles.segmentIconContainer}>
-              <View style={styles.segmentIconBg}><User color="#fff" size={16} /></View>
+              <View style={styles.segmentIconBg}>
+                <User color="#fff" size={16} />
+              </View>
             </View>
             <View style={styles.segmentInfo}>
               <Text style={styles.segmentName}>Walk to Cubao Station Exit</Text>
@@ -291,53 +360,115 @@ export function PlanTripScreen() {
           </View>
         </View>
       </View>
-      
+
       <View style={styles.bottomStatsRow}>
-         <View style={styles.bottomStatBox}>
-            <View style={styles.statIconRow}>
-                <User color="#f59e0b" size={20} style={{marginRight: 4}} />
-                <User color="#f59e0b" size={20} style={{marginRight: 4, marginLeft: -10}} />
-                <User color="#f59e0b" size={20} style={{marginLeft: -10}} />
-            </View>
-            <View style={styles.bottomStatInfo}>
-              <Text style={styles.bottomStatTitle}>Moderate Crowds</Text>
-              <Text style={styles.bottomStatDesc}>Busier than usual on MRT-3. Expect moderate crowd levels.</Text>
-            </View>
-         </View>
-         <View style={styles.bottomStatBoxSmall}>
-            <Shield fill="#fbbf24" color="#fbbf24" size={24} />
-            <View style={styles.bottomStatInfo}>
-              <Text style={styles.bottomStatLabel}>Route Safety</Text>
-              <Text style={styles.bottomStatValueGood}>Good <ArrowRight size={14} color="#10b981"/></Text>
-            </View>
-         </View>
+        <View style={styles.bottomStatBox}>
+          <View style={styles.statIconRow}>
+            <User color="#f59e0b" size={20} style={{ marginRight: 4 }} />
+            <User
+              color="#f59e0b"
+              size={20}
+              style={{ marginRight: 4, marginLeft: -10 }}
+            />
+            <User color="#f59e0b" size={20} style={{ marginLeft: -10 }} />
+          </View>
+          <View style={styles.bottomStatInfo}>
+            <Text style={styles.bottomStatTitle}>Moderate Crowds</Text>
+            <Text style={styles.bottomStatDesc}>
+              Busier than usual on MRT-3. Expect moderate crowd levels.
+            </Text>
+          </View>
+        </View>
+        <View style={styles.bottomStatBoxSmall}>
+          <Shield fill="#fbbf24" color="#fbbf24" size={24} />
+          <View style={styles.bottomStatInfo}>
+            <Text style={styles.bottomStatLabel}>Route Safety</Text>
+            <Text style={styles.bottomStatValueGood}>
+              Good <ArrowRight size={14} color="#10b981" />
+            </Text>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
 }
 
-export function BottomTabBar({ activeTab, onTabSelect }: { activeTab: string, onTabSelect: (t: string) => void }) {
+export function BottomTabBar({
+  activeTab,
+  onTabSelect,
+}: {
+  activeTab: string;
+  onTabSelect: (t: string) => void;
+}) {
   return (
     <View style={styles.tabBar}>
       <Pressable style={styles.tabItem} onPress={() => onTabSelect("home")}>
         <Home color={activeTab === "home" ? "#1e3a8a" : "#9ca3af"} size={24} />
-        <Text style={[styles.tabLabel, activeTab === "home" && styles.tabLabelActive]}>Home</Text>
+        <Text
+          style={[
+            styles.tabLabel,
+            activeTab === "home" && styles.tabLabelActive,
+          ]}
+        >
+          Home
+        </Text>
       </Pressable>
       <Pressable style={styles.tabItem} onPress={() => onTabSelect("trips")}>
-        <MapIcon color={activeTab === "trips" ? "#1e3a8a" : "#9ca3af"} size={24} />
-        <Text style={[styles.tabLabel, activeTab === "trips" && styles.tabLabelActive]}>Trips</Text>
+        <MapIcon
+          color={activeTab === "trips" ? "#1e3a8a" : "#9ca3af"}
+          size={24}
+        />
+        <Text
+          style={[
+            styles.tabLabel,
+            activeTab === "trips" && styles.tabLabelActive,
+          ]}
+        >
+          Trips
+        </Text>
       </Pressable>
       <Pressable style={styles.tabItem} onPress={() => onTabSelect("rewards")}>
-        <Star fill={activeTab === "rewards" ? "#1e3a8a" : "transparent"} color={activeTab === "rewards" ? "#1e3a8a" : "#9ca3af"} size={24} />
-        <Text style={[styles.tabLabel, activeTab === "rewards" && styles.tabLabelActive]}>Rewards</Text>
+        <Star
+          fill={activeTab === "rewards" ? "#1e3a8a" : "transparent"}
+          color={activeTab === "rewards" ? "#1e3a8a" : "#9ca3af"}
+          size={24}
+        />
+        <Text
+          style={[
+            styles.tabLabel,
+            activeTab === "rewards" && styles.tabLabelActive,
+          ]}
+        >
+          Rewards
+        </Text>
       </Pressable>
       <Pressable style={styles.tabItem} onPress={() => onTabSelect("report")}>
-        <Shield color={activeTab === "report" ? "#1e3a8a" : "#9ca3af"} size={24} />
-        <Text style={[styles.tabLabel, activeTab === "report" && styles.tabLabelActive]}>Report</Text>
+        <Shield
+          color={activeTab === "report" ? "#1e3a8a" : "#9ca3af"}
+          size={24}
+        />
+        <Text
+          style={[
+            styles.tabLabel,
+            activeTab === "report" && styles.tabLabelActive,
+          ]}
+        >
+          Report
+        </Text>
       </Pressable>
       <Pressable style={styles.tabItem} onPress={() => onTabSelect("profile")}>
-        <User color={activeTab === "profile" ? "#1e3a8a" : "#9ca3af"} size={24} />
-        <Text style={[styles.tabLabel, activeTab === "profile" && styles.tabLabelActive]}>Profile</Text>
+        <User
+          color={activeTab === "profile" ? "#1e3a8a" : "#9ca3af"}
+          size={24}
+        />
+        <Text
+          style={[
+            styles.tabLabel,
+            activeTab === "profile" && styles.tabLabelActive,
+          ]}
+        >
+          Profile
+        </Text>
       </Pressable>
     </View>
   );
@@ -637,7 +768,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6b7280",
   },
-  
+
   /* Plan Trip Styles */
   tripInputCard: {
     backgroundColor: "#fff",

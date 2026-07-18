@@ -44,7 +44,11 @@ import {
   ArrowRight,
 } from "lucide-react-native";
 
-import { RewardsDashboardScreen, PlanTripScreen, BottomTabBar } from "./NewScreens";
+import {
+  RewardsDashboardScreen,
+  PlanTripScreen,
+  BottomTabBar,
+} from "./NewScreens";
 
 const arrow = "\u2192";
 const sustainableRoute =
@@ -1107,7 +1111,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         {screen === "comparison" ? (
           <RouteComparisonScreen onStartTrip={() => setScreen("detail")} />
         ) : null}
@@ -1159,14 +1163,13 @@ export default function App() {
             onBackToRoutes={backToRoutes}
           />
         ) : null}
-        {screen === "rewardsDashboard" ? (
-          <RewardsDashboardScreen />
-        ) : null}
-        {screen === "planTrip" ? (
-          <PlanTripScreen />
-        ) : null}
+        {screen === "rewardsDashboard" ? <RewardsDashboardScreen /> : null}
+        {screen === "planTrip" ? <PlanTripScreen /> : null}
       </View>
-      <BottomTabBar activeTab={activeTab} onTabSelect={(t) => handleTabSelect(t as TabName)} />
+      <BottomTabBar
+        activeTab={activeTab}
+        onTabSelect={(t) => handleTabSelect(t as TabName)}
+      />
     </SafeAreaView>
   );
 }
