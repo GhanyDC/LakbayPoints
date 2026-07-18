@@ -1,11 +1,11 @@
 import { strict as assert } from "assert";
 import { classifySustainableTripChain } from "../packages/shared/src/classifier";
-import { guadalupeCubaoRoutes } from "../packages/shared/src/routes";
+import { phase0ARouteOptions } from "../packages/shared/src/routes";
 import type { GpsTracePoint } from "../packages/shared/src/types";
 import validTrace from "../data/traces/valid_sustainable_guadalupe_cubao.json";
 import suspiciousTrace from "../data/traces/suspicious_trace_rejected.json";
 
-const sustainableRoute = guadalupeCubaoRoutes.find(
+const sustainableRoute = phase0ARouteOptions.find(
   (route) => route.type === "sustainable",
 );
 

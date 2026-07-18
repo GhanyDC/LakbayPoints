@@ -3,13 +3,13 @@ import test from "node:test";
 
 import {
   classifySustainableTripChain,
-  guadalupeCubaoRoutes,
+  phase0ARouteOptions,
   suspiciousTraceRejected,
   validSustainableGuadalupeCubaoTrace,
 } from "../src/index";
 
 test("shared test harness runs the current classifier fixtures", () => {
-  const route = guadalupeCubaoRoutes.find(
+  const route = phase0ARouteOptions.find(
     (candidate) => candidate.type === "sustainable",
   );
 

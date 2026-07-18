@@ -1,4 +1,4 @@
-import { guadalupeCubaoRoutes } from "./routes";
+import { phase0ARouteOptions } from "./routes";
 import type {
   ClassifierResult,
   ClassifierSignalChecklist,
@@ -115,7 +115,7 @@ function resolveRoute(input: ClassifySustainableTripChainInput) {
     return input.selectedRoute;
   }
 
-  const options = input.routeOptions ?? guadalupeCubaoRoutes;
+  const options = input.routeOptions ?? phase0ARouteOptions;
 
   return (
     input.expectedRoute ??

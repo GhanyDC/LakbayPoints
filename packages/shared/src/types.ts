@@ -10,6 +10,7 @@ export type TransportMode =
   | "mrt"
   | "bus"
   | "jeepney"
+  | "public_road_transport"
   | "ferry"
   | "bike"
   | "ebike"
@@ -18,36 +19,76 @@ export type TransportMode =
 export type RouteOptionType =
   "private_baseline" | "sustainable" | "phase2_preview";
 
-export type TrafficCondition = "Light" | "Moderate" | "Heavy";
+export type DataStatus =
+  | "prototype_estimate"
+  | "official_reference"
+  | "pending_confirmation"
+  | "not_applicable";
+
+export type RouteRecommendationStatus =
+  "recommended" | "comparison_only" | "future_preview";
+
+export type RouteRewardEligibility = "verification_required" | "ineligible";
+
+export type RouteAccessPointKind =
+  | "home_access_zone"
+  | "mrt_station"
+  | "ferry_station"
+  | "demo_destination"
+  | "concept_transfer";
+
+export type RouteAccessPoint = {
+  id: string;
+  label: string;
+  kind: RouteAccessPointKind;
+};
 
 export type RouteSegment = {
   id: string;
   mode: TransportMode;
+  displayMode: string;
   label: string;
-  startName: string;
-  endName: string;
-  distanceKm: number;
-  estimatedTimeMin: number;
-  polyline?: [number, number][];
+  originAccessPointId: string;
+  destinationAccessPointId: string;
+  travelTimeMin: number | null;
+  waitDwellTimeMin: number | null;
+  distanceKm: number | null;
+  farePhp: number | null;
+  fareStatus: DataStatus;
+  fareDisplay?: string;
+};
+
+export type RouteTotals = {
+  travelTimeMin: number | null;
+  waitDwellTimeMin: number | null;
+  totalTimeMin: number | null;
+  distanceKm: number | null;
+  knownFarePhp: number;
+  hasPendingFare: boolean;
 };
 
 export type RouteOption = {
   id: string;
   name: string;
   type: RouteOptionType;
-  origin: string;
-  destination: string;
+  recommendationStatus: RouteRecommendationStatus;
+  dataStatus: DataStatus;
+  dataStatusLabel: string;
+  dataVersion: string;
+  lastReviewedDate: string;
+  disclaimer: string;
+  originAccessPointId: string;
+  destinationAccessPointId: string;
+  accessPoints: RouteAccessPoint[];
   segments: RouteSegment[];
-  estimatedTimeMin: number;
-  estimatedCostPhp: number;
   accessScore: AccessScore;
-  estimatedCo2eAvoidedKg?: number;
+  rewardEligibility: RouteRewardEligibility;
+  estimatedCo2eAvoidedKg: number | null;
+  co2eMethodologyStatus: DataStatus;
+  co2eDisplay: string;
   lakbayScoreReward?: number;
   campaignPointsReward?: number;
   notes?: string[];
-  tripChainLabel?: string;
-  trafficCondition?: TrafficCondition;
-  co2eBaselineKg?: number;
   phaseLabel?: string;
   futureIntegrationNote?: string;
 };

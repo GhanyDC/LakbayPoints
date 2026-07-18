@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { classifySustainableTripChain } from "../packages/shared/src/classifier";
 import { demoUserRewardState } from "../packages/shared/src/demo-data";
-import { guadalupeCubaoRoutes } from "../packages/shared/src/routes";
+import { phase0ARouteOptions } from "../packages/shared/src/routes";
 import { calculateTripRewards } from "../packages/shared/src/rewards";
 import type {
   GpsTracePoint,
@@ -10,7 +10,7 @@ import type {
 import validTrace from "../data/traces/valid_sustainable_guadalupe_cubao.json";
 import suspiciousTrace from "../data/traces/suspicious_trace_rejected.json";
 
-const sustainableRoute = guadalupeCubaoRoutes.find(
+const sustainableRoute = phase0ARouteOptions.find(
   (route) => route.type === "sustainable",
 );
 
@@ -51,7 +51,7 @@ assert.equal(validRewards.campaignPointsEarned, 40);
 assert.equal(validRewards.updatedLakbayScore, 360);
 assert.equal(validRewards.updatedCampaignPoints, 60);
 assert.equal(validRewards.campaignCapRemaining, 40);
-assert.equal(validRewards.estimatedCo2eAvoidedKg, 2.8);
+assert.equal(validRewards.estimatedCo2eAvoidedKg, 0);
 assert.equal(suspiciousRewards.lakbayScoreEarned, 0);
 assert.equal(suspiciousRewards.campaignPointsEarned, 0);
 assert.equal(suspiciousRewards.rewardEligibility, "None");
