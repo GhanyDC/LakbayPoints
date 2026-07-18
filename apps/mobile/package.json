@@ -13,7 +13,9 @@
     "@lakbaypoints/shared": "*",
     "expo": "~54.0.0",
     "expo-status-bar": "~3.0.9",
+    "lucide-react-native": "^1.24.0",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-native": "0.81.5",
+    "react-native-svg": "15.12.1"
   }
 }

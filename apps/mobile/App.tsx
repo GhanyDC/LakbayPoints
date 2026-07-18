@@ -26,6 +26,25 @@ import {
   type RouteSegment,
   validSustainableGuadalupeCubaoTrace,
 } from "@lakbaypoints/shared";
+import {
+  Home,
+  Map as MapIcon,
+  Award,
+  Shield,
+  User,
+  Bell,
+  Star,
+  Flame,
+  CreditCard,
+  QrCode,
+  Percent,
+  Ticket,
+  TrendingUp,
+  MapPin,
+  ArrowRight,
+} from "lucide-react-native";
+
+import { RewardsDashboardScreen, PlanTripScreen, BottomTabBar } from "./NewScreens";
 
 const arrow = "\u2192";
 const sustainableRoute =
@@ -39,7 +58,11 @@ type ScreenName =
   | "rewards"
   | "report"
   | "reportConfirmation"
-  | "dashboardPreview";
+  | "dashboardPreview"
+  | "rewardsDashboard"
+  | "planTrip";
+
+type TabName = "home" | "trips" | "rewards" | "report" | "profile";
 type TraceMode = "valid" | "suspicious";
 type VerifiedTripState = {
   classifierResult: ClassifierResult;
@@ -1059,7 +1082,8 @@ function DashboardPreviewPlaceholderScreen({
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<ScreenName>("comparison");
+  const [screen, setScreen] = useState<ScreenName>("planTrip");
+  const [activeTab, setActiveTab] = useState<TabName>("trips");
   const [verifiedTrip, setVerifiedTrip] = useState<VerifiedTripState | null>(
     null,
   );
@@ -1072,60 +1096,77 @@ export default function App() {
     setScreen("comparison");
   };
 
+  const handleTabSelect = (tab: TabName) => {
+    setActiveTab(tab);
+    if (tab === "rewards") setScreen("rewardsDashboard");
+    else if (tab === "trips") setScreen("planTrip");
+    else if (tab === "report") setScreen("comparison");
+    else setScreen("comparison"); // fallback for home/profile
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
-      {screen === "comparison" ? (
-        <RouteComparisonScreen onStartTrip={() => setScreen("detail")} />
-      ) : null}
-      {screen === "detail" ? (
-        <RouteDetailScreen
-          route={route}
-          onBack={() => setScreen("comparison")}
-          onBeginPlayback={() => setScreen("playback")}
-        />
-      ) : null}
-      {screen === "playback" ? (
-        <TripPlaybackScreen
-          route={route}
-          onBackToDetail={() => setScreen("detail")}
-          onViewRewards={(classifierResult, traceMode) => {
-            setVerifiedTrip({ classifierResult, traceMode });
-            setScreen("rewards");
-          }}
-        />
-      ) : null}
-      {screen === "rewards" && verifiedTrip ? (
-        <RewardResultScreen
-          route={route}
-          verifiedTrip={verifiedTrip}
-          onReportAccessBarrier={() => setScreen("report")}
-          onBackToRoutes={backToRoutes}
-        />
-      ) : null}
-      {screen === "report" ? (
-        <ReportAccessBarrierScreen
-          onSubmitReport={(report) => {
-            setSubmittedReport(report);
-            setScreen("reportConfirmation");
-          }}
-          onBackToRoutes={backToRoutes}
-        />
-      ) : null}
-      {screen === "reportConfirmation" && submittedReport ? (
-        <ReportConfirmationScreen
-          report={submittedReport}
-          onDashboardPreview={() => setScreen("dashboardPreview")}
-          onBackToRoutes={backToRoutes}
-        />
-      ) : null}
-      {screen === "dashboardPreview" ? (
-        <DashboardPreviewPlaceholderScreen
-          report={submittedReport}
-          onBackToConfirmation={() => setScreen("reportConfirmation")}
-          onBackToRoutes={backToRoutes}
-        />
-      ) : null}
+      <View style={{flex: 1}}>
+        {screen === "comparison" ? (
+          <RouteComparisonScreen onStartTrip={() => setScreen("detail")} />
+        ) : null}
+        {screen === "detail" ? (
+          <RouteDetailScreen
+            route={route}
+            onBack={() => setScreen("comparison")}
+            onBeginPlayback={() => setScreen("playback")}
+          />
+        ) : null}
+        {screen === "playback" ? (
+          <TripPlaybackScreen
+            route={route}
+            onBackToDetail={() => setScreen("detail")}
+            onViewRewards={(classifierResult, traceMode) => {
+              setVerifiedTrip({ classifierResult, traceMode });
+              setScreen("rewards");
+            }}
+          />
+        ) : null}
+        {screen === "rewards" && verifiedTrip ? (
+          <RewardResultScreen
+            route={route}
+            verifiedTrip={verifiedTrip}
+            onReportAccessBarrier={() => setScreen("report")}
+            onBackToRoutes={backToRoutes}
+          />
+        ) : null}
+        {screen === "report" ? (
+          <ReportAccessBarrierScreen
+            onSubmitReport={(report) => {
+              setSubmittedReport(report);
+              setScreen("reportConfirmation");
+            }}
+            onBackToRoutes={backToRoutes}
+          />
+        ) : null}
+        {screen === "reportConfirmation" && submittedReport ? (
+          <ReportConfirmationScreen
+            report={submittedReport}
+            onDashboardPreview={() => setScreen("dashboardPreview")}
+            onBackToRoutes={backToRoutes}
+          />
+        ) : null}
+        {screen === "dashboardPreview" ? (
+          <DashboardPreviewPlaceholderScreen
+            report={submittedReport}
+            onBackToConfirmation={() => setScreen("reportConfirmation")}
+            onBackToRoutes={backToRoutes}
+          />
+        ) : null}
+        {screen === "rewardsDashboard" ? (
+          <RewardsDashboardScreen />
+        ) : null}
+        {screen === "planTrip" ? (
+          <PlanTripScreen />
+        ) : null}
+      </View>
+      <BottomTabBar activeTab={activeTab} onTabSelect={(t) => handleTabSelect(t as TabName)} />
     </SafeAreaView>
   );
 }
