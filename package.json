@@ -11,6 +11,10 @@
     "apps/dashboard",
     "packages/shared"
   ],
+  "overrides": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
   "scripts": {
     "bootstrap": "npm install",
     "mobile": "npm run start -w @lakbaypoints/mobile",
@@ -19,11 +23,13 @@
     "mobile:clear": "npm run start -w @lakbaypoints/mobile -- --clear",
     "dashboard": "npm run dev -w @lakbaypoints/dashboard",
     "dashboard:build": "npm run build -w @lakbaypoints/dashboard",
+    "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
     "check:classifier": "tsc -p tsconfig.check.json && node .check-output/scripts/check-classifier.js",
     "check:rewards": "tsc -p tsconfig.check.json && node .check-output/scripts/check-rewards.js",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run check:classifier && npm run check:rewards",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run check:classifier && npm run check:rewards",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

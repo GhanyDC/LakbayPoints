@@ -27,24 +27,6 @@ import {
   validSustainableGuadalupeCubaoTrace,
 } from "@lakbaypoints/shared";
 import {
-  Home,
-  Map as MapIcon,
-  Award,
-  Shield,
-  User,
-  Bell,
-  Star,
-  Flame,
-  CreditCard,
-  QrCode,
-  Percent,
-  Ticket,
-  TrendingUp,
-  MapPin,
-  ArrowRight,
-} from "lucide-react-native";
-
-import {
   RewardsDashboardScreen,
   PlanTripScreen,
   BottomTabBar,

@@ -5,7 +5,6 @@ import type {
   ClassifySustainableTripChainInput,
   GpsTracePoint,
   RewardEligibility,
-  RouteOption,
   StationAccessPoint,
   VerificationResultLabel,
 } from "./types";

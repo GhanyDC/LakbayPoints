@@ -3,7 +3,6 @@ import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import {
   Home,
   Map as MapIcon,
-  Award,
   Shield,
   User,
   Bell,
