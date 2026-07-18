@@ -6,6 +6,7 @@
  */
 
 const path = require("node:path");
+const fs = require("node:fs");
 
 const root = path.resolve(__dirname, "../../..");
 const compiledShared = path.join(root, ".check-output/packages/shared/src");
@@ -42,6 +43,27 @@ const jsonSuspiciousTrace = require(path.join(
 
 const sustainableRoute = guadalupeCubaoRoutes.find(
   (route) => route.type === "sustainable",
+);
+
+const appSource = fs.readFileSync(
+  path.join(root, "apps/mobile/App.tsx"),
+  "utf8",
+);
+const newScreensSource = fs.readFileSync(
+  path.join(root, "apps/mobile/NewScreens.tsx"),
+  "utf8",
+);
+const rewardsDashboardSource = newScreensSource.slice(
+  newScreensSource.indexOf("export function RewardsDashboardScreen"),
+  newScreensSource.indexOf("export function PlanTripScreen"),
+);
+const planTripSource = newScreensSource.slice(
+  newScreensSource.indexOf("export function PlanTripScreen"),
+  newScreensSource.indexOf("export function BottomTabBar"),
+);
+const bottomTabSource = newScreensSource.slice(
+  newScreensSource.indexOf("export function BottomTabBar"),
+  newScreensSource.indexOf("const styles"),
 );
 
 if (!sustainableRoute) {
@@ -192,12 +214,51 @@ try {
 }
 
 const output = {
+  mergedFrontend: {
+    initialScreen:
+      appSource.match(/useState<ScreenName>\("([^"]+)"\)/)?.[1] ?? null,
+    planTripHasPressableAction: planTripSource.includes("<Pressable"),
+    sharedRecommendedTimeMin: sustainableRoute.estimatedTimeMin,
+    displayedRecommendedTimeMin: 44,
+    displayedSegmentTimeSumMin: 6 + 26 + 6,
+    sharedSegmentTimeSumMin: sustainableRoute.segments.reduce(
+      (sum, segment) => sum + segment.estimatedTimeMin,
+      0,
+    ),
+    rewardsDisplayedLakbayPoints: 2450,
+    seededCampaignPoints: demoUserRewardState.campaignPoints,
+    campaignPointsCap: demoUserRewardState.campaignPointsCap,
+    redemptionLabelsPresented: [
+      "Transit Credits",
+      "QR Ticket",
+      "Merchant Discount",
+      "Raffle Entry",
+    ].filter((label) => rewardsDashboardSource.includes(label)),
+    unlabeledOperationalClaims: [
+      "Transit Heatmap",
+      "commuter density",
+      "Moderate Crowds",
+      "Route Safety",
+    ].filter((label) => planTripSource.includes(label)),
+    reportTabRoutesToReportScreen: appSource.includes(
+      'tab === "report") setScreen("report")',
+    ),
+    homeAndProfileHaveDedicatedScreens:
+      appSource.includes('tab === "home") setScreen("home")') &&
+      appSource.includes('tab === "profile") setScreen("profile")'),
+    bottomTabsDeclareAccessibilityRoles:
+      bottomTabSource.includes("accessibilityRole"),
+    bottomTabsDeclareSelectedState:
+      bottomTabSource.includes("accessibilityState"),
+  },
   contrastRatios: {
     tealOnWhite: contrastRatio("#0f766e", "#ffffff"),
     whiteOnTeal: contrastRatio("#ffffff", "#0f766e"),
     slateOnWhite: contrastRatio("#475569", "#ffffff"),
     mutedSlateOnLight: contrastRatio("#64748b", "#f8fafc"),
     placeholderOnWhite: contrastRatio("#94a3b8", "#ffffff"),
+    inactiveTabGrayOnWhite: contrastRatio("#9ca3af", "#ffffff"),
+    newSecondaryGrayOnWhite: contrastRatio("#6b7280", "#ffffff"),
     amberOnAmberLight: contrastRatio("#92400e", "#fef3c7"),
     blueOnBlueLight: contrastRatio("#1e3a8a", "#dbeafe"),
   },

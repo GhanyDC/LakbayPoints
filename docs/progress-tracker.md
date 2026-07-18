@@ -36,9 +36,9 @@ Update this file after every meaningful change.
 
 ### 2026-07-18
 
-- Completed the Phase 0A implementation audit.
+- Completed the Phase 0A implementation audit and refreshed it after merging `origin/carl` frontend changes.
 - Audit report: `docs/audits/phase-0a-audit-report.md`.
-- Decision: NO-GO; readiness score: 63/100.
+- Decision: NO-GO; refreshed readiness score: 51/100 (pre-merge score: 63/100).
 - Audit findings remain authoritative until the Critical and Must Fix items are resolved and re-audited; existing module rows were not promoted to Done by this audit.
 
 ### 2026-07-16
