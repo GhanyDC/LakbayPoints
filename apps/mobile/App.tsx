@@ -14,7 +14,14 @@ import {
   calculateTripRewards,
   classifySustainableTripChain,
   demoUserRewardState,
-  guadalupeCubaoRoutes,
+  formatRouteCo2e,
+  formatRouteDistance,
+  formatRouteFare,
+  formatRouteTime,
+  getRouteAccessPointLabel,
+  getRouteChainLabel,
+  phase0APilotRoute,
+  phase0ARouteOptions,
   suspiciousTraceRejected,
   type AccessBarrierCategory,
   type AccessBarrierReport,
@@ -33,9 +40,7 @@ import {
 } from "./NewScreens";
 
 const arrow = "\u2192";
-const sustainableRoute =
-  guadalupeCubaoRoutes.find((route) => route.type === "sustainable") ??
-  guadalupeCubaoRoutes[0];
+const sustainableRoute = phase0APilotRoute;
 
 type ScreenName =
   | "comparison"
@@ -75,16 +80,24 @@ type PlaybackStep = {
 
 const playbackSteps: PlaybackStep[] = [
   {
-    segmentId: "walk-guadalupe-origin-station",
-    status: "Walking segment detected",
+    segmentId: "jeepney-cubao-access-to-mrt3",
+    status: "Public-road access segment detected",
   },
   {
-    segmentId: "mrt3-guadalupe-cubao",
-    status: "Transit corridor segment in progress",
+    segmentId: "mrt3-araneta-cubao-to-guadalupe",
+    status: "MRT-3 segment in progress",
   },
   {
-    segmentId: "walk-cubao-station-destination",
-    status: "Approaching destination",
+    segmentId: "walk-guadalupe-mrt-to-ferry",
+    status: "Walking transfer segment detected",
+  },
+  {
+    segmentId: "ferry-guadalupe-to-hulo",
+    status: "Ferry transfer segment detected",
+  },
+  {
+    segmentId: "walk-hulo-ferry-to-office",
+    status: "Approaching demo destination",
   },
 ];
 
@@ -137,10 +150,7 @@ const demoReportLocations: DemoReportLocation[] = [
 ];
 
 function readableTripChain(route: RouteOption) {
-  return (
-    route.tripChainLabel?.replaceAll("->", arrow) ??
-    route.segments.map((segment) => segment.label).join(` ${arrow} `)
-  );
+  return getRouteChainLabel(route);
 }
 
 function formatMode(mode: RouteSegment["mode"]) {
@@ -149,6 +159,7 @@ function formatMode(mode: RouteSegment["mode"]) {
     mrt: "MRT3",
     bus: "Bus",
     jeepney: "Jeepney",
+    public_road_transport: "Public road transport",
     ferry: "Ferry",
     bike: "Bike",
     ebike: "E-bike",
@@ -159,18 +170,7 @@ function formatMode(mode: RouteSegment["mode"]) {
 }
 
 function segmentStepTitle(segment: RouteSegment, index: number) {
-  if (segment.mode === "walk" && index === 0) {
-    return "Walk to station/loading area";
-  }
-
-  if (segment.mode === "mrt") {
-    return "MRT3 / public transport corridor segment";
-  }
-
-  if (segment.mode === "walk") {
-    return "Walk to destination";
-  }
-
+  void index;
   return segment.label;
 }
 
@@ -206,7 +206,6 @@ function RouteCard({
 }) {
   const isRecommended = route.type === "sustainable";
   const isPhaseTwo = route.type === "phase2_preview";
-  const isBaseline = route.type === "private_baseline";
 
   return (
     <View
@@ -220,6 +219,7 @@ function RouteCard({
         <View style={styles.cardTitleGroup}>
           <Text style={styles.cardName}>{route.name}</Text>
           <Text style={styles.tripChain}>{readableTripChain(route)}</Text>
+          <Text style={styles.dataStatusLabel}>{route.dataStatusLabel}</Text>
         </View>
         {isRecommended ? (
           <Text style={styles.recommendedBadge}>Recommended</Text>
@@ -232,57 +232,42 @@ function RouteCard({
       <View style={styles.metricGrid}>
         <View style={styles.metric}>
           <Text style={styles.metricLabel}>Time</Text>
-          <Text style={styles.metricValue}>{route.estimatedTimeMin} min</Text>
+          <Text style={styles.metricValue}>{formatRouteTime(route)}</Text>
         </View>
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>
-            {route.type === "sustainable" ? "Fare" : "Cost"}
-          </Text>
-          <Text style={styles.metricValue}>PHP {route.estimatedCostPhp}</Text>
+          <Text style={styles.metricLabel}>Fare / cost</Text>
+          <Text style={styles.metricValue}>{formatRouteFare(route)}</Text>
         </View>
-        {!isBaseline ? (
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Access</Text>
-            <Text style={styles.metricValue}>{route.accessScore}</Text>
-          </View>
-        ) : null}
-        {route.trafficCondition ? (
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Traffic</Text>
-            <Text style={styles.metricValue}>{route.trafficCondition}</Text>
-          </View>
-        ) : null}
-        {route.co2eBaselineKg ? (
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>CO2e baseline</Text>
-            <Text style={styles.metricValue}>{route.co2eBaselineKg} kg</Text>
-          </View>
-        ) : null}
-        {route.estimatedCo2eAvoidedKg ? (
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Estimated CO2e avoided</Text>
-            <Text style={styles.metricValue}>
-              {route.estimatedCo2eAvoidedKg} kg
-            </Text>
-          </View>
-        ) : null}
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Distance</Text>
+          <Text style={styles.metricValue}>{formatRouteDistance(route)}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Access</Text>
+          <Text style={styles.metricValue}>{route.accessScore}</Text>
+        </View>
+        <View style={styles.metric}>
+          <Text style={styles.metricLabel}>Estimated CO2e avoided</Text>
+          <Text style={styles.metricValue}>{formatRouteCo2e(route)}</Text>
+        </View>
         {route.lakbayScoreReward ? (
           <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Lakbay Score</Text>
+            <Text style={styles.metricLabel}>Potential Lakbay Score</Text>
             <Text style={styles.metricValue}>+{route.lakbayScoreReward}</Text>
           </View>
         ) : null}
         {route.campaignPointsReward ? (
           <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Lakbay Points</Text>
+            <Text style={styles.metricLabel}>Potential campaign Points</Text>
             <Text style={styles.metricValue}>
-              +{route.campaignPointsReward}
+              up to +{route.campaignPointsReward}
             </Text>
           </View>
         ) : null}
       </View>
 
       <View style={styles.noteGroup}>
+        <Text style={styles.note}>{route.disclaimer}</Text>
         {route.notes?.slice(0, 2).map((note) => (
           <Text style={styles.note} key={note}>
             {note}
@@ -315,13 +300,24 @@ function AppHeader({
   title?: string;
   subtitle?: string;
 }) {
+  const origin = getRouteAccessPointLabel(
+    sustainableRoute,
+    sustainableRoute.originAccessPointId,
+  );
+  const destination = getRouteAccessPointLabel(
+    sustainableRoute,
+    sustainableRoute.destinationAccessPointId,
+  );
+
   return (
     <View style={styles.header}>
       <Text style={styles.eyebrow}>{eyebrow}</Text>
       <Text style={styles.title}>{title}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       <View style={styles.corridorPill}>
-        <Text style={styles.corridorText}>Guadalupe {arrow} Cubao</Text>
+        <Text style={styles.corridorText}>
+          {origin} {arrow} {destination}
+        </Text>
       </View>
     </View>
   );
@@ -332,26 +328,24 @@ function MetricGrid({ route }: { route: RouteOption }) {
     <View style={styles.metricGrid}>
       <View style={styles.metric}>
         <Text style={styles.metricLabel}>Time</Text>
-        <Text style={styles.metricValue}>{route.estimatedTimeMin} min</Text>
+        <Text style={styles.metricValue}>{formatRouteTime(route)}</Text>
       </View>
       <View style={styles.metric}>
-        <Text style={styles.metricLabel}>
-          {route.type === "sustainable" ? "Fare" : "Cost"}
-        </Text>
-        <Text style={styles.metricValue}>PHP {route.estimatedCostPhp}</Text>
+        <Text style={styles.metricLabel}>Fare / cost</Text>
+        <Text style={styles.metricValue}>{formatRouteFare(route)}</Text>
+      </View>
+      <View style={styles.metric}>
+        <Text style={styles.metricLabel}>Distance</Text>
+        <Text style={styles.metricValue}>{formatRouteDistance(route)}</Text>
       </View>
       <View style={styles.metric}>
         <Text style={styles.metricLabel}>Access</Text>
         <Text style={styles.metricValue}>{route.accessScore}</Text>
       </View>
-      {route.estimatedCo2eAvoidedKg ? (
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Estimated CO2e avoided</Text>
-          <Text style={styles.metricValue}>
-            {route.estimatedCo2eAvoidedKg} kg
-          </Text>
-        </View>
-      ) : null}
+      <View style={styles.metric}>
+        <Text style={styles.metricLabel}>Estimated CO2e avoided</Text>
+        <Text style={styles.metricValue}>{formatRouteCo2e(route)}</Text>
+      </View>
       {route.lakbayScoreReward ? (
         <View style={styles.metric}>
           <Text style={styles.metricLabel}>Lakbay Score</Text>
@@ -360,8 +354,10 @@ function MetricGrid({ route }: { route: RouteOption }) {
       ) : null}
       {route.campaignPointsReward ? (
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Lakbay Points</Text>
-          <Text style={styles.metricValue}>+{route.campaignPointsReward}</Text>
+          <Text style={styles.metricLabel}>Potential campaign Points</Text>
+          <Text style={styles.metricValue}>
+            up to +{route.campaignPointsReward}
+          </Text>
         </View>
       ) : null}
     </View>
@@ -372,18 +368,19 @@ function RouteComparisonScreen({ onStartTrip }: { onStartTrip: () => void }) {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <AppHeader
-        eyebrow="Guide the Trip. Verify the Shift."
-        subtitle={"MMDA\u2019s Verified Mode-Shift Data Layer"}
+        eyebrow="Guide the Trip. Verify the Shift. Improve Access."
+        subtitle="A Verified Multimodal Mode-Shift Platform for Metro Manila"
       />
 
       <View style={styles.routeList}>
-        {guadalupeCubaoRoutes.map((route) => (
+        {phase0ARouteOptions.map((route) => (
           <RouteCard key={route.id} route={route} onStartTrip={onStartTrip} />
         ))}
       </View>
 
       <Text style={styles.prototypeNote}>
-        Prototype uses static pilot-corridor data
+        Static prototype route options; no live routing, traffic, schedule, or
+        environmental-impact data.
       </Text>
     </ScrollView>
   );
@@ -423,16 +420,34 @@ function RouteDetailScreen({
               <Text style={styles.stepNumberText}>{index + 1}</Text>
             </View>
             <View style={styles.stepContent}>
-              <Text style={styles.stepMode}>{formatMode(segment.mode)}</Text>
+              <Text style={styles.stepMode}>{segment.displayMode}</Text>
               <Text style={styles.stepTitle}>
                 {segmentStepTitle(segment, index)}
               </Text>
               <Text style={styles.stepRoute}>
-                {segment.startName} {arrow} {segment.endName}
+                {getRouteAccessPointLabel(route, segment.originAccessPointId)}{" "}
+                {arrow}{" "}
+                {getRouteAccessPointLabel(
+                  route,
+                  segment.destinationAccessPointId,
+                )}
               </Text>
               <Text style={styles.stepMeta}>
-                {segment.estimatedTimeMin} min
-                {segment.distanceKm ? ` - ${segment.distanceKm} km` : ""}
+                {segment.travelTimeMin === null
+                  ? "Travel time pending"
+                  : `${segment.travelTimeMin} min travel`}
+                {segment.waitDwellTimeMin === null
+                  ? " · Wait/dwell pending"
+                  : ` · ${segment.waitDwellTimeMin} min wait/dwell`}
+                {segment.distanceKm === null
+                  ? " · Distance pending"
+                  : ` · ${segment.distanceKm.toFixed(1)} km`}
+              </Text>
+              <Text style={styles.stepMeta}>
+                Fare:{" "}
+                {segment.farePhp === null
+                  ? (segment.fareDisplay ?? "To be confirmed")
+                  : `PHP ${segment.farePhp}`}
               </Text>
             </View>
           </View>
@@ -440,8 +455,7 @@ function RouteDetailScreen({
       </View>
 
       <Text style={styles.infoNote}>
-        Prototype uses static pilot-corridor data. Full routing will be added
-        during formal pilot development.
+        {route.dataStatusLabel}. {route.disclaimer}
       </Text>
 
       <View style={styles.actionRow}>
@@ -544,7 +558,10 @@ function TripPlaybackScreen({
 
       <View style={[styles.card, styles.playbackHeroCard]}>
         <Text style={styles.sectionKicker}>Current trip</Text>
-        <Text style={styles.detailTitle}>Guadalupe {arrow} Cubao</Text>
+        <Text style={styles.detailTitle}>
+          {getRouteAccessPointLabel(route, route.originAccessPointId)} {arrow}{" "}
+          {getRouteAccessPointLabel(route, route.destinationAccessPointId)}
+        </Text>
         <Text style={styles.detailChain}>{readableTripChain(route)}</Text>
         <ProgressIndicator activeIndex={activeIndex} route={route} />
       </View>
@@ -574,7 +591,7 @@ function TripPlaybackScreen({
             key={segment.id}
           >
             <View style={styles.playbackStepTop}>
-              <Text style={styles.stepMode}>{formatMode(segment.mode)}</Text>
+              <Text style={styles.stepMode}>{segment.displayMode}</Text>
               <Text style={styles.stepMeta}>
                 {playbackSteps[index]?.status}
               </Text>
@@ -583,7 +600,12 @@ function TripPlaybackScreen({
               {segmentStepTitle(segment, index)}
             </Text>
             <Text style={styles.stepRoute}>
-              {segment.startName} {arrow} {segment.endName}
+              {getRouteAccessPointLabel(route, segment.originAccessPointId)}{" "}
+              {arrow}{" "}
+              {getRouteAccessPointLabel(
+                route,
+                segment.destinationAccessPointId,
+              )}
             </Text>
           </View>
         ))}
@@ -847,8 +869,8 @@ function ReportAccessBarrierScreen({
 
       <View style={[styles.card, styles.reportIntroCard]}>
         <Text style={styles.statusBody}>
-          Help MMDA identify access barriers that make walking, public
-          transport, and sustainable commuting harder.
+          Help transport agencies identify access barriers that make walking,
+          public transport, and sustainable commuting harder.
         </Text>
         <Text style={styles.helperNote}>
           Reports support validation and prioritization. The MVP does not
@@ -976,8 +998,8 @@ function ReportConfirmationScreen({
 
       <View style={[styles.card, styles.reportIntroCard]}>
         <Text style={styles.statusBody}>
-          Your report has been added to the MMDA dashboard queue for validation
-          in this prototype.
+          Your report has been added to the prototype agency dashboard queue for
+          validation in this prototype.
         </Text>
       </View>
 
@@ -995,7 +1017,7 @@ function ReportConfirmationScreen({
           style={styles.primaryAction}
         >
           <Text style={styles.primaryActionText}>
-            View MMDA Dashboard Preview
+            View Agency Dashboard Preview
           </Text>
         </Pressable>
         <Pressable
@@ -1022,14 +1044,14 @@ function DashboardPreviewPlaceholderScreen({
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <AppHeader
-        eyebrow="MMDA Dashboard"
+        eyebrow="Agency Dashboard"
         title="Dashboard Preview"
         subtitle="Report queue placeholder"
       />
 
       <View style={[styles.card, styles.dashboardPlaceholderCard]}>
         <Text style={styles.sectionKicker}>
-          Coming next: MMDA Dashboard Preview
+          Coming next: Agency Dashboard Preview
         </Text>
         <Text style={styles.statusBody}>
           This placeholder shows where the submitted report will appear in the
@@ -1146,7 +1168,12 @@ export default function App() {
           />
         ) : null}
         {screen === "rewardsDashboard" ? <RewardsDashboardScreen /> : null}
-        {screen === "planTrip" ? <PlanTripScreen /> : null}
+        {screen === "planTrip" ? (
+          <PlanTripScreen
+            route={route}
+            onCompareRoutes={() => setScreen("comparison")}
+          />
+        ) : null}
       </View>
       <BottomTabBar
         activeTab={activeTab}
@@ -1247,6 +1274,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     lineHeight: 20,
+  },
+  dataStatusLabel: {
+    color: "#0f766e",
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 6,
   },
   recommendedBadge: {
     backgroundColor: "#ccfbf1",

@@ -1,6 +1,15 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import {
+  formatRouteCo2e,
+  formatRouteDistance,
+  formatRouteFare,
+  formatRouteTime,
+  getRouteAccessPointLabel,
+  getRouteTotals,
+  type RouteOption,
+} from "@lakbaypoints/shared";
+import {
   Home,
   Map as MapIcon,
   Shield,
@@ -12,9 +21,7 @@ import {
   QrCode,
   Percent,
   Ticket,
-  TrendingUp,
   MapPin,
-  ArrowRight,
 } from "lucide-react-native";
 
 export function RewardsDashboardScreen() {
@@ -163,7 +170,20 @@ export function RewardsDashboardScreen() {
   );
 }
 
-export function PlanTripScreen() {
+export function PlanTripScreen({
+  route,
+  onCompareRoutes,
+}: {
+  route: RouteOption;
+  onCompareRoutes: () => void;
+}) {
+  const totals = getRouteTotals(route);
+  const origin = getRouteAccessPointLabel(route, route.originAccessPointId);
+  const destination = getRouteAccessPointLabel(
+    route,
+    route.destinationAccessPointId,
+  );
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
@@ -171,223 +191,133 @@ export function PlanTripScreen() {
         <Bell color="#0f766e" size={24} />
       </View>
 
+      <Text style={styles.positioning}>
+        A Verified Multimodal Mode-Shift Platform for Metro Manila
+      </Text>
+
       <View style={styles.tripInputCard}>
         <View style={styles.tripInputRow}>
           <View style={styles.inputDotOrigin} />
-          <Text style={styles.tripInputText}>Guadalupe Station</Text>
-          <TrendingUp
-            color="#9ca3af"
-            size={20}
-            style={{ marginLeft: "auto" }}
-          />
+          <Text style={styles.tripInputText}>{origin}</Text>
         </View>
         <View style={styles.tripInputDivider} />
         <View style={styles.tripInputRow}>
           <View style={styles.inputDotDest} />
-          <Text style={styles.tripInputText}>Cubao Station</Text>
-        </View>
-        <View style={styles.swapIconContainer}>
-          <Text style={{ color: "#6b7280" }}>↑↓</Text>
+          <Text style={styles.tripInputText}>{destination}</Text>
         </View>
       </View>
 
-      <View style={styles.tripTabs}>
-        <View style={[styles.tripTab, styles.tripTabActive]}>
-          <Text style={[styles.tripTabText, styles.tripTabTextActive]}>
-            Best Route
-          </Text>
-          <Text style={[styles.tripTabSub, styles.tripTabSubActive]}>
-            Recommended
-          </Text>
-        </View>
-        <View style={styles.tripTab}>
-          <Text style={styles.tripTabText}>Fastest</Text>
-          <Text style={styles.tripTabSub}>44 min</Text>
-        </View>
-        <View style={styles.tripTab}>
-          <Text style={styles.tripTabText}>Least Walk</Text>
-          <Text style={styles.tripTabSub}>1.1 km</Text>
-        </View>
-      </View>
-
-      <View style={styles.mapPlaceholder}>
-        <Text style={styles.mapTitle}>Transit Heatmap</Text>
-        <Text style={styles.mapSubtitle}>
-          See public transport access and commuter density
+      <View style={styles.prototypeCard}>
+        <Text style={styles.prototypeLabel}>{route.dataStatusLabel}</Text>
+        <Text style={styles.prototypeMeta}>
+          Reviewed {route.lastReviewedDate} · {route.dataVersion}
         </Text>
+        <Text style={styles.prototypeDisclaimer}>{route.disclaimer}</Text>
+      </View>
 
-        {/* Pseudo Map Background */}
-        <View style={styles.pseudoMapBg}>
-          <Text
-            style={{
-              position: "absolute",
-              top: 10,
-              left: 10,
-              color: "#9ca3af",
-              fontSize: 10,
-              fontWeight: "bold",
-            }}
-          >
-            KAMUNING
+      <View style={styles.planMetricGrid}>
+        <View style={styles.planMetric}>
+          <Text style={styles.planMetricLabel}>Total time</Text>
+          <Text style={styles.planMetricValue}>{formatRouteTime(route)}</Text>
+        </View>
+        <View style={styles.planMetric}>
+          <Text style={styles.planMetricLabel}>Distance</Text>
+          <Text style={styles.planMetricValue}>
+            {formatRouteDistance(route)}
           </Text>
-          <Text
-            style={{
-              position: "absolute",
-              top: 50,
-              right: 10,
-              color: "#9ca3af",
-              fontSize: 10,
-              fontWeight: "bold",
-            }}
-          >
-            CUBAO
-          </Text>
-          <Text
-            style={{
-              position: "absolute",
-              bottom: 50,
-              left: 10,
-              color: "#9ca3af",
-              fontSize: 10,
-              fontWeight: "bold",
-            }}
-          >
-            MANDALUYONG
-          </Text>
-
-          <View style={styles.mapLineContainer}>
-            <View style={styles.mapStation}>
-              <MapPin fill="#fff" color="#0f766e" size={20} />
-              <Text style={styles.mapStationText}>Guadalupe Station</Text>
-            </View>
-
-            <View style={styles.mapLineSegment}>
-              <View style={styles.dottedLine} />
-              <View style={styles.walkIconSmall}>
-                <User color="#fff" size={10} />
-              </View>
-            </View>
-
-            <View style={styles.mrtLineContainer}>
-              <View style={styles.mrtLine} />
-              <View style={styles.mrtBadge}>
-                <Text style={styles.mrtBadgeText}>MRT-3</Text>
-              </View>
-            </View>
-
-            <View style={styles.mapLineSegment}>
-              <View style={styles.dottedLine} />
-              <View style={styles.walkIconSmall}>
-                <User color="#fff" size={10} />
-              </View>
-            </View>
-
-            <View style={styles.mapStation}>
-              <MapPin fill="#fff" color="#0f766e" size={20} />
-              <Text style={styles.mapStationText}>Cubao Station</Text>
-            </View>
-          </View>
-
-          <View style={styles.heatmapLegendMap}>
-            <Text style={styles.heatmapLegendText}>Commuter Density</Text>
-            <View style={styles.heatmapBarContainer}>
-              <Text style={styles.heatmapLegendLabel}>Low</Text>
-              <View style={styles.heatmapGradient} />
-              <Text style={styles.heatmapLegendLabel}>High</Text>
-            </View>
-          </View>
+        </View>
+        <View style={styles.planMetricWide}>
+          <Text style={styles.planMetricLabel}>Known fare</Text>
+          <Text style={styles.planMetricValue}>{formatRouteFare(route)}</Text>
+        </View>
+        <View style={styles.planMetricWide}>
+          <Text style={styles.planMetricLabel}>Estimated CO2e avoided</Text>
+          <Text style={styles.planMetricValue}>{formatRouteCo2e(route)}</Text>
         </View>
       </View>
 
       <View style={styles.routeDetailsCard}>
         <View style={styles.routeDetailsHeader}>
-          <View>
-            <Text style={styles.routeDetailsTitle}>Recommended Route</Text>
+          <View style={styles.routeDetailsHeading}>
+            <Text style={styles.routeDetailsTitle}>{route.name}</Text>
             <Text style={styles.routeDetailsSub}>
-              Incl. 12 min walk • 1 transfer
+              {totals.travelTimeMin} min travel · {totals.waitDwellTimeMin} min
+              wait/dwell · {route.segments.length} segments
             </Text>
           </View>
-          <Text style={styles.routeTotalTime}>44 min</Text>
+          <Text style={styles.routeTotalTime}>{formatRouteTime(route)}</Text>
         </View>
 
         <View style={styles.segmentList}>
-          <View style={styles.segmentRow}>
-            <View style={styles.segmentIconContainer}>
-              <View style={styles.segmentIconBg}>
-                <User color="#fff" size={16} />
-              </View>
-              <View style={styles.segmentDash} />
-            </View>
-            <View style={styles.segmentInfo}>
-              <Text style={styles.segmentName}>Walk to Guadalupe Station</Text>
-              <Text style={styles.segmentDesc}>6 min (450 m)</Text>
-            </View>
-            <Text style={styles.segmentTime}>6 min</Text>
-          </View>
+          {route.segments.map((segment, index) => {
+            const segmentOrigin = getRouteAccessPointLabel(
+              route,
+              segment.originAccessPointId,
+            );
+            const segmentDestination = getRouteAccessPointLabel(
+              route,
+              segment.destinationAccessPointId,
+            );
+            const fare =
+              segment.farePhp === null
+                ? (segment.fareDisplay ?? "To be confirmed")
+                : `PHP ${segment.farePhp}`;
 
-          <View style={styles.segmentRow}>
-            <View style={styles.segmentIconContainer}>
-              <View
-                style={[styles.segmentIconBg, { backgroundColor: "#1e3a8a" }]}
-              >
-                <MapIcon color="#fff" size={16} />
+            return (
+              <View style={styles.segmentRow} key={segment.id}>
+                <View style={styles.segmentIconContainer}>
+                  <View style={styles.segmentIconBg}>
+                    <Text style={styles.segmentIconText}>{index + 1}</Text>
+                  </View>
+                  {index < route.segments.length - 1 ? (
+                    <View style={styles.segmentDash} />
+                  ) : null}
+                </View>
+                <View style={styles.segmentInfo}>
+                  <Text style={styles.segmentMode}>{segment.displayMode}</Text>
+                  <Text style={styles.segmentName}>{segment.label}</Text>
+                  <Text style={styles.segmentRoute}>
+                    {segmentOrigin} → {segmentDestination}
+                  </Text>
+                  <Text style={styles.segmentDesc}>
+                    {segment.travelTimeMin} min travel ·{" "}
+                    {segment.waitDwellTimeMin} min wait/dwell ·{" "}
+                    {segment.distanceKm?.toFixed(1)} km
+                  </Text>
+                  <Text style={styles.segmentFare}>
+                    Fare: {fare} · {segment.fareStatus.replaceAll("_", " ")}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.segmentDash} />
-            </View>
-            <View style={styles.segmentInfo}>
-              <Text style={styles.segmentName}>
-                <Text style={styles.boldBlue}>MRT-3</Text> Guadalupe{" "}
-                <ArrowRight size={14} color="#000" style={{ marginTop: 4 }} />{" "}
-                Cubao Station
-              </Text>
-              <Text style={styles.segmentDesc}>6 stops • Every 3-4 min</Text>
-            </View>
-            <Text style={styles.segmentTime}>26 min</Text>
-          </View>
-
-          <View style={styles.segmentRow}>
-            <View style={styles.segmentIconContainer}>
-              <View style={styles.segmentIconBg}>
-                <User color="#fff" size={16} />
-              </View>
-            </View>
-            <View style={styles.segmentInfo}>
-              <Text style={styles.segmentName}>Walk to Cubao Station Exit</Text>
-              <Text style={styles.segmentDesc}>6 min (450 m)</Text>
-            </View>
-            <Text style={styles.segmentTime}>6 min</Text>
-          </View>
+            );
+          })}
         </View>
       </View>
 
-      <View style={styles.bottomStatsRow}>
-        <View style={styles.bottomStatBox}>
-          <View style={styles.statIconRow}>
-            <User color="#f59e0b" size={20} style={{ marginRight: 4 }} />
-            <User
-              color="#f59e0b"
-              size={20}
-              style={{ marginRight: 4, marginLeft: -10 }}
-            />
-            <User color="#f59e0b" size={20} style={{ marginLeft: -10 }} />
-          </View>
-          <View style={styles.bottomStatInfo}>
-            <Text style={styles.bottomStatTitle}>Moderate Crowds</Text>
-            <Text style={styles.bottomStatDesc}>
-              Busier than usual on MRT-3. Expect moderate crowd levels.
-            </Text>
-          </View>
-        </View>
-        <View style={styles.bottomStatBoxSmall}>
-          <Shield fill="#fbbf24" color="#fbbf24" size={24} />
-          <View style={styles.bottomStatInfo}>
-            <Text style={styles.bottomStatLabel}>Route Safety</Text>
-            <Text style={styles.bottomStatValueGood}>
-              Good <ArrowRight size={14} color="#10b981" />
-            </Text>
-          </View>
-        </View>
+      <View style={styles.rewardPotentialCard}>
+        <Text style={styles.rewardPotentialTitle}>
+          Potential verified reward
+        </Text>
+        <Text style={styles.rewardPotentialValue}>
+          +{route.lakbayScoreReward} Lakbay Score · up to +
+          {route.campaignPointsReward} campaign Points
+        </Text>
+        <Text style={styles.rewardPotentialNote}>
+          Subject to trip verification; campaign cap applies.
+        </Text>
       </View>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={onCompareRoutes}
+        style={styles.compareButton}
+      >
+        <Text style={styles.compareButtonText}>Compare Route Options</Text>
+      </Pressable>
+
+      <Text style={styles.tagline}>
+        Guide the Trip. Verify the Shift. Improve Access.
+      </Text>
     </ScrollView>
   );
 }
@@ -769,16 +699,23 @@ const styles = StyleSheet.create({
   },
 
   /* Plan Trip Styles */
+  positioning: {
+    color: "#0f766e",
+    fontSize: 13,
+    fontWeight: "600",
+    lineHeight: 19,
+    marginBottom: 16,
+    textAlign: "center",
+  },
   tripInputCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
-    position: "relative",
   },
   tripInputRow: {
     flexDirection: "row",
@@ -801,8 +738,10 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   tripInputText: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
     color: "#111827",
+    fontWeight: "600",
   },
   tripInputDivider: {
     height: 1,
@@ -810,177 +749,59 @@ const styles = StyleSheet.create({
     marginLeft: 24,
     marginVertical: 4,
   },
-  swapIconContainer: {
-    position: "absolute",
-    right: 16,
-    top: 30,
-    backgroundColor: "#f3f4f6",
-    padding: 8,
-    borderRadius: 16,
+  prototypeCard: {
+    backgroundColor: "#ecfeff",
+    borderColor: "#a5f3fc",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
   },
-  tripTabs: {
+  prototypeLabel: {
+    color: "#155e75",
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  prototypeMeta: {
+    color: "#0e7490",
+    fontSize: 11,
+    marginBottom: 6,
+  },
+  prototypeDisclaimer: {
+    color: "#164e63",
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  planMetricGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     marginBottom: 16,
   },
-  tripTab: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
+  planMetric: {
+    width: "48%",
     backgroundColor: "#fff",
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  tripTabActive: {
-    backgroundColor: "#1e3a8a",
-  },
-  tripTabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1e3a8a",
-    marginBottom: 4,
-  },
-  tripTabTextActive: {
-    color: "#fff",
-  },
-  tripTabSub: {
-    fontSize: 11,
-    color: "#6b7280",
-  },
-  tripTabSubActive: {
-    color: "#93c5fd",
-  },
-  mapPlaceholder: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  mapTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1e3a8a",
-    marginBottom: 4,
-  },
-  mapSubtitle: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginBottom: 16,
-  },
-  pseudoMapBg: {
-    height: 220,
-    backgroundColor: "#f0fdfa",
     borderRadius: 12,
-    overflow: "hidden",
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 12,
+    marginBottom: 10,
   },
-  mapLineContainer: {
-    position: "absolute",
-    top: 40,
-    bottom: 40,
-    left: 50,
-    right: 50,
-    alignItems: "center",
-  },
-  mapStation: {
-    flexDirection: "row",
-    alignItems: "center",
+  planMetricWide: {
+    width: "100%",
     backgroundColor: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    zIndex: 10,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
   },
-  mapStationText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#1e3a8a",
-    marginLeft: 6,
-  },
-  mapLineSegment: {
-    height: 30,
-    width: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dottedLine: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 2,
-    borderStyle: "dashed",
-    borderWidth: 1,
-    borderColor: "#0f766e",
-  },
-  walkIconSmall: {
-    backgroundColor: "#1e3a8a",
-    padding: 4,
-    borderRadius: 10,
-    zIndex: 5,
-  },
-  mrtLineContainer: {
-    flex: 1,
-    width: 4,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mrtLine: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 4,
-    backgroundColor: "#1e3a8a",
-  },
-  mrtBadge: {
-    backgroundColor: "#1e3a8a",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    zIndex: 5,
-  },
-  mrtBadgeText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  heatmapLegendMap: {
-    position: "absolute",
-    bottom: 12,
-    right: 12,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    padding: 8,
-    borderRadius: 8,
-  },
-  heatmapLegendText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#111827",
+  planMetricLabel: {
+    color: "#6b7280",
+    fontSize: 11,
     marginBottom: 4,
   },
-  heatmapBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  heatmapLegendLabel: {
-    fontSize: 9,
-    color: "#6b7280",
-  },
-  heatmapGradient: {
-    width: 60,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#10b981",
-    marginHorizontal: 6,
+  planMetricValue: {
+    color: "#1e3a8a",
+    fontSize: 16,
+    fontWeight: "700",
   },
   routeDetailsCard: {
     backgroundColor: "#fff",
@@ -995,8 +816,12 @@ const styles = StyleSheet.create({
   routeDetailsHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 20,
+  },
+  routeDetailsHeading: {
+    flex: 1,
+    paddingRight: 10,
   },
   routeDetailsTitle: {
     fontSize: 16,
@@ -1007,118 +832,121 @@ const styles = StyleSheet.create({
   routeDetailsSub: {
     fontSize: 12,
     color: "#6b7280",
+    lineHeight: 17,
   },
   routeTotalTime: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#1e3a8a",
   },
   segmentList: {
-    paddingLeft: 8,
+    paddingLeft: 4,
   },
   segmentRow: {
     flexDirection: "row",
-    marginBottom: 24,
+    marginBottom: 22,
     alignItems: "flex-start",
   },
   segmentIconContainer: {
     alignItems: "center",
-    marginRight: 16,
-    width: 24,
+    marginRight: 14,
+    width: 26,
   },
   segmentIconBg: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#10b981",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#0f766e",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
+  segmentIconText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "700",
+  },
   segmentDash: {
     position: "absolute",
-    top: 24,
-    bottom: -32,
+    top: 26,
+    bottom: -28,
     width: 2,
-    backgroundColor: "#e5e7eb",
-    borderStyle: "dashed",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
+    backgroundColor: "#d1d5db",
   },
   segmentInfo: {
     flex: 1,
   },
+  segmentMode: {
+    color: "#0f766e",
+    fontSize: 12,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
   segmentName: {
     fontSize: 14,
     color: "#111827",
-    fontWeight: "500",
+    fontWeight: "600",
     marginBottom: 4,
   },
-  boldBlue: {
-    color: "#1e3a8a",
-    fontWeight: "bold",
+  segmentRoute: {
+    fontSize: 12,
+    color: "#374151",
+    lineHeight: 17,
+    marginBottom: 4,
   },
   segmentDesc: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#6b7280",
+    lineHeight: 16,
   },
-  segmentTime: {
+  segmentFare: {
+    fontSize: 11,
+    color: "#6b7280",
+    lineHeight: 16,
+    textTransform: "capitalize",
+  },
+  rewardPotentialCard: {
+    backgroundColor: "#f0fdf4",
+    borderColor: "#bbf7d0",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+  rewardPotentialTitle: {
+    color: "#166534",
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  rewardPotentialValue: {
+    color: "#14532d",
     fontSize: 14,
-    color: "#111827",
+    fontWeight: "700",
+    lineHeight: 20,
+  },
+  rewardPotentialNote: {
+    color: "#166534",
+    fontSize: 11,
+    marginTop: 4,
+  },
+  compareButton: {
+    backgroundColor: "#1e3a8a",
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: "center",
+  },
+  compareButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  tagline: {
+    color: "#0f766e",
+    fontSize: 12,
     fontWeight: "600",
-  },
-  bottomStatsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  bottomStatBox: {
-    flex: 1,
-    backgroundColor: "#fef3c7",
-    borderRadius: 12,
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 8,
-  },
-  statIconRow: {
-    flexDirection: "row",
-    marginRight: 12,
-  },
-  bottomStatBoxSmall: {
-    width: 140,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  bottomStatInfo: {
-    flex: 1,
-  },
-  bottomStatTitle: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#92400e",
-    marginBottom: 2,
-  },
-  bottomStatDesc: {
-    fontSize: 10,
-    color: "#b45309",
-    lineHeight: 14,
-  },
-  bottomStatLabel: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginBottom: 2,
-  },
-  bottomStatValueGood: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#10b981",
+    textAlign: "center",
+    marginTop: 14,
   },
   tabBar: {
     flexDirection: "row",
