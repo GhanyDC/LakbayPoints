@@ -4,35 +4,50 @@ Update this file after every meaningful change.
 
 ## Current Phase
 
-**Phase 0: Challenge MVP**
+**Phase 0A: Challenge MVP Stabilization**
 
 ## Build Status
 
 | Module | Status | Owner | Notes |
 |---|---|---|---|
-| Repo setup | Done | TBD | npm workspace monorepo foundation moved to repository root |
-| Docs setup | Done | Team | Initial docs preserved |
-| Mobile route search | Not started | TBD | |
-| Static route data | Done | TBD | Guadalupe to Cubao demo route options added |
-| Mobile route comparison | Done | TBD | Three static route cards in Expo starter |
-| Route detail | Done | TBD | Recommended sustainable route detail screen added |
-| Trip playback | Done | TBD | Connected to shared classifier result |
-| Classifier | Done | TBD | Rule-based Sustainable Trip Chain Classifier added |
-| Valid GPS trace | Done | TBD | Seeded Guadalupe to Cubao sustainable trace |
-| Suspicious GPS trace | Done | TBD | Seeded rejected anti-cheating trace |
-| Reward logic | Done | TBD | Shared Lakbay Score and campaign cap calculation added |
-| Reward screen | Done | TBD | Reward the Shift mobile screen added |
-| Access report form | Done | TBD | Mobile report form added after the reward result screen |
-| Report confirmation screen | Done | TBD | Submitted report confirmation and dashboard preview placeholder added |
-| Seed access-barrier reports | Done | TBD | Prototype/sample corridor reports seeded |
-| Dashboard layout | Not started | TBD | |
+| Repo setup | Done | TBD | npm workspace monorepo foundation at repository root |
+| Quality-gate foundation | Done | TBD | Root verification, lint, formatting, tests, and smoke checks established in `aca2c12` |
+| Product route source | Done | TBD | Shared TypeScript owns the final five-segment Phase 0A journey; JSON is a validated mirror |
+| Plan Trip | Done | TBD | Uses shared segments and derived totals; CTA opens Route Comparison |
+| Mobile route comparison | Done | TBD | Shared recommended route plus pending private baseline and non-live Phase 2 preview |
+| Route detail | Done | TBD | Uses the same shared access points, segments, statuses, and totals |
+| Trip playback | Partial | TBD | Displays final route labels; progression and final route-bound traces remain pending |
+| Classifier | Partial | TBD | Rule-based prototype exists, but route binding and hardening still target legacy corridor assumptions |
+| GPS traces | Partial | TBD | Valid and suspicious fixtures exist for the legacy corridor; final route fixtures are pending |
+| Reward logic | Partial | TBD | Shared calculation exists; boundary stabilization remains pending |
+| Reward result screen | Partial | TBD | Existing prototype screen is connected; calibrated CO2e and reward boundaries remain pending |
+| Rewards tab cleanup | Pending | TBD | Out-of-scope XP, levels, streaks, and redemption concepts require a separate cleanup task |
+| Access report form | Done | TBD | Prototype mobile form and confirmation flow exist |
+| Seed access-barrier reports | Done | TBD | Approximate prototype/sample reports are seeded |
+| Dashboard layout | Not started | TBD | Agency preview only; no live integration |
 | Report queue | Not started | TBD | |
 | Dashboard map | Not started | TBD | |
 | Analytics cards | Not started | TBD | |
-| UI polish | Not started | TBD | |
 | Demo script | Not started | TBD | |
 
 ## Change Log
+
+### 2026-07-19
+
+- Migrated the authoritative shared route source to the final Cubao-to-Hulo
+  five-segment multimodal pilot journey.
+- Centralized travel, wait/dwell, distance, fare, status, access-point, reward
+  eligibility, version, review-date, disclaimer, and CO2e methodology fields.
+- Derived the 91-minute, 14.1 km, and PHP 35 + ferry fare TBC displays from
+  segment values; CO2e remains pending pilot calibration.
+- Updated Plan Trip, Route Comparison, and Route Detail to consume the shared
+  route source and added a working Plan Trip comparison CTA.
+- Removed route-screen heatmap, crowd-density, route-safety, live-traffic, and
+  official-endorsement implications.
+- Added route arithmetic, ordered-mode, pending-state, eligibility, JSON-mirror,
+  Plan Trip, unsupported-label, and CTA-navigation coverage.
+- Classifier final-route binding, reward-boundary fixes, playback progression,
+  dashboard functionality, backend work, and live APIs remain pending.
 
 ### 2026-07-18
 
@@ -91,14 +106,15 @@ Update this file after every meaningful change.
 
 ## MVP Demo Readiness Checklist
 
-- [ ] Can search Guadalupe to Cubao route
-- [x] Can compare private baseline vs sustainable trip
-- [x] Can open sustainable route details
-- [x] Can play sample trip trace
-- [x] Can show classifier confidence score
-- [x] Can reject suspicious trace
-- [x] Can show Lakbay Score and campaign points
-- [x] Can submit access-barrier report
+- [x] Can open the shared-data Plan Trip journey
+- [x] Can compare the recommended journey with qualified alternatives
+- [x] Can open the five-segment shared Route Detail
+- [x] Can show derived time, distance, and known/pending fare
+- [x] Can show ferry fare and CO2e as pending
+- [ ] Has final route-bound playback progression and GPS fixtures
+- [ ] Has classifier rules hardened and bound to the final route
+- [ ] Has reward boundaries stabilized
+- [x] Can submit an access-barrier report
 - [ ] Can view report in dashboard
 - [ ] Can update report status
 - [ ] Can show basic dashboard metrics
@@ -111,11 +127,12 @@ Update this file after every meaningful change.
 | Risk | Mitigation |
 |---|---|
 | Scope creep | Only build approved MVP loop |
-| Classifier overclaiming | Use rule-based confidence language |
-| Rewards appear expensive | Use Lakbay Score + capped campaign points |
-| Dashboard appears decorative | Make it the institutional payoff |
-| Data not yet available | Use seeded data, then swap official data later |
+| Classifier overclaiming | Mark final route binding and hardening as pending |
+| Rewards appear guaranteed | Label route rewards as potential, verification-required, and capped |
+| Prototype appears officially operated | Use neutral agency-preview language and avoid ownership/endorsement claims |
+| Static data appears live | Show data status, review date, disclaimer, and pending calibration labels |
+| Parallel totals drift | Derive totals from shared segments and validate the JSON mirror in tests |
 
 ## Next Actions
 
-1. Build MMDA Dashboard overview and report queue.
+1. Complete navigation consistency and the out-of-scope Rewards-tab cleanup.

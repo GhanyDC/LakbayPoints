@@ -2,87 +2,83 @@
 
 ## Product Tone
 
-LakbayPoints should feel:
-- civic
-- clean
-- trustworthy
-- commuter-friendly
-- government-ready
-- modern but not gimmicky
-
+LakbayPoints should feel civic, clean, trustworthy, commuter-friendly, and
+modern without implying an official agency endorsement or live integration.
 Avoid making it look like a game-only app.
 
-## Core Terminology
+## Product Language
 
-Use these exact terms consistently:
+Use these exact phrases consistently:
 
-- Guide the Trip
-- Verify the Shift
-- Improve the Road
+- LakbayPoints
+- A Verified Multimodal Mode-Shift Platform for Metro Manila
+- Guide the Trip. Verify the Shift. Improve Access.
 - Sustainable Trip Chain
 - Sustainable Trip Chain Classifier
 - Lakbay Score
-- Lakbay Points
+- campaign Points
 - Report Access Barriers
-- MMDA Dashboard
+- Agency Dashboard Preview
 - Estimated CO2e avoided
+- Static prototype data
+- Pending pilot calibration
 
 Avoid:
-- carbon credits
-- cash rewards
-- AI detects everything
-- driver rewards
-- full NCR routing
+
+- possessive language such as “MMDA's LakbayPoints”
+- claims of MMDA ownership, operation, integration, or endorsement
+- carbon credits, cash rewards, XP, levels, or streaks on route screens
+- live traffic, heatmap, crowd-density, service-frequency, or route-safety
+  claims without supporting data
+- full NCR routing or official-looking pending values
 
 ## Mobile UI Priorities
 
-The user should answer only three questions:
-1. Which route should I take?
-2. What do I earn or save?
-3. What access barrier can I report?
+The commuter should quickly understand:
+
+1. Which multimodal route is being demonstrated?
+2. Which values are known, estimated, or pending?
+3. What reward could become eligible after verification?
+4. What access barrier can be reported?
 
 ## Route Card Layout
 
 Each route card should show:
-- route title
-- trip chain icons/text
-- estimated time
-- estimated cost
+
+- route title and recommendation/future status
+- ordered shared trip-chain labels
+- derived time, distance, and fare display
 - access score
-- estimated CO2e avoided, if applicable
-- Lakbay Score reward
-- campaign points, if applicable
-- clear CTA
+- CO2e as pending until calibrated
+- potential Lakbay Score and capped campaign Points, if eligible
+- data-status label and prototype disclaimer
+- a clear CTA only where the route supports the current demo flow
+
+Private baseline and future-preview cards must show pending/non-live states
+instead of invented official-looking metrics.
 
 ## Color Guidance
 
 Use calm civic colors:
-- blue / navy for trust and mobility
+
+- blue/navy for trust and mobility
 - green for sustainability and verified progress
-- amber/orange for warnings and access barriers
+- amber/orange for warnings, access barriers, and pending states
 - neutral grays for dashboard backgrounds
 
 Do not overuse bright reward colors.
 
-## Dashboard UI Priorities
+## Agency Preview Priorities
 
-The dashboard should look useful to MMDA, not like a consumer app.
-
-Must show:
-- report queue
-- map pins
-- status
-- verified trips
-- campaign performance
-- estimated impact
-
-Keep charts simple.
+The future dashboard should look useful to an agency while remaining visibly a
+prototype. Planned content includes a report queue, map pins, status, verified
+trips, campaign performance, and calibrated impact metrics. Do not present
+these as live before their implementation and data sources are approved.
 
 ## Presentation Mode
 
-Every screen should be readable from a projector:
-- large headings
-- few metrics per screen
-- clear contrast
-- avoid dense tables in mobile app
-- dashboard tables may be denser but still clean
+- Use large headings and clear contrast.
+- Keep each screen to a small number of meaningful metrics.
+- Qualify static and pending values near where they appear.
+- Avoid dense mobile tables.
+- Keep future dashboard tables simple and readable.

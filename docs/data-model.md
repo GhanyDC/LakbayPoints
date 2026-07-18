@@ -1,6 +1,73 @@
 # Data Model
 
-This MVP uses simple TypeScript-friendly objects and seeded data.
+The application uses simple TypeScript objects and static prototype data. The
+authoritative route source is `packages/shared/src/routes.ts`; the file
+`data/routes/phase-0a-multimodal-pilot-routes.json` is a test-validated mirror.
+
+Frontend screens must use the shared selectors and formatting helpers. They
+must not store their own copies of route totals.
+
+## Data Status
+
+```ts
+type DataStatus =
+  | "prototype_estimate"
+  | "official_reference"
+  | "pending_confirmation"
+  | "not_applicable";
+```
+
+These values qualify individual fares and route-level methodology or data
+status. They do not imply that the application is connected to live services.
+
+## RouteAccessPoint
+
+```ts
+type RouteAccessPoint = {
+  id: string;
+  label: string;
+  kind:
+    | "home_access_zone"
+    | "mrt_station"
+    | "ferry_station"
+    | "demo_destination"
+    | "concept_transfer";
+};
+```
+
+Access-point IDs let every segment reference the same approved public labels
+without using a personal address.
+
+## RouteSegment
+
+```ts
+type RouteSegment = {
+  id: string;
+  mode:
+    | "walk"
+    | "mrt"
+    | "bus"
+    | "jeepney"
+    | "public_road_transport"
+    | "ferry"
+    | "bike"
+    | "ebike"
+    | "private_vehicle";
+  displayMode: string;
+  label: string;
+  originAccessPointId: string;
+  destinationAccessPointId: string;
+  travelTimeMin: number | null;
+  waitDwellTimeMin: number | null;
+  distanceKm: number | null;
+  farePhp: number | null;
+  fareStatus: DataStatus;
+  fareDisplay?: string;
+};
+```
+
+The first pilot segment uses the generalized internal mode
+`public_road_transport` and the public display label `Jeepney`.
 
 ## RouteOption
 
@@ -9,163 +76,90 @@ type RouteOption = {
   id: string;
   name: string;
   type: "private_baseline" | "sustainable" | "phase2_preview";
-  origin: string;
-  destination: string;
+  recommendationStatus:
+    | "recommended"
+    | "comparison_only"
+    | "future_preview";
+  dataStatus: DataStatus;
+  dataStatusLabel: string;
+  dataVersion: string;
+  lastReviewedDate: string;
+  disclaimer: string;
+  originAccessPointId: string;
+  destinationAccessPointId: string;
+  accessPoints: RouteAccessPoint[];
   segments: RouteSegment[];
-  estimatedTimeMin: number;
-  estimatedCostPhp: number;
   accessScore: "Poor" | "Fair" | "Good" | "Excellent";
-  estimatedCo2eAvoidedKg?: number;
+  rewardEligibility: "verification_required" | "ineligible";
+  estimatedCo2eAvoidedKg: number | null;
+  co2eMethodologyStatus: DataStatus;
+  co2eDisplay: string;
   lakbayScoreReward?: number;
   campaignPointsReward?: number;
   notes?: string[];
+  phaseLabel?: string;
+  futureIntegrationNote?: string;
 };
 ```
 
-## RouteSegment
+Route-level reward eligibility describes whether the option may enter
+verification. It is distinct from the classifier's `Full`, `Reduced`, or
+`None` result.
+
+## Derived RouteTotals
+
+`getRouteTotals(route)` calculates:
 
 ```ts
-type RouteSegment = {
-  id: string;
-  mode: "walk" | "mrt" | "bus" | "jeepney" | "ferry" | "bike" | "ebike" | "private_vehicle";
-  label: string;
-  startName: string;
-  endName: string;
-  distanceKm: number;
-  estimatedTimeMin: number;
-  polyline?: [number, number][];
+type RouteTotals = {
+  travelTimeMin: number | null;
+  waitDwellTimeMin: number | null;
+  totalTimeMin: number | null;
+  distanceKm: number | null;
+  knownFarePhp: number;
+  hasPendingFare: boolean;
 };
 ```
 
-## GpsTracePoint
+If any required time or distance is `null`, that total remains pending. Known
+fare sums only non-null values while `hasPendingFare` preserves the unresolved
+ferry fare in UI formatting.
 
-```ts
-type GpsTracePoint = {
-  timestamp: string;
-  latitude: number;
-  longitude: number;
-  speedKph?: number;
-  activity?: "walking" | "still" | "in_vehicle" | "unknown";
-};
-```
+## Approved Segment Values
 
-## ClassifierResult
+| # | Mode | Travel | Wait/dwell | Distance | Fare | Fare status |
+|---|---|---:|---:|---:|---:|---|
+| 1 | Jeepney | 12 min | 5 min | 3.0 km | PHP 15 | `prototype_estimate` |
+| 2 | MRT-3 | 17 min | 5 min | 6.5 km | PHP 20 | `official_reference` |
+| 3 | Walk | 15 min | 0 min | 1.1 km | PHP 0 | `not_applicable` |
+| 4 | Pasig River Ferry | 12 min | 10 min | 2.4 km | null / To be confirmed | `pending_confirmation` |
+| 5 | Walk | 15 min | 0 min | 1.1 km | PHP 0 | `not_applicable` |
 
-```ts
-type ClassifierResult = {
-  confidenceScore: number;
-  result:
-    | "Verified sustainable trip chain"
-    | "Partially verified trip"
-    | "Unverified trip"
-    | "Suspicious pattern";
-  rewardEligibility: "Full" | "Reduced" | "None";
-  signals: {
-    routeMatch: boolean;
-    speedPatternValid: boolean;
-    walkingSegmentsDetected: boolean;
-    stationDwellDetected: boolean;
-    proximityValid: boolean;
-    impossibleMovementDetected: boolean;
-    suspiciousPattern: boolean;
-    activityRecognitionSupport?: boolean;
-  };
-  explanation: string[];
-};
-```
+The derived result is 91 minutes, 14.1 km, PHP 35 in known fares plus ferry
+fare TBC. `estimatedCo2eAvoidedKg` is `null` and its methodology status remains
+`pending_confirmation`.
 
-## UserRewardState
+## Comparison Data Rules
 
-```ts
-type UserRewardState = {
-  userId: string;
-  lakbayScore: number;
-  campaignPoints: number;
-  campaignPointsCap: number;
-  verifiedTrips: number;
-  estimatedCo2eAvoidedKg: number;
-};
-```
+- Private baseline time, cost/fare, distance, and CO2e are `null` pending
+  calibration; it is reward-ineligible.
+- Phase 2 Future Preview metrics are `null`, it is not live, and it is
+  reward-ineligible.
+- All route options carry a data version, review date, and disclaimer.
 
-## RewardResult
+## GPS Trace and Classifier
 
-Lakbay Score is a non-cash progress meter. Lakbay Points are capped, campaign-based incentives for verified sustainable trip chains.
+`GpsTracePoint` and `ClassifierResult` remain shared prototype types. The
+current rule-based classifier and sample traces still reflect the previous
+corridor assumptions. Binding those rules, station points, and fixtures to the
+final multimodal route is explicitly pending and is not part of this route-data
+migration.
 
-```ts
-type LakbayScoreReward = {
-  earned: number;
-  updatedTotal: number;
-  nonCash: true;
-};
+## Rewards and Reports
 
-type CampaignPointsReward = {
-  earned: number;
-  updatedTotal: number;
-  cap: number;
-  capRemaining: number;
-  capped: boolean;
-};
+Lakbay Score is a non-cash progress value. Campaign Points are capped campaign
+incentives. Existing reward-boundary stabilization remains pending.
 
-type RewardResult = {
-  rewardEligibility: "Full" | "Reduced" | "None";
-  lakbayScoreEarned: number;
-  campaignPointsEarned: number;
-  updatedLakbayScore: number;
-  updatedCampaignPoints: number;
-  campaignPointsCap: number;
-  campaignCapRemaining: number;
-  estimatedCo2eAvoidedKg: number;
-  rewardMessage: string;
-  lakbayScore: LakbayScoreReward;
-  campaignPoints: CampaignPointsReward;
-  updatedUserRewardState: UserRewardState;
-};
-```
-
-## AccessBarrierReport
-
-```ts
-type AccessBarrierCategory =
-    | "sidewalk_obstruction"
-    | "unsafe_crossing"
-    | "flooding"
-    | "illegal_parking_or_loading_obstruction"
-    | "damaged_walkway_or_access_path";
-
-type ReportSeverity = "Low" | "Medium" | "High";
-
-type ReportStatus =
-  | "Submitted"
-  | "Under Review"
-  | "Verified"
-  | "Assigned"
-  | "Resolved";
-
-type AccessBarrierReport = {
-  id: string;
-  category: AccessBarrierCategory;
-  severity: ReportSeverity;
-  description: string;
-  latitude: number;
-  longitude: number;
-  photoUrl?: string;
-  status: ReportStatus;
-  createdAt: string;
-};
-```
-
-Seeded access-barrier report coordinates are approximate prototype/sample data
-for the Guadalupe to Cubao pilot corridor.
-
-## DashboardMetric
-
-```ts
-type DashboardMetric = {
-  verifiedSustainableTrips: number;
-  accessBarrierReports: number;
-  reportsUnderReview: number;
-  estimatedCo2eAvoidedKg: number;
-  campaignPointsIssued: number;
-  repeatTripUsers: number;
-};
-```
+Access-barrier reports retain category, severity, description, coordinates,
+status, and timestamp fields. Seeded coordinates are approximate prototype
+data and are not evidence of a live agency workflow.
