@@ -209,19 +209,21 @@ export function PlanTripScreen({
 
       <View style={styles.locationBlock}>
         <View style={styles.locationInputArea}>
-          <View style={styles.locationRow}>
-            <View style={styles.dotOrigin} />
-            <Text style={styles.locationText}>{origin}</Text>
+          <View style={styles.locationInputLeft}>
+            <View style={styles.locationRow}>
+              <View style={styles.dotOrigin} />
+              <Text style={styles.locationText} numberOfLines={1}>{origin}</Text>
+            </View>
+            <View style={styles.locationDivider} />
+            <View style={styles.locationRow}>
+              <View style={styles.dotDest} />
+              <Text style={styles.locationText} numberOfLines={1}>{destination}</Text>
+            </View>
           </View>
-          <View style={styles.locationDivider} />
-          <View style={styles.locationRow}>
-            <View style={styles.dotDest} />
-            <Text style={styles.locationText}>{destination}</Text>
-          </View>
+          <Pressable style={styles.swapButton}>
+            <ArrowUpDown color="#64748b" size={20} />
+          </Pressable>
         </View>
-        <Pressable style={styles.swapButton}>
-          <ArrowUpDown color="#64748b" size={20} />
-        </Pressable>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.routeTabs}>
@@ -709,6 +711,8 @@ const styles = StyleSheet.create({
   },
   locationInputArea: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: "#e2e8f0",
     borderRadius: 12,
@@ -718,6 +722,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 5,
     elevation: 1,
+  },
+  locationInputLeft: {
+    flex: 1,
   },
   locationRow: {
     flexDirection: "row",
@@ -758,6 +765,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     backgroundColor: "#fff",
+    flexGrow: 1,
+    justifyContent: "center",
   },
   routeTab: {
     paddingVertical: 10,
@@ -792,10 +801,14 @@ const styles = StyleSheet.create({
   mapArea: {
     height: 320,
     position: "relative",
+    marginHorizontal: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 16,
   },
   densityLegend: {
     position: "absolute",
-    bottom: 24,
+    bottom: 12,
     right: 16,
     backgroundColor: "#fff",
     padding: 8,
@@ -863,10 +876,10 @@ const styles = StyleSheet.create({
   },
   bottomRouteCard: {
     backgroundColor: "#fff",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderRadius: 24,
+    marginHorizontal: 16,
+    marginBottom: 16,
     padding: 24,
-    marginTop: -20,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -1014,7 +1027,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: "#e5e7eb",
-    paddingBottom: 24,
+    paddingBottom: 0,
     paddingTop: 8,
   },
   tabItem: {
