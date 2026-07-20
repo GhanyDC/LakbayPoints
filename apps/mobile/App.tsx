@@ -1,6 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
+  Bell,
+  MapPin,
+  PersonStanding,
+  Car,
+  CloudRain,
+  CarFront,
+  TriangleAlert,
+  MoreHorizontal,
+  Camera,
+  Send,
+  CircleCheckBig,
+} from "lucide-react-native";
+import {
   type DimensionValue,
   BackHandler,
   Pressable,
@@ -11,6 +24,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import MapView from "react-native-maps";
 import {
   calculateTripRewards,
   classifySustainableTripChain,
@@ -65,6 +79,8 @@ type VerifiedTripState = {
 type ReportCategoryOption = {
   label: string;
   value: AccessBarrierCategory;
+  Icon: any;
+  color: string;
 };
 type DemoReportLocation = {
   label: string;
@@ -140,24 +156,40 @@ const playbackSteps: PlaybackStep[] = [
 
 const reportCategories: ReportCategoryOption[] = [
   {
-    label: "Sidewalk obstruction",
+    label: "Sidewalk\nObstruction",
     value: "sidewalk_obstruction",
+    Icon: PersonStanding,
+    color: "#eab308",
   },
   {
-    label: "Unsafe crossing",
-    value: "unsafe_crossing",
+    label: "Illegal\nParking",
+    value: "illegal_parking",
+    Icon: Car,
+    color: "#1e3a8a",
   },
   {
     label: "Flooding",
     value: "flooding",
+    Icon: CloudRain,
+    color: "#2563eb",
   },
   {
-    label: "Illegal parking / loading obstruction",
-    value: "illegal_parking_or_loading_obstruction",
+    label: "Road\nCrash",
+    value: "road_crash",
+    Icon: CarFront,
+    color: "#dc2626",
   },
   {
-    label: "Damaged walkway or access path",
-    value: "damaged_walkway_or_access_path",
+    label: "Pothole",
+    value: "pothole",
+    Icon: TriangleAlert,
+    color: "#6b7280",
+  },
+  {
+    label: "Other",
+    value: "other",
+    Icon: MoreHorizontal,
+    color: "#4b5563",
   },
 ];
 
@@ -871,15 +903,16 @@ function ReportAccessBarrierScreen({
 }) {
   const [category, setCategory] = useState<ReportCategoryOption | null>(null);
   const [severity, setSeverity] = useState<ReportSeverity | null>(null);
-  const [location, setLocation] = useState<DemoReportLocation | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | undefined>(undefined);
   const [description, setDescription] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
+
   const submitReport = () => {
     const cleanDescription = description.trim();
 
-    if (!category || !severity || !location || cleanDescription.length === 0) {
+    if (!category || !severity) {
       setValidationMessage(
-        "Choose a category, severity, demo location, and add a short description.",
+        "Please select a category and severity.",
       );
       return;
     }
@@ -888,124 +921,157 @@ function ReportAccessBarrierScreen({
     onSubmitReport({
       id: `prototype-report-${Date.now()}`,
       category: category.value,
-      categoryLabel: category.label,
+      categoryLabel: category.label.replace("\n", " "),
       severity,
       description: cleanDescription,
-      latitude: location.latitude,
-      longitude: location.longitude,
-      locationLabel: location.label,
-      photoUrl: "prototype-photo-placeholder",
+      latitude: 14.5664,
+      longitude: 121.0455,
+      locationLabel: "Your Location",
+      photoUrl,
       status: "Submitted",
       createdAt: new Date().toISOString(),
     });
   };
 
+  const handlePhotoUpload = () => {
+    setPhotoUrl("file:///mock-photo-url.jpg");
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <AppHeader
-        eyebrow="Improve the Road"
-        title="LakbayPoints"
-        subtitle="Report Access Barriers"
-      />
-
-      <View style={[styles.card, styles.reportIntroCard]}>
-        <Text style={styles.statusBody}>
-          Help transport agencies identify access barriers that make walking,
-          public transport, and sustainable commuting harder.
-        </Text>
-        <Text style={styles.helperNote}>
-          Reports support validation and prioritization. The MVP does not
-          automate enforcement or dispatch.
-        </Text>
+    <ScrollView contentContainerStyle={styles.reportContent}>
+      <View style={styles.reportTopBar}>
+        <View style={{ width: 24 }} />
+        <Text style={styles.reportTopBarTitle}>Report an Issue</Text>
+        <Bell color="#1e3a8a" size={24} />
       </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.fieldLabel}>Category</Text>
-        <View style={styles.optionGrid}>
-          {reportCategories.map((option) => (
-            <OptionButton
+      <View style={styles.mapContainer}>
+        <MapView
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={{
+            latitude: 14.5664,
+            longitude: 121.0455,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          scrollEnabled={false}
+          zoomEnabled={false}
+        />
+        <View style={styles.mapPinOverlay}>
+          <View style={styles.mapPinContainer}>
+            <MapPin color="#fff" size={24} />
+          </View>
+        </View>
+        <View style={styles.locationPill}>
+          <MapPin color="#2563eb" size={14} />
+          <Text style={styles.locationPillText}>Your Location</Text>
+        </View>
+      </View>
+
+      <Text style={styles.reportSectionTitle}>What's the issue?</Text>
+      
+      <View style={styles.reportGrid}>
+        {reportCategories.map((option) => {
+          const isSelected = category?.value === option.value;
+          return (
+            <Pressable
               key={option.value}
-              label={option.label}
-              selected={category?.value === option.value}
+              style={[styles.reportGridItem, isSelected && styles.reportGridItemSelected]}
               onPress={() => setCategory(option)}
-            />
-          ))}
-        </View>
+            >
+              <View style={[styles.reportIconHexagonOuter, { borderColor: option.color }]}>
+                <View style={[styles.reportIconHexagonInner, { backgroundColor: option.color }]}>
+                  <option.Icon color="#fff" size={24} />
+                </View>
+              </View>
+              <Text style={styles.reportGridLabel}>{option.label}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.fieldLabel}>Severity</Text>
-        <View style={styles.optionGrid}>
-          {reportSeverityOptions.map((option) => (
-            <OptionButton
+      <View style={styles.reportSectionHeader}>
+        <Text style={styles.reportSectionTitle}>Severity Level</Text>
+      </View>
+
+      <View style={styles.severityGrid}>
+        {reportSeverityOptions.map((option) => {
+          const isSelected = severity === option;
+          return (
+            <Pressable
               key={option}
-              label={option}
-              selected={severity === option}
+              style={[
+                styles.severityItem,
+                isSelected && styles.severityItemSelected,
+              ]}
               onPress={() => setSeverity(option)}
-            />
-          ))}
-        </View>
+            >
+              <Text
+                style={[
+                  styles.severityText,
+                  isSelected && styles.severityTextSelected,
+                ]}
+              >
+                {option}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.fieldLabel}>Location</Text>
-        <Text style={styles.fieldHelp}>
-          Prototype uses selectable demo locations near the pilot corridor.
-        </Text>
-        <View style={styles.optionGrid}>
-          {demoReportLocations.map((option) => (
-            <OptionButton
-              key={option.label}
-              label={option.label}
-              selected={location?.label === option.label}
-              onPress={() => setLocation(option)}
-            />
-          ))}
-        </View>
+      <View style={styles.reportSectionHeader}>
+        <Text style={styles.reportSectionTitle}>Add a photo <Text style={styles.reportOptional}>(optional)</Text></Text>
       </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.fieldLabel}>Description</Text>
+      <Pressable style={styles.photoUploadButton} onPress={handlePhotoUpload}>
+        {photoUrl ? (
+          <>
+            <CircleCheckBig color="#16a34a" size={28} />
+            <View style={styles.photoUploadTexts}>
+              <Text style={styles.photoUploadTitle}>Photo attached</Text>
+              <Text style={styles.photoUploadSub}>mock-photo-url.jpg</Text>
+            </View>
+          </>
+        ) : (
+          <>
+            <Camera color="#2563eb" size={28} />
+            <View style={styles.photoUploadTexts}>
+              <Text style={styles.photoUploadTitle}>Tap to upload a photo</Text>
+              <Text style={styles.photoUploadSub}>JPG, PNG up to 10MB</Text>
+            </View>
+          </>
+        )}
+      </Pressable>
+
+      <View style={styles.reportSectionHeader}>
+        <Text style={styles.reportSectionTitle}>Details <Text style={styles.reportOptional}>(optional)</Text></Text>
+      </View>
+
+      <View style={styles.detailsInputContainer}>
         <TextInput
           multiline
           onChangeText={setDescription}
-          placeholder="Briefly describe the access barrier."
-          placeholderTextColor="#94a3b8"
-          style={styles.textInput}
+          placeholder="Provide a short description of the issue..."
+          placeholderTextColor="#9ca3af"
+          style={styles.detailsInput}
           textAlignVertical="top"
           value={description}
         />
-      </View>
-
-      <View style={styles.formGroup}>
-        <Text style={styles.fieldLabel}>Photo placeholder</Text>
-        <View style={styles.photoPlaceholder}>
-          <Text style={styles.photoPlaceholderText}>
-            Photo upload placeholder only - camera upload is not enabled in this
-            prototype.
-          </Text>
-        </View>
+        <Text style={styles.charCount}>{description.length}/300</Text>
       </View>
 
       {validationMessage ? (
-        <Text style={styles.validationText}>{validationMessage}</Text>
+        <Text style={styles.validationTextError}>{validationMessage}</Text>
       ) : null}
 
-      <View style={styles.actionRow}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={submitReport}
-          style={styles.primaryAction}
-        >
-          <Text style={styles.primaryActionText}>Submit Report</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onBackToRoutes}
-          style={styles.secondaryAction}
-        >
-          <Text style={styles.secondaryActionText}>Back to Routes</Text>
-        </Pressable>
+      <Pressable style={styles.submitReportButton} onPress={submitReport}>
+        <Send color="#fff" size={20} style={{ marginRight: 10 }} />
+        <Text style={styles.submitReportButtonText}>Submit Report</Text>
+      </Pressable>
+      
+      <View style={styles.reportDisclaimerRow}>
+        <CircleCheckBig color="#16a34a" size={14} />
+        <Text style={styles.reportDisclaimerText}>Your report helps keep our roads safe and better for everyone.</Text>
       </View>
     </ScrollView>
   );
@@ -1969,5 +2035,220 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     lineHeight: 18,
+  },
+  reportContent: {
+    padding: 20,
+    paddingBottom: 36,
+    paddingTop: 10,
+    backgroundColor: "#fff",
+  },
+  reportTopBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  reportTopBarTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1e3a8a",
+  },
+  mapContainer: {
+    height: 180,
+    backgroundColor: "#e2e8f0",
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 24,
+    position: "relative",
+    alignItems: "center",
+  },
+  mapPinOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mapPinContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#2563eb",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  locationPill: {
+    position: "absolute",
+    bottom: -16,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  locationPillText: {
+    color: "#1e3a8a",
+    fontSize: 12,
+    fontWeight: "600",
+    marginLeft: 6,
+  },
+  reportSectionHeader: {
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  reportSectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+  reportOptional: {
+    color: "#64748b",
+    fontSize: 13,
+    fontWeight: "400",
+  },
+  reportGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 16,
+  },
+  reportGridItem: {
+    width: "31%",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  reportGridItemSelected: {
+    opacity: 0.7,
+  },
+  reportIconHexagonOuter: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    backgroundColor: "#fff",
+  },
+  reportIconHexagonInner: {
+    width: 52,
+    height: 52,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reportGridLabel: {
+    fontSize: 11,
+    color: "#334155",
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  severityGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  severityItem: {
+    width: "31%",
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+  },
+  severityItemSelected: {
+    backgroundColor: "#1e3a8a",
+    borderColor: "#1e3a8a",
+  },
+  severityText: {
+    color: "#475569",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  severityTextSelected: {
+    color: "#fff",
+  },
+  photoUploadButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderStyle: "dashed",
+    borderRadius: 12,
+    padding: 16,
+    justifyContent: "center",
+  },
+  photoUploadTexts: {
+    marginLeft: 12,
+  },
+  photoUploadTitle: {
+    color: "#1e3a8a",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  photoUploadSub: {
+    color: "#64748b",
+    fontSize: 11,
+  },
+  detailsInputContainer: {
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    padding: 16,
+    height: 120,
+    position: "relative",
+  },
+  detailsInput: {
+    flex: 1,
+    fontSize: 14,
+    color: "#0f172a",
+  },
+  charCount: {
+    position: "absolute",
+    bottom: 12,
+    right: 16,
+    fontSize: 11,
+    color: "#9ca3af",
+  },
+  validationTextError: {
+    color: "#dc2626",
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 12,
+    textAlign: "center",
+  },
+  submitReportButton: {
+    backgroundColor: "#16a34a",
+    borderRadius: 12,
+    height: 52,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  submitReportButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  reportDisclaimerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reportDisclaimerText: {
+    color: "#475569",
+    fontSize: 11,
+    marginLeft: 6,
   },
 });

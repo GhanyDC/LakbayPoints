@@ -18,6 +18,16 @@ import {
   User,
   Bell,
   Star,
+  Flame,
+  Footprints,
+  Train,
+  MapPin,
+  Lock,
+  CreditCard,
+  QrCode,
+  Percent,
+  Ticket,
+  CircleCheckBig,
 } from "lucide-react-native";
 
 export function RewardsOverviewScreen({
@@ -25,102 +35,128 @@ export function RewardsOverviewScreen({
 }: {
   onPlanTrip: () => void;
 }) {
-  const campaignCapRemaining = Math.max(
-    0,
-    demoUserRewardState.campaignPointsCap - demoUserRewardState.campaignPoints,
-  );
+  const xp = demoUserRewardState.campaignPoints;
+  const xpCap = demoUserRewardState.campaignPointsCap;
+  const progressPercent = Math.min(100, (xp / xpCap) * 100);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
-        <Text style={styles.topBarTitle}>Rewards Overview</Text>
-        <Bell color="#0f766e" size={24} />
+        <View style={{ width: 24 }} />
+        <Text style={styles.topBarTitle}>My Rewards</Text>
+        <Bell color="#1e3a8a" size={24} />
       </View>
 
-      <View style={styles.rewardStatusCard}>
-        <Text style={styles.rewardStatusLabel}>Verification required</Text>
-        <Text style={styles.rewardStatusTitle}>
-          No verified trip selected in this session
-        </Text>
-        <Text style={styles.rewardStatusBody}>
-          Potential rewards become results only after the trip verification
-          flow. This overview does not issue rewards.
-        </Text>
-      </View>
-
-      <View style={styles.rewardBalanceGrid}>
-        <View style={styles.rewardBalanceCard}>
-          <Text style={styles.rewardBalanceLabel}>Lakbay Score</Text>
-          <Text style={styles.rewardBalanceValue}>
-            {demoUserRewardState.lakbayScore}
-          </Text>
-          <Text style={styles.rewardBalanceNote}>
-            Seeded non-cash prototype balance
-          </Text>
+      <View style={styles.levelCard}>
+        <View style={styles.levelHeader}>
+          <Text style={styles.levelTitle}>EDSA Explorer</Text>
+          <View style={styles.levelBadge}>
+            <Text style={styles.levelBadgeText}>Level 12</Text>
+          </View>
         </View>
-        <View style={styles.rewardBalanceCard}>
-          <Text style={styles.rewardBalanceLabel}>campaign Points</Text>
-          <Text style={styles.rewardBalanceValue}>
-            {demoUserRewardState.campaignPoints} /{" "}
-            {demoUserRewardState.campaignPointsCap}
-          </Text>
-          <Text style={styles.rewardBalanceNote}>
-            {campaignCapRemaining} Points below the campaign cap
-          </Text>
+        <Text style={styles.levelProgressText}>
+          {xp} / {xpCap} XP to Level 13
+        </Text>
+        <View style={styles.progressBarTrack}>
+          <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
         </View>
-        <View style={styles.rewardBalanceCardWide}>
-          <Text style={styles.rewardBalanceLabel}>Verified trip history</Text>
-          <Text style={styles.rewardBalanceValue}>
-            {demoUserRewardState.verifiedTrips}
-          </Text>
-          <Text style={styles.rewardBalanceNote}>
-            Seeded demonstration history, not a live account record
-          </Text>
+        <View style={styles.levelIconContainer}>
+          <Star color="#fff" fill="#fff" size={32} />
         </View>
       </View>
 
-      <View style={styles.rewardPotentialSummary}>
-        <Text style={styles.rewardPotentialSummaryLabel}>
-          Current route potential
-        </Text>
-        <Text style={styles.rewardPotentialSummaryTitle}>
-          {phase0APilotRoute.name}
-        </Text>
-        <Text style={styles.rewardPotentialSummaryValue}>
-          +{phase0APilotRoute.lakbayScoreReward} Lakbay Score · up to +
-          {phase0APilotRoute.campaignPointsReward} campaign Points
-        </Text>
-        <Text style={styles.rewardPotentialSummaryNote}>
-          Subject to full trip verification. The campaign cap applies.
-        </Text>
+      <View style={styles.pointsCard}>
+        <View style={styles.pointsColumn}>
+          <Text style={styles.pointsLabel}>Lakbay Points</Text>
+          <Text style={styles.pointsValue}>{demoUserRewardState.lakbayScore}</Text>
+          <Text style={styles.pointsSub}>Total Points</Text>
+        </View>
+        <View style={styles.pointsDivider} />
+        <View style={styles.pointsColumn}>
+          <Text style={styles.pointsLabel}>This Week</Text>
+          <Text style={styles.pointsValueGreen}>+{demoUserRewardState.verifiedTrips * 15}</Text>
+          <Text style={styles.pointsSub}>Points Earned</Text>
+        </View>
       </View>
 
-      <View style={styles.rewardRulesCard}>
-        <Text style={styles.rewardRulesTitle}>How Phase 0A rewards work</Text>
-        <Text style={styles.rewardRule}>• Lakbay Score is non-cash.</Text>
-        <Text style={styles.rewardRule}>
-          • Campaign Points are capped incentives for verified trips.
-        </Text>
-        <Text style={styles.rewardRule}>
-          • Suspicious or unverified trips receive no reward.
-        </Text>
-        <Text style={styles.rewardRule}>
-          • Only the defined score and capped campaign Points are in scope.
-        </Text>
+      <View style={styles.streakCard}>
+        <View style={styles.streakIconWrap}>
+          <Flame color="#f59e0b" fill="#f59e0b" size={24} />
+        </View>
+        <View style={styles.streakTextWrap}>
+          <Text style={styles.streakTitle}>{demoUserRewardState.verifiedTrips}-Day Commute Streak</Text>
+          <Text style={styles.streakBody}>Keep it up! 1 more day to earn <Text style={styles.streakHighlight}>50</Text> bonus points.</Text>
+        </View>
+        <View style={styles.streakCircle}>
+          <Text style={styles.streakCircleText}>{demoUserRewardState.verifiedTrips}</Text>
+          <View style={styles.streakCircleLine} />
+          <Text style={styles.streakCircleText}>7</Text>
+        </View>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={onPlanTrip}
-        style={styles.rewardPlanButton}
-      >
-        <Text style={styles.rewardPlanButtonText}>Plan a Trip to Verify</Text>
-      </Pressable>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Achievement Badges</Text>
+        <Text style={styles.viewAllText}>View All</Text>
+      </View>
+      
+      <View style={styles.badgesGrid}>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#2563eb' }]}>
+            <Footprints color="#2563eb" size={24} />
+            <View style={styles.badgeCheck}><CircleCheckBig color="#fff" fill="#16a34a" size={14} /></View>
+          </View>
+          <Text style={styles.badgeLabel}>First Step</Text>
+        </View>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#16a34a' }]}>
+            <Train color="#16a34a" size={24} />
+            <View style={styles.badgeCheck}><CircleCheckBig color="#fff" fill="#16a34a" size={14} /></View>
+          </View>
+          <Text style={styles.badgeLabel}>Transit Rider</Text>
+        </View>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#f59e0b' }]}>
+            <MapPin color="#f59e0b" size={24} />
+            <View style={styles.badgeCheck}><CircleCheckBig color="#fff" fill="#16a34a" size={14} /></View>
+          </View>
+          <Text style={styles.badgeLabel}>Explorer</Text>
+        </View>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#9ca3af' }]}>
+            <Lock color="#9ca3af" size={24} />
+          </View>
+          <Text style={styles.badgeLabel}>Commuter Pro</Text>
+          <Text style={styles.badgeSub}>Level 15</Text>
+        </View>
+      </View>
 
-      <Text style={styles.rewardDisclaimer}>
-        Static seeded demonstration data. No live account, wallet, or payment
-        integration is connected.
-      </Text>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Redeem Rewards</Text>
+        <Text style={styles.viewAllText}>View All</Text>
+      </View>
+
+      <View style={styles.redeemGrid}>
+        <View style={styles.redeemCard}>
+          <CreditCard color="#1e3a8a" size={28} />
+          <Text style={styles.redeemLabel}>Transit Credits</Text>
+          <Text style={styles.redeemPts}>100 pts</Text>
+        </View>
+        <View style={styles.redeemCard}>
+          <QrCode color="#1e3a8a" size={28} />
+          <Text style={styles.redeemLabel}>QR Ticket</Text>
+          <Text style={styles.redeemPts}>150 pts</Text>
+        </View>
+        <View style={styles.redeemCard}>
+          <Percent color="#f59e0b" size={28} />
+          <Text style={styles.redeemLabel}>Merchant Discount</Text>
+          <Text style={styles.redeemPts}>200 pts</Text>
+        </View>
+        <View style={styles.redeemCard}>
+          <Ticket color="#1e3a8a" size={28} />
+          <Text style={styles.redeemLabel}>Raffle Entry</Text>
+          <Text style={styles.redeemPts}>250 pts</Text>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -302,7 +338,8 @@ export function BottomTabBar({
     <View accessibilityRole="tablist" style={styles.tabBar}>
       {bottomTabItems.map(({ name, label, Icon }) => {
         const selected = activeTab === name;
-        const color = selected ? "#1e3a8a" : "#64748b";
+        const isRewardsSelected = selected && name === "rewards";
+        const color = isRewardsSelected ? "#f59e0b" : selected ? "#1e3a8a" : "#64748b";
 
         return (
           <Pressable
@@ -318,7 +355,7 @@ export function BottomTabBar({
               fill={name === "rewards" && selected ? color : "transparent"}
               size={24}
             />
-            <Text style={[styles.tabLabel, selected && styles.tabLabelActive]}>
+            <Text style={[styles.tabLabel, selected && styles.tabLabelActive, isRewardsSelected && { color }]}>
               {label}
             </Text>
           </Pressable>
@@ -333,6 +370,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 36,
     paddingTop: 10,
+    backgroundColor: "#f8fafc",
   },
   topBar: {
     flexDirection: "row",
@@ -344,151 +382,249 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#1e3a8a",
-    marginLeft: "auto",
-    marginRight: "auto",
   },
-  rewardStatusCard: {
-    backgroundColor: "#eff6ff",
-    borderColor: "#bfdbfe",
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 18,
+  levelCard: {
+    backgroundColor: "#0f172a",
+    borderRadius: 20,
+    padding: 24,
     marginBottom: 16,
+    position: "relative",
+    overflow: "hidden",
   },
-  rewardStatusLabel: {
-    color: "#1d4ed8",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    marginBottom: 6,
-  },
-  rewardStatusTitle: {
-    color: "#172554",
-    fontSize: 19,
-    fontWeight: "800",
-    lineHeight: 25,
-    marginBottom: 6,
-  },
-  rewardStatusBody: {
-    color: "#334155",
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  rewardBalanceGrid: {
+  levelHeader: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  },
-  rewardBalanceCard: {
-    width: "48%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  rewardBalanceCardWide: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  rewardBalanceLabel: {
-    color: "#475569",
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  rewardBalanceValue: {
-    color: "#1e3a8a",
-    fontSize: 24,
-    fontWeight: "800",
-  },
-  rewardBalanceNote: {
-    color: "#64748b",
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 4,
-  },
-  rewardPotentialSummary: {
-    backgroundColor: "#f0fdf4",
-    borderColor: "#bbf7d0",
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
-  },
-  rewardPotentialSummaryLabel: {
-    color: "#15803d",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    marginBottom: 5,
-  },
-  rewardPotentialSummaryTitle: {
-    color: "#14532d",
-    fontSize: 17,
-    fontWeight: "800",
-    lineHeight: 23,
-    marginBottom: 7,
-  },
-  rewardPotentialSummaryValue: {
-    color: "#166534",
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 21,
-  },
-  rewardPotentialSummaryNote: {
-    color: "#166534",
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 6,
-  },
-  rewardRulesCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
-  },
-  rewardRulesTitle: {
-    color: "#1e3a8a",
-    fontSize: 16,
-    fontWeight: "800",
+    alignItems: "center",
     marginBottom: 8,
   },
-  rewardRule: {
-    color: "#475569",
-    fontSize: 13,
-    lineHeight: 21,
-  },
-  rewardPlanButton: {
-    minHeight: 48,
-    backgroundColor: "#1e3a8a",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-  },
-  rewardPlanButtonText: {
+  levelTitle: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 20,
+    fontWeight: "700",
+    marginRight: 12,
+  },
+  levelBadge: {
+    backgroundColor: "#fde047",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  levelBadgeText: {
+    color: "#1e3a8a",
+    fontSize: 12,
     fontWeight: "800",
   },
-  rewardDisclaimer: {
+  levelProgressText: {
+    color: "#cbd5e1",
+    fontSize: 13,
+    marginBottom: 12,
+  },
+  progressBarTrack: {
+    height: 8,
+    backgroundColor: "#334155",
+    borderRadius: 4,
+    width: "70%",
+  },
+  progressBarFill: {
+    height: 8,
+    backgroundColor: "#facc15",
+    borderRadius: 4,
+  },
+  levelIconContainer: {
+    position: "absolute",
+    right: 20,
+    top: 24,
+    width: 60,
+    height: 70,
+    backgroundColor: "#2563eb",
+    alignItems: "center",
+    justifyContent: "center",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  pointsCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  pointsColumn: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  pointsDivider: {
+    width: 1,
+    backgroundColor: "#e2e8f0",
+    marginHorizontal: 16,
+  },
+  pointsLabel: {
+    color: "#1e3a8a",
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  pointsValue: {
+    color: "#0f172a",
+    fontSize: 28,
+    fontWeight: "800",
+  },
+  pointsValueGreen: {
+    color: "#16a34a",
+    fontSize: 28,
+    fontWeight: "800",
+  },
+  pointsSub: {
     color: "#64748b",
+    fontSize: 12,
+  },
+  streakCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  streakIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#fef3c7",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
+  streakTextWrap: {
+    flex: 1,
+  },
+  streakTitle: {
+    color: "#1e3a8a",
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  streakBody: {
+    color: "#64748b",
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  streakHighlight: {
+    color: "#2563eb",
+    fontWeight: "700",
+  },
+  streakCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: "#f59e0b",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+  },
+  streakCircleText: {
+    color: "#0f172a",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  streakCircleLine: {
+    width: 16,
+    height: 1,
+    backgroundColor: "#0f172a",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    color: "#1e3a8a",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  viewAllText: {
+    color: "#2563eb",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  badgesGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  badgeItem: {
+    alignItems: "center",
+    width: "23%",
+  },
+  badgeHexagon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    backgroundColor: "#fff",
+    position: "relative",
+  },
+  badgeCheck: {
+    position: "absolute",
+    bottom: -4,
+    right: -4,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+  },
+  badgeLabel: {
+    color: "#0f172a",
     fontSize: 11,
-    lineHeight: 17,
+    fontWeight: "600",
     textAlign: "center",
-    marginTop: 12,
+  },
+  badgeSub: {
+    color: "#64748b",
+    fontSize: 10,
+    textAlign: "center",
+  },
+  redeemGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    marginBottom: 16,
+  },
+  redeemCard: {
+    width: "23%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  redeemLabel: {
+    color: "#0f172a",
+    fontSize: 10,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  redeemPts: {
+    color: "#64748b",
+    fontSize: 10,
   },
 
   /* Plan Trip Styles */
