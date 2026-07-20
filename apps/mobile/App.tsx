@@ -958,13 +958,13 @@ function ReportAccessBarrierScreen({
           zoomEnabled={false}
         />
         <View style={styles.mapPinOverlay}>
+          <View style={styles.locationPill}>
+            <MapPin color="#2563eb" size={14} />
+            <Text style={styles.locationPillText}>Your Location</Text>
+          </View>
           <View style={styles.mapPinContainer}>
             <MapPin color="#fff" size={24} />
           </View>
-        </View>
-        <View style={styles.locationPill}>
-          <MapPin color="#2563eb" size={14} />
-          <Text style={styles.locationPillText}>Your Location</Text>
         </View>
       </View>
 
@@ -2080,8 +2080,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   locationPill: {
-    position: "absolute",
-    bottom: -16,
     backgroundColor: "#fff",
     flexDirection: "row",
     alignItems: "center",
@@ -2092,6 +2090,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 3,
+    marginBottom: 8,
   },
   locationPillText: {
     color: "#1e3a8a",

@@ -28,7 +28,13 @@ import {
   Percent,
   Ticket,
   CircleCheckBig,
+  ArrowUpDown,
+  Users,
+  ShieldCheck,
+  ChevronRight,
+  Bus,
 } from "lucide-react-native";
+import MapView from "react-native-maps";
 
 export function RewardsOverviewScreen({
   onPlanTrip,
@@ -175,140 +181,188 @@ export function PlanTripScreen({
     route.destinationAccessPointId,
   );
 
+  const [selectedTab, setSelectedTab] = React.useState("best");
+
+  const getSegmentIcon = (mode: string) => {
+    switch (mode) {
+      case "walk":
+        return <Footprints color="#fff" size={14} />;
+      case "mrt_3":
+      case "lrt_1":
+      case "lrt_2":
+        return <Train color="#fff" size={14} />;
+      case "edsa_carousel":
+      case "puv":
+        return <Bus color="#fff" size={14} />;
+      default:
+        return <MapPin color="#fff" size={14} />;
+    }
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.topBar}>
-        <Text style={styles.topBarTitle}>Plan Your Trip</Text>
-        <Bell color="#0f766e" size={24} />
+    <ScrollView contentContainerStyle={styles.planContent} bounces={false}>
+      <View style={styles.planTopBar}>
+        <View style={{ width: 24 }} />
+        <Text style={styles.planTopBarTitle}>Plan Your Trip</Text>
+        <Bell color="#1e3a8a" size={24} />
       </View>
 
-      <Text style={styles.positioning}>
-        A Verified Multimodal Mode-Shift Platform for Metro Manila
-      </Text>
-
-      <View style={styles.tripInputCard}>
-        <View style={styles.tripInputRow}>
-          <View style={styles.inputDotOrigin} />
-          <Text style={styles.tripInputText}>{origin}</Text>
-        </View>
-        <View style={styles.tripInputDivider} />
-        <View style={styles.tripInputRow}>
-          <View style={styles.inputDotDest} />
-          <Text style={styles.tripInputText}>{destination}</Text>
-        </View>
-      </View>
-
-      <View style={styles.prototypeCard}>
-        <Text style={styles.prototypeLabel}>{route.dataStatusLabel}</Text>
-        <Text style={styles.prototypeMeta}>
-          Reviewed {route.lastReviewedDate} · {route.dataVersion}
-        </Text>
-        <Text style={styles.prototypeDisclaimer}>{route.disclaimer}</Text>
-      </View>
-
-      <View style={styles.planMetricGrid}>
-        <View style={styles.planMetric}>
-          <Text style={styles.planMetricLabel}>Total time</Text>
-          <Text style={styles.planMetricValue}>{formatRouteTime(route)}</Text>
-        </View>
-        <View style={styles.planMetric}>
-          <Text style={styles.planMetricLabel}>Distance</Text>
-          <Text style={styles.planMetricValue}>
-            {formatRouteDistance(route)}
-          </Text>
-        </View>
-        <View style={styles.planMetricWide}>
-          <Text style={styles.planMetricLabel}>Known fare</Text>
-          <Text style={styles.planMetricValue}>{formatRouteFare(route)}</Text>
-        </View>
-        <View style={styles.planMetricWide}>
-          <Text style={styles.planMetricLabel}>Estimated CO2e avoided</Text>
-          <Text style={styles.planMetricValue}>{formatRouteCo2e(route)}</Text>
-        </View>
-      </View>
-
-      <View style={styles.routeDetailsCard}>
-        <View style={styles.routeDetailsHeader}>
-          <View style={styles.routeDetailsHeading}>
-            <Text style={styles.routeDetailsTitle}>{route.name}</Text>
-            <Text style={styles.routeDetailsSub}>
-              {totals.travelTimeMin} min travel · {totals.waitDwellTimeMin} min
-              wait/dwell · {route.segments.length} segments
-            </Text>
+      <View style={styles.locationBlock}>
+        <View style={styles.locationInputArea}>
+          <View style={styles.locationRow}>
+            <View style={styles.dotOrigin} />
+            <Text style={styles.locationText}>{origin}</Text>
           </View>
-          <Text style={styles.routeTotalTime}>{formatRouteTime(route)}</Text>
+          <View style={styles.locationDivider} />
+          <View style={styles.locationRow}>
+            <View style={styles.dotDest} />
+            <Text style={styles.locationText}>{destination}</Text>
+          </View>
+        </View>
+        <Pressable style={styles.swapButton}>
+          <ArrowUpDown color="#64748b" size={20} />
+        </Pressable>
+      </View>
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.routeTabs}>
+        <Pressable 
+          style={[styles.routeTab, selectedTab === "best" && styles.routeTabActive]}
+          onPress={() => setSelectedTab("best")}
+        >
+          <Text style={[styles.routeTabTitle, selectedTab === "best" && styles.routeTabTitleActive]}>Best Route</Text>
+          <Text style={[styles.routeTabSub, selectedTab === "best" && styles.routeTabSubActive]}>Recommended</Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.routeTab, selectedTab === "fastest" && styles.routeTabActive]}
+          onPress={() => setSelectedTab("fastest")}
+        >
+          <Text style={[styles.routeTabTitle, selectedTab === "fastest" && styles.routeTabTitleActive]}>Fastest</Text>
+          <Text style={[styles.routeTabSub, selectedTab === "fastest" && styles.routeTabSubActive]}>44 min</Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.routeTab, selectedTab === "least_walk" && styles.routeTabActive]}
+          onPress={() => setSelectedTab("least_walk")}
+        >
+          <Text style={[styles.routeTabTitle, selectedTab === "least_walk" && styles.routeTabTitleActive]}>Least Walk</Text>
+          <Text style={[styles.routeTabSub, selectedTab === "least_walk" && styles.routeTabSubActive]}>1.1 km</Text>
+        </Pressable>
+      </ScrollView>
+
+      <View style={styles.mapArea}>
+        <MapView
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={{
+            latitude: 14.5818,
+            longitude: 121.0531,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+          scrollEnabled={false}
+          zoomEnabled={false}
+        />
+        
+        {/* Mock heatmap density bar */}
+        <View style={styles.densityLegend}>
+          <Text style={styles.densityLegendTitle}>Commuter Density</Text>
+          <View style={styles.densityGradientRow}>
+            <View style={[styles.densityBlock, { backgroundColor: "#86efac" }]} />
+            <View style={[styles.densityBlock, { backgroundColor: "#fde047" }]} />
+            <View style={[styles.densityBlock, { backgroundColor: "#f97316" }]} />
+            <View style={[styles.densityBlock, { backgroundColor: "#dc2626" }]} />
+          </View>
+          <View style={styles.densityLabels}>
+            <Text style={styles.densityLabelText}>Low</Text>
+            <Text style={styles.densityLabelText}>High</Text>
+          </View>
+        </View>
+        
+        {/* Mock pins */}
+        <View style={[styles.mapOverlayPin, { top: 120, left: 60 }]}>
+          <View style={styles.mapPinIconContainer}>
+            <Train color="#1e3a8a" size={14} />
+          </View>
+          <Text style={styles.mapPinLabel}>Guadalupe Station</Text>
+        </View>
+        
+        <View style={[styles.mapOverlayPin, { top: 50, right: 60 }]}>
+          <View style={styles.mapPinIconContainer}>
+            <Train color="#1e3a8a" size={14} />
+          </View>
+          <Text style={styles.mapPinLabel}>Cubao Station</Text>
+        </View>
+      </View>
+
+      <View style={styles.bottomRouteCard}>
+        <View style={styles.routeHeaderRow}>
+          <View>
+            <Text style={styles.routeHeaderTitle}>Recommended Route</Text>
+            <Text style={styles.routeHeaderSub}>Incl. 12 min walk • {route.segments.length - 1} transfer</Text>
+          </View>
+          <Text style={styles.routeTimeBig}>{formatRouteTime(route)}</Text>
         </View>
 
-        <View style={styles.segmentList}>
+        <View style={styles.timelineList}>
           {route.segments.map((segment, index) => {
-            const segmentOrigin = getRouteAccessPointLabel(
-              route,
-              segment.originAccessPointId,
-            );
-            const segmentDestination = getRouteAccessPointLabel(
-              route,
-              segment.destinationAccessPointId,
-            );
-            const fare =
-              segment.farePhp === null
-                ? (segment.fareDisplay ?? "To be confirmed")
-                : `PHP ${segment.farePhp}`;
-
+            const isWalk = segment.mode === "walk";
+            const segmentColor = isWalk ? "#2563eb" : "#1e3a8a";
             return (
-              <View style={styles.segmentRow} key={segment.id}>
-                <View style={styles.segmentIconContainer}>
-                  <View style={styles.segmentIconBg}>
-                    <Text style={styles.segmentIconText}>{index + 1}</Text>
+              <View style={styles.timelineRow} key={segment.id}>
+                <View style={styles.timelineLeft}>
+                  <View style={[styles.timelineIconBg, { backgroundColor: segmentColor }]}>
+                    {getSegmentIcon(segment.mode)}
                   </View>
-                  {index < route.segments.length - 1 ? (
-                    <View style={styles.segmentDash} />
-                  ) : null}
+                  {index < route.segments.length - 1 && (
+                    <View style={styles.timelineLine} />
+                  )}
                 </View>
-                <View style={styles.segmentInfo}>
-                  <Text style={styles.segmentMode}>{segment.displayMode}</Text>
-                  <Text style={styles.segmentName}>{segment.label}</Text>
-                  <Text style={styles.segmentRoute}>
-                    {segmentOrigin} → {segmentDestination}
-                  </Text>
-                  <Text style={styles.segmentDesc}>
-                    {segment.travelTimeMin} min travel ·{" "}
-                    {segment.waitDwellTimeMin} min wait/dwell ·{" "}
-                    {segment.distanceKm?.toFixed(1)} km
-                  </Text>
-                  <Text style={styles.segmentFare}>
-                    Fare: {fare} · {segment.fareStatus.replaceAll("_", " ")}
-                  </Text>
+                <View style={styles.timelineRight}>
+                  {isWalk ? (
+                    <>
+                      <Text style={styles.timelineActionText}>{segment.label}</Text>
+                      <Text style={styles.timelineMetaText}>{segment.travelTimeMin} min ({segment.distanceKm?.toFixed(1) || 0.4} km)</Text>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.timelineTransitRow}>
+                        <View style={[styles.transitBadge, { backgroundColor: segmentColor }]}>
+                          <Text style={styles.transitBadgeText}>{segment.displayMode}</Text>
+                        </View>
+                        <Text style={styles.timelineActionText} numberOfLines={1}>{segment.label}</Text>
+                      </View>
+                      <Text style={styles.timelineMetaText}>{segment.travelTimeMin} min • Every 3-4 min</Text>
+                    </>
+                  )}
+                  {index < route.segments.length - 1 && <View style={styles.timelineSpacing} />}
+                </View>
+                <View style={styles.timelineTimeRight}>
+                   <Text style={styles.timelineTimeText}>{segment.travelTimeMin} min</Text>
                 </View>
               </View>
             );
           })}
         </View>
+
+        <View style={styles.chipsRow}>
+          <View style={styles.chipCardYellow}>
+            <Users color="#d97706" size={24} style={{ marginRight: 8 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.chipTitleYellow}>Moderate Crowds</Text>
+              <Text style={styles.chipSubYellow}>Busier than usual on MRT-3. Expect moderate crowd levels.</Text>
+            </View>
+          </View>
+          
+          <View style={styles.chipCardGreen}>
+            <View style={styles.chipGreenIconContainer}>
+               <ShieldCheck color="#fff" size={16} />
+            </View>
+            <View style={{ flex: 1, marginLeft: 8 }}>
+              <Text style={styles.chipSubGreen}>Route Safety</Text>
+              <Text style={styles.chipTitleGreen}>Good</Text>
+            </View>
+            <ChevronRight color="#15803d" size={20} />
+          </View>
+        </View>
       </View>
-
-      <View style={styles.rewardPotentialCard}>
-        <Text style={styles.rewardPotentialTitle}>
-          Potential verified reward
-        </Text>
-        <Text style={styles.rewardPotentialValue}>
-          +{route.lakbayScoreReward} Lakbay Score · up to +
-          {route.campaignPointsReward} campaign Points
-        </Text>
-        <Text style={styles.rewardPotentialNote}>
-          Subject to trip verification; campaign cap applies.
-        </Text>
-      </View>
-
-      <Pressable
-        accessibilityRole="button"
-        onPress={onCompareRoutes}
-        style={styles.compareButton}
-      >
-        <Text style={styles.compareButtonText}>Compare Route Options</Text>
-      </Pressable>
-
-      <Text style={styles.tagline}>
-        Guide the Trip. Verify the Shift. Improve Access.
-      </Text>
     </ScrollView>
   );
 }
@@ -628,30 +682,49 @@ const styles = StyleSheet.create({
   },
 
   /* Plan Trip Styles */
-  positioning: {
-    color: "#0f766e",
-    fontSize: 13,
-    fontWeight: "600",
-    lineHeight: 19,
-    marginBottom: 16,
-    textAlign: "center",
+  planContent: {
+    flexGrow: 1,
+    backgroundColor: "#f8fafc",
   },
-  tripInputCard: {
+  planTopBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 16,
     backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
   },
-  tripInputRow: {
+  planTopBarTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1e3a8a",
+  },
+  locationBlock: {
+    backgroundColor: "#fff",
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
-  inputDotOrigin: {
+  locationInputArea: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 5,
+    elevation: 1,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  dotOrigin: {
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -659,223 +732,282 @@ const styles = StyleSheet.create({
     borderColor: "#3b82f6",
     marginRight: 12,
   },
-  inputDotDest: {
+  dotDest: {
     width: 12,
     height: 12,
     borderRadius: 6,
     backgroundColor: "#f59e0b",
     marginRight: 12,
   },
-  tripInputText: {
-    flex: 1,
+  locationText: {
     fontSize: 15,
-    color: "#111827",
+    color: "#0f172a",
     fontWeight: "600",
   },
-  tripInputDivider: {
+  locationDivider: {
     height: 1,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#e2e8f0",
     marginLeft: 24,
     marginVertical: 4,
   },
-  prototypeCard: {
-    backgroundColor: "#ecfeff",
-    borderColor: "#a5f3fc",
+  swapButton: {
+    padding: 12,
+    marginLeft: 8,
+  },
+  routeTabs: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    backgroundColor: "#fff",
+  },
+  routeTab: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginRight: 12,
+    alignItems: "center",
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#fff",
   },
-  prototypeLabel: {
-    color: "#155e75",
-    fontSize: 13,
+  routeTabActive: {
+    backgroundColor: "#1e3a8a",
+    borderColor: "#1e3a8a",
+  },
+  routeTabTitle: {
+    fontSize: 14,
     fontWeight: "700",
-    marginBottom: 4,
+    color: "#0f172a",
+    marginBottom: 2,
   },
-  prototypeMeta: {
-    color: "#0e7490",
+  routeTabTitleActive: {
+    color: "#fff",
+  },
+  routeTabSub: {
     fontSize: 11,
-    marginBottom: 6,
+    color: "#64748b",
   },
-  prototypeDisclaimer: {
-    color: "#164e63",
-    fontSize: 12,
-    lineHeight: 18,
+  routeTabSubActive: {
+    color: "#e0e7ff",
   },
-  planMetricGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginBottom: 16,
+  mapArea: {
+    height: 320,
+    position: "relative",
   },
-  planMetric: {
-    width: "48%",
+  densityLegend: {
+    position: "absolute",
+    bottom: 24,
+    right: 16,
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  planMetricWide: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  planMetricLabel: {
-    color: "#6b7280",
-    fontSize: 11,
-    marginBottom: 4,
-  },
-  planMetricValue: {
-    color: "#1e3a8a",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  routeDetailsCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    padding: 8,
+    borderRadius: 8,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 10,
+    elevation: 3,
+    width: 140,
+  },
+  densityLegendTitle: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#334155",
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  densityGradientRow: {
+    flexDirection: "row",
+    height: 6,
+    borderRadius: 3,
+    overflow: "hidden",
+    marginBottom: 4,
+  },
+  densityBlock: {
+    flex: 1,
+  },
+  densityLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  densityLabelText: {
+    fontSize: 9,
+    color: "#64748b",
+  },
+  mapOverlayPin: {
+    position: "absolute",
+    alignItems: "center",
+  },
+  mapPinIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    marginBottom: 4,
+  },
+  mapPinLabel: {
+    backgroundColor: "#fff",
+    color: "#1e3a8a",
+    fontSize: 11,
+    fontWeight: "700",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 2,
   },
-  routeDetailsHeader: {
+  bottomRouteCard: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    marginTop: -20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  routeHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: 20,
   },
-  routeDetailsHeading: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  routeDetailsTitle: {
+  routeHeaderTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#1e3a8a",
+    fontWeight: "700",
+    color: "#0f172a",
     marginBottom: 4,
   },
-  routeDetailsSub: {
+  routeHeaderSub: {
     fontSize: 12,
-    color: "#6b7280",
-    lineHeight: 17,
+    color: "#64748b",
   },
-  routeTotalTime: {
-    fontSize: 18,
-    fontWeight: "bold",
+  routeTimeBig: {
+    fontSize: 22,
+    fontWeight: "800",
     color: "#1e3a8a",
   },
-  segmentList: {
-    paddingLeft: 4,
+  timelineList: {
+    marginBottom: 20,
   },
-  segmentRow: {
+  timelineRow: {
     flexDirection: "row",
-    marginBottom: 22,
-    alignItems: "flex-start",
   },
-  segmentIconContainer: {
+  timelineLeft: {
     alignItems: "center",
-    marginRight: 14,
-    width: 26,
+    width: 32,
+    marginRight: 16,
   },
-  segmentIconBg: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#0f766e",
+  timelineIconBg: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
-  segmentIconText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  segmentDash: {
-    position: "absolute",
-    top: 26,
-    bottom: -28,
+  timelineLine: {
     width: 2,
-    backgroundColor: "#d1d5db",
-  },
-  segmentInfo: {
     flex: 1,
+    backgroundColor: "#1e3a8a",
+    borderStyle: "dashed",
+    opacity: 0.3,
   },
-  segmentMode: {
-    color: "#0f766e",
-    fontSize: 12,
-    fontWeight: "700",
+  timelineRight: {
+    flex: 1,
+    paddingBottom: 16,
+  },
+  timelineActionText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
     marginBottom: 2,
   },
-  segmentName: {
-    fontSize: 14,
-    color: "#111827",
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  segmentRoute: {
+  timelineMetaText: {
     fontSize: 12,
-    color: "#374151",
-    lineHeight: 17,
-    marginBottom: 4,
+    color: "#64748b",
   },
-  segmentDesc: {
-    fontSize: 11,
-    color: "#6b7280",
-    lineHeight: 16,
-  },
-  segmentFare: {
-    fontSize: 11,
-    color: "#6b7280",
-    lineHeight: 16,
-    textTransform: "capitalize",
-  },
-  rewardPotentialCard: {
-    backgroundColor: "#f0fdf4",
-    borderColor: "#bbf7d0",
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
-  },
-  rewardPotentialTitle: {
-    color: "#166534",
-    fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  rewardPotentialValue: {
-    color: "#14532d",
-    fontSize: 14,
-    fontWeight: "700",
-    lineHeight: 20,
-  },
-  rewardPotentialNote: {
-    color: "#166534",
-    fontSize: 11,
-    marginTop: 4,
-  },
-  compareButton: {
-    backgroundColor: "#1e3a8a",
-    borderRadius: 12,
-    paddingVertical: 15,
+  timelineTransitRow: {
+    flexDirection: "row",
     alignItems: "center",
+    marginBottom: 4,
   },
-  compareButtonText: {
+  transitBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  transitBadgeText: {
     color: "#fff",
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: 10,
+    fontWeight: "800",
   },
-  tagline: {
-    color: "#0f766e",
+  timelineTimeRight: {
+    marginLeft: 12,
+  },
+  timelineTimeText: {
     fontSize: 12,
     fontWeight: "600",
-    textAlign: "center",
-    marginTop: 14,
+    color: "#475569",
+    paddingTop: 4,
+  },
+  timelineSpacing: {
+    height: 4,
+  },
+  chipsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  chipCardYellow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fef3c7",
+    padding: 12,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  chipTitleYellow: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#b45309",
+    marginBottom: 2,
+  },
+  chipSubYellow: {
+    fontSize: 9,
+    color: "#92400e",
+    lineHeight: 12,
+  },
+  chipCardGreen: {
+    flex: 0.8,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    padding: 12,
+    borderRadius: 12,
+  },
+  chipGreenIconContainer: {
+    backgroundColor: "#f59e0b",
+    padding: 4,
+    borderRadius: 12,
+  },
+  chipTitleGreen: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#16a34a",
+  },
+  chipSubGreen: {
+    fontSize: 10,
+    color: "#64748b",
   },
   tabBar: {
     flexDirection: "row",
