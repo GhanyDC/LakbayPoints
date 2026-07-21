@@ -176,9 +176,11 @@ export function RewardsOverviewScreen({
 export function PlanTripScreen({
   route,
   onCompareRoutes,
+  onBeginPlayback,
 }: {
   route: RouteOption;
   onCompareRoutes: () => void;
+  onBeginPlayback: () => void;
 }) {
   const totals = getRouteTotals(route);
   const origin = getRouteAccessPointLabel(route, route.originAccessPointId);
@@ -371,6 +373,14 @@ export function PlanTripScreen({
           </View>
         </View>
       </View>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={onBeginPlayback}
+        style={[styles.primaryButtonLarge, { marginHorizontal: 16, marginBottom: 16 }]}
+      >
+        <Text style={styles.primaryButtonText}>Begin Trip Playback</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -1051,5 +1061,19 @@ const styles = StyleSheet.create({
   tabLabelActive: {
     color: "#1e3a8a",
     fontWeight: "700",
+  },
+  primaryButtonLarge: {
+    backgroundColor: "#1e3a8a",
+    paddingVertical: 16,
+    borderRadius: 16,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    marginRight: 6,
   },
 });

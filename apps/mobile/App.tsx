@@ -12,6 +12,14 @@ import {
   Camera,
   Send,
   CircleCheckBig,
+  Footprints,
+  Train,
+  Bus,
+  ShieldCheck,
+  ChevronRight,
+  AlertCircle,
+  Sparkles,
+  Navigation,
 } from "lucide-react-native";
 import {
   type DimensionValue,
@@ -277,83 +285,50 @@ function RouteCard({
   const isPhaseTwo = route.type === "phase2_preview";
 
   return (
-    <View
-      style={[
-        styles.card,
-        isRecommended && styles.recommendedCard,
-        isPhaseTwo && styles.previewCard,
-      ]}
-    >
-      <View style={styles.cardHeader}>
-        <View style={styles.cardTitleGroup}>
-          <Text style={styles.cardName}>{route.name}</Text>
-          <Text style={styles.tripChain}>{readableTripChain(route)}</Text>
-          <Text style={styles.dataStatusLabel}>{route.dataStatusLabel}</Text>
+    <View style={[styles.routeOptionCard, isRecommended && styles.routeOptionCardRecommended]}>
+      <View style={styles.routeOptionHeader}>
+        <View style={styles.routeOptionTitleRow}>
+          <Text style={styles.routeOptionName}>{route.name}</Text>
+          {isRecommended ? (
+            <View style={styles.recommendedChip}>
+              <Sparkles color="#b45309" size={12} />
+              <Text style={styles.recommendedChipText}>Recommended</Text>
+            </View>
+          ) : null}
         </View>
-        {isRecommended ? (
-          <Text style={styles.recommendedBadge}>Recommended</Text>
-        ) : null}
-        {route.phaseLabel ? (
-          <Text style={styles.phaseBadge}>{route.phaseLabel}</Text>
-        ) : null}
+        <Text style={styles.routeOptionChain}>{readableTripChain(route)}</Text>
       </View>
 
-      <View style={styles.metricGrid}>
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Time</Text>
-          <Text style={styles.metricValue}>{formatRouteTime(route)}</Text>
+      <View style={styles.routeMetricsGrid}>
+        <View style={styles.routeMetricItem}>
+          <Text style={styles.routeMetricLabel}>Time</Text>
+          <Text style={styles.routeMetricValue}>{formatRouteTime(route)}</Text>
         </View>
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Fare / cost</Text>
-          <Text style={styles.metricValue}>{formatRouteFare(route)}</Text>
+        <View style={styles.routeMetricItem}>
+          <Text style={styles.routeMetricLabel}>Fare</Text>
+          <Text style={styles.routeMetricValue}>{formatRouteFare(route)}</Text>
         </View>
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Distance</Text>
-          <Text style={styles.metricValue}>{formatRouteDistance(route)}</Text>
-        </View>
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Access</Text>
-          <Text style={styles.metricValue}>{route.accessScore}</Text>
-        </View>
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Estimated CO2e avoided</Text>
-          <Text style={styles.metricValue}>{formatRouteCo2e(route)}</Text>
+        <View style={styles.routeMetricItem}>
+          <Text style={styles.routeMetricLabel}>CO2 Avoided</Text>
+          <Text style={[styles.routeMetricValue, { color: "#16a34a" }]}>{formatRouteCo2e(route)}</Text>
         </View>
         {route.lakbayScoreReward ? (
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Potential Lakbay Score</Text>
-            <Text style={styles.metricValue}>+{route.lakbayScoreReward}</Text>
-          </View>
-        ) : null}
-        {route.campaignPointsReward ? (
-          <View style={styles.metric}>
-            <Text style={styles.metricLabel}>Potential campaign Points</Text>
-            <Text style={styles.metricValue}>
-              up to +{route.campaignPointsReward}
-            </Text>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>Lakbay Score</Text>
+            <Text style={[styles.routeMetricValue, { color: "#2563eb" }]}>+{route.lakbayScoreReward}</Text>
           </View>
         ) : null}
       </View>
 
-      <View style={styles.noteGroup}>
-        <Text style={styles.note}>{route.disclaimer}</Text>
-        {route.notes?.slice(0, 2).map((note) => (
-          <Text style={styles.note} key={note}>
-            {note}
-          </Text>
-        ))}
-        {route.futureIntegrationNote ? (
-          <Text style={styles.futureNote}>{route.futureIntegrationNote}</Text>
-        ) : null}
+      <View style={styles.routeNoteGroup}>
+        <AlertCircle color="#64748b" size={14} />
+        <Text style={styles.routeNoteText}>{route.disclaimer}</Text>
       </View>
 
       {isRecommended ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={onStartTrip}
-          style={styles.cta}
-        >
-          <Text style={styles.ctaText}>Start Trip</Text>
+        <Pressable accessibilityRole="button" onPress={onStartTrip} style={styles.primaryButton}>
+          <Text style={styles.primaryButtonText}>Select Route</Text>
+          <ChevronRight color="#fff" size={20} />
         </Pressable>
       ) : null}
     </View>
@@ -369,88 +344,46 @@ function AppHeader({
   title?: string;
   subtitle?: string;
 }) {
-  const origin = getRouteAccessPointLabel(
-    sustainableRoute,
-    sustainableRoute.originAccessPointId,
-  );
-  const destination = getRouteAccessPointLabel(
-    sustainableRoute,
-    sustainableRoute.destinationAccessPointId,
-  );
-
   return (
-    <View style={styles.header}>
-      <Text style={styles.eyebrow}>{eyebrow}</Text>
-      <Text style={styles.title}>{title}</Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-      <View style={styles.corridorPill}>
-        <Text style={styles.corridorText}>
-          {origin} {arrow} {destination}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function MetricGrid({ route }: { route: RouteOption }) {
-  return (
-    <View style={styles.metricGrid}>
-      <View style={styles.metric}>
-        <Text style={styles.metricLabel}>Time</Text>
-        <Text style={styles.metricValue}>{formatRouteTime(route)}</Text>
-      </View>
-      <View style={styles.metric}>
-        <Text style={styles.metricLabel}>Fare / cost</Text>
-        <Text style={styles.metricValue}>{formatRouteFare(route)}</Text>
-      </View>
-      <View style={styles.metric}>
-        <Text style={styles.metricLabel}>Distance</Text>
-        <Text style={styles.metricValue}>{formatRouteDistance(route)}</Text>
-      </View>
-      <View style={styles.metric}>
-        <Text style={styles.metricLabel}>Access</Text>
-        <Text style={styles.metricValue}>{route.accessScore}</Text>
-      </View>
-      <View style={styles.metric}>
-        <Text style={styles.metricLabel}>Estimated CO2e avoided</Text>
-        <Text style={styles.metricValue}>{formatRouteCo2e(route)}</Text>
-      </View>
-      {route.lakbayScoreReward ? (
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Potential Lakbay Score</Text>
-          <Text style={styles.metricValue}>+{route.lakbayScoreReward}</Text>
-        </View>
-      ) : null}
-      {route.campaignPointsReward ? (
-        <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Potential campaign Points</Text>
-          <Text style={styles.metricValue}>
-            up to +{route.campaignPointsReward}
-          </Text>
-        </View>
-      ) : null}
+    <View style={styles.modernHeader}>
+      <Text style={styles.modernEyebrow}>{eyebrow}</Text>
+      <Text style={styles.modernTitle}>{title}</Text>
+      {subtitle ? <Text style={styles.modernSubtitle}>{subtitle}</Text> : null}
     </View>
   );
 }
 
 function RouteComparisonScreen({ onStartTrip }: { onStartTrip: () => void }) {
+  const origin = getRouteAccessPointLabel(sustainableRoute, sustainableRoute.originAccessPointId);
+  const destination = getRouteAccessPointLabel(sustainableRoute, sustainableRoute.destinationAccessPointId);
+
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <AppHeader
-        eyebrow="Guide the Trip. Verify the Shift. Improve Access."
-        subtitle="A Verified Multimodal Mode-Shift Platform for Metro Manila"
-      />
+    <ScrollView contentContainerStyle={styles.mainContainer} bounces={false}>
+      <View style={styles.modernTopBar}>
+        <View style={{ width: 24 }} />
+        <Text style={styles.modernTopBarTitle}>Compare Routes</Text>
+        <Bell color="#1e3a8a" size={24} />
+      </View>
+
+      <View style={styles.corridorBlock}>
+        <View style={styles.corridorInputArea}>
+          <View style={styles.corridorRow}>
+            <View style={styles.dotOrigin} />
+            <Text style={styles.corridorText} numberOfLines={1}>{origin}</Text>
+          </View>
+          <View style={styles.corridorDivider} />
+          <View style={styles.corridorRow}>
+            <View style={styles.dotDest} />
+            <Text style={styles.corridorText} numberOfLines={1}>{destination}</Text>
+          </View>
+        </View>
+      </View>
 
       <View style={styles.routeList}>
         {phase0ARouteOptions.map((route) => (
           <RouteCard key={route.id} route={route} onStartTrip={onStartTrip} />
         ))}
       </View>
-
-      <Text style={styles.prototypeNote}>
-        Static prototype route options; no live routing, traffic, schedule, or
-        environmental-impact data.
-      </Text>
     </ScrollView>
   );
 }
@@ -465,82 +398,106 @@ function RouteDetailScreen({
   onBeginPlayback: () => void;
 }) {
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <AppHeader eyebrow="Guide the Trip" />
-
-      <View style={[styles.card, styles.detailHeroCard]}>
-        <Text style={styles.sectionKicker}>Sustainable Trip Chain</Text>
-        <Text style={styles.detailTitle}>{route.name}</Text>
-        <Text style={styles.detailChain}>{readableTripChain(route)}</Text>
-        <MetricGrid route={route} />
-      </View>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Segment breakdown</Text>
-        <Text style={styles.sectionCaption}>
-          Static trip preview for the MVP corridor
-        </Text>
-      </View>
-
-      <View style={styles.stepList}>
-        {route.segments.map((segment, index) => (
-          <View style={styles.stepCard} key={segment.id}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>{index + 1}</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepMode}>{segment.displayMode}</Text>
-              <Text style={styles.stepTitle}>
-                {segmentStepTitle(segment, index)}
-              </Text>
-              <Text style={styles.stepRoute}>
-                {getRouteAccessPointLabel(route, segment.originAccessPointId)}{" "}
-                {arrow}{" "}
-                {getRouteAccessPointLabel(
-                  route,
-                  segment.destinationAccessPointId,
-                )}
-              </Text>
-              <Text style={styles.stepMeta}>
-                {segment.travelTimeMin === null
-                  ? "Travel time pending"
-                  : `${segment.travelTimeMin} min travel`}
-                {segment.waitDwellTimeMin === null
-                  ? " · Wait/dwell pending"
-                  : ` · ${segment.waitDwellTimeMin} min wait/dwell`}
-                {segment.distanceKm === null
-                  ? " · Distance pending"
-                  : ` · ${segment.distanceKm.toFixed(1)} km`}
-              </Text>
-              <Text style={styles.stepMeta}>
-                Fare:{" "}
-                {segment.farePhp === null
-                  ? (segment.fareDisplay ?? "To be confirmed")
-                  : `PHP ${segment.farePhp}`}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <Text style={styles.infoNote}>
-        {route.dataStatusLabel}. {route.disclaimer}
-      </Text>
-
-      <View style={styles.actionRow}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onBeginPlayback}
-          style={styles.primaryAction}
-        >
-          <Text style={styles.primaryActionText}>Begin Trip Playback</Text>
+    <ScrollView contentContainerStyle={styles.mainContainer} bounces={false}>
+      <View style={styles.modernTopBar}>
+        <Pressable onPress={onBack} style={{ padding: 4, marginLeft: -4 }}>
+          <ChevronRight color="#1e3a8a" size={24} style={{ transform: [{ rotate: "180deg" }] }} />
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onBack}
-          style={styles.secondaryAction}
-        >
-          <Text style={styles.secondaryActionText}>Back to Routes</Text>
+        <Text style={styles.modernTopBarTitle}>Route Details</Text>
+        <Bell color="#1e3a8a" size={24} />
+      </View>
+
+      <View style={styles.routeMapArea}>
+        <MapView
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={{
+            latitude: 14.5864,
+            longitude: 121.0455,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+          scrollEnabled={false}
+          zoomEnabled={false}
+        />
+        <View style={styles.routeMapOverlay}>
+          <View style={styles.mapPinContainer}>
+            <Navigation color="#fff" size={24} />
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.routeDetailCard}>
+        <Text style={styles.routeDetailCardTitle}>{route.name}</Text>
+        
+        <View style={styles.routeMetricsGrid}>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>Time</Text>
+            <Text style={styles.routeMetricValue}>{formatRouteTime(route)}</Text>
+          </View>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>Fare</Text>
+            <Text style={styles.routeMetricValue}>{formatRouteFare(route)}</Text>
+          </View>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>Distance</Text>
+            <Text style={styles.routeMetricValue}>{formatRouteDistance(route)}</Text>
+          </View>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>CO2 Avoided</Text>
+            <Text style={[styles.routeMetricValue, { color: "#16a34a" }]}>{formatRouteCo2e(route)}</Text>
+          </View>
+        </View>
+
+        <View style={styles.timelineContainer}>
+          {route.segments.map((segment, index) => {
+            const isLast = index === route.segments.length - 1;
+            const mode = segment.mode;
+            let IconComp = Footprints;
+            let iconColor = "#2563eb"; // blue for walk
+            let bgColor = "#eff6ff";
+            
+            if (mode === "mrt") {
+              IconComp = Train;
+              iconColor = "#fff";
+              bgColor = "#1e3a8a"; // dark blue for transit
+            } else if (mode === "bus" || mode === "jeepney") {
+              IconComp = Bus;
+              iconColor = "#fff";
+              bgColor = "#1e3a8a";
+            }
+            
+            return (
+              <View style={styles.timelineRow} key={segment.id}>
+                <View style={styles.timelineLeft}>
+                  <View style={[styles.timelineIconNode, { backgroundColor: bgColor }]}>
+                    <IconComp color={iconColor} size={16} />
+                  </View>
+                  {!isLast && <View style={styles.timelineLine} />}
+                </View>
+                <View style={styles.timelineContent}>
+                  <View style={styles.timelineHeader}>
+                    {mode !== "walk" && (
+                      <View style={[styles.transitBadge, { backgroundColor: bgColor }]}>
+                        <Text style={styles.transitBadgeText}>{segment.displayMode.toUpperCase()}</Text>
+                      </View>
+                    )}
+                    <Text style={styles.timelineTitle}>{segmentStepTitle(segment, index)}</Text>
+                  </View>
+                  <Text style={styles.timelineSub}>
+                    {segment.travelTimeMin ? `${segment.travelTimeMin} min` : 'Travel pending'}
+                    {segment.waitDwellTimeMin ? ` • Every ${segment.waitDwellTimeMin} min` : ''}
+                  </Text>
+                </View>
+                <View style={styles.timelineTimeRight}>
+                  <Text style={styles.timelineTimeText}>{segment.travelTimeMin ? `${segment.travelTimeMin} min` : '-'}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        <Pressable accessibilityRole="button" onPress={onBeginPlayback} style={styles.primaryButtonLarge}>
+          <Text style={styles.primaryButtonText}>Begin Trip Playback</Text>
         </Pressable>
       </View>
     </ScrollView>
@@ -558,29 +515,24 @@ function ProgressIndicator({
     `${((activeIndex + 1) / route.segments.length) * 100}%` as DimensionValue;
 
   return (
-    <View style={styles.progressWrap}>
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: progressWidth }]} />
+    <View style={styles.playbackProgressWrap}>
+      <View style={styles.playbackProgressTrack}>
+        <View style={[styles.playbackProgressFill, { width: progressWidth }]} />
       </View>
-      <View style={styles.progressSteps}>
-        {route.segments.map((segment, index) => (
-          <View style={styles.progressStep} key={segment.id}>
-            <View
-              style={[
-                styles.progressDot,
-                index <= activeIndex && styles.progressDotActive,
-              ]}
-            />
-            <Text
-              style={[
-                styles.progressStepLabel,
-                index === activeIndex && styles.progressStepLabelActive,
-              ]}
-            >
-              {formatMode(segment.mode)}
-            </Text>
-          </View>
-        ))}
+      <View style={styles.playbackProgressSteps}>
+        {route.segments.map((segment, index) => {
+          let IconComp = Footprints;
+          if (segment.mode === "mrt") IconComp = Train;
+          else if (segment.mode === "bus" || segment.mode === "jeepney") IconComp = Bus;
+          const isActive = index <= activeIndex;
+          return (
+            <View style={styles.playbackProgressStep} key={segment.id}>
+              <View style={[styles.playbackProgressDot, isActive && styles.playbackProgressDotActive]}>
+                <IconComp color={isActive ? "#fff" : "#9ca3af"} size={14} />
+              </View>
+            </View>
+          );
+        })}
       </View>
     </View>
   );
@@ -593,178 +545,95 @@ function TripPlaybackScreen({
 }: {
   route: RouteOption;
   onBackToDetail: () => void;
-  onViewRewards: (
-    classifierResult: ClassifierResult,
-    traceMode: TraceMode,
-  ) => void;
+  onViewRewards: (classifierResult: ClassifierResult, traceMode: TraceMode) => void;
 }) {
   const [traceMode, setTraceMode] = useState<TraceMode>("valid");
-  const [classifierResult, setClassifierResult] =
-    useState<ClassifierResult | null>(null);
+  const [classifierResult, setClassifierResult] = useState<ClassifierResult | null>(null);
   const resultVisible = classifierResult !== null;
   const activeIndex = resultVisible ? route.segments.length - 1 : 1;
   const currentSegment = route.segments[activeIndex];
-  const currentStatus =
-    playbackSteps[activeIndex]?.status ?? "Trip segment in progress";
+  const currentStatus = playbackSteps[activeIndex]?.status ?? "Trip segment in progress";
   const runVerification = (mode: TraceMode) => {
-    const gpsTrace =
-      mode === "valid"
-        ? validSustainableGuadalupeCubaoTrace
-        : suspiciousTraceRejected;
-
+    const gpsTrace = mode === "valid" ? validSustainableGuadalupeCubaoTrace : suspiciousTraceRejected;
     setTraceMode(mode);
     setClassifierResult(
-      classifySustainableTripChain({
-        selectedRoute: route,
-        gpsTrace,
-      }),
+      classifySustainableTripChain({ selectedRoute: route, gpsTrace }),
     );
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <AppHeader eyebrow="Verify the Shift" title="Verify the Shift" />
-
-      <View style={[styles.card, styles.playbackHeroCard]}>
-        <Text style={styles.sectionKicker}>Current trip</Text>
-        <Text style={styles.detailTitle}>
-          {getRouteAccessPointLabel(route, route.originAccessPointId)} {arrow}{" "}
-          {getRouteAccessPointLabel(route, route.destinationAccessPointId)}
-        </Text>
-        <Text style={styles.detailChain}>{readableTripChain(route)}</Text>
-        <ProgressIndicator activeIndex={activeIndex} route={route} />
+    <ScrollView contentContainerStyle={styles.mainContainer} bounces={false}>
+      <View style={styles.modernTopBar}>
+        <Pressable onPress={onBackToDetail} style={{ padding: 4, marginLeft: -4 }}>
+          <ChevronRight color="#1e3a8a" size={24} style={{ transform: [{ rotate: "180deg" }] }} />
+        </Pressable>
+        <Text style={styles.modernTopBarTitle}>Active Trip</Text>
+        <Bell color="#1e3a8a" size={24} />
       </View>
 
-      <View style={styles.statusCard}>
-        <Text style={styles.sectionKicker}>Current segment</Text>
-        <Text style={styles.statusTitle}>
-          {currentSegment
-            ? segmentStepTitle(currentSegment, activeIndex)
-            : "Trip playback"}
-        </Text>
-        <Text style={styles.statusBody}>{currentStatus}</Text>
-      </View>
-
-      <Text style={styles.classifierNote}>
-        For MVP, verification uses a rule-based confidence engine based on
-        multiple trip signals.
-      </Text>
-
-      <View style={styles.stepList}>
-        {route.segments.map((segment, index) => (
-          <View
-            style={[
-              styles.playbackStepCard,
-              index === activeIndex && styles.playbackStepCardActive,
-            ]}
-            key={segment.id}
-          >
-            <View style={styles.playbackStepTop}>
-              <Text style={styles.stepMode}>{segment.displayMode}</Text>
-              <Text style={styles.stepMeta}>
-                {playbackSteps[index]?.status}
-              </Text>
-            </View>
-            <Text style={styles.stepTitle}>
-              {segmentStepTitle(segment, index)}
-            </Text>
-            <Text style={styles.stepRoute}>
-              {getRouteAccessPointLabel(route, segment.originAccessPointId)}{" "}
-              {arrow}{" "}
-              {getRouteAccessPointLabel(
-                route,
-                segment.destinationAccessPointId,
-              )}
-            </Text>
+      <View style={styles.routeMapArea}>
+        <MapView
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={{ latitude: 14.5864, longitude: 121.0455, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
+          scrollEnabled={false}
+          zoomEnabled={false}
+        />
+        <View style={styles.routeMapOverlay}>
+          <View style={[styles.mapPinContainer, { backgroundColor: "#16a34a" }]}>
+            <Navigation color="#fff" size={24} />
           </View>
-        ))}
+        </View>
       </View>
 
-      {classifierResult ? (
-        <View style={[styles.card, styles.resultCard]}>
-          <Text style={styles.sectionKicker}>
-            Sustainable Trip Chain Classifier
-          </Text>
-          <Text style={styles.traceModeText}>
-            Demo trace:{" "}
-            {traceMode === "valid"
-              ? "Valid sustainable trip"
-              : "Suspicious trace"}
-          </Text>
-          <Text style={styles.resultLabel}>Confidence Score</Text>
-          <Text style={styles.resultScore}>
-            {classifierResult.confidenceScore}%
-          </Text>
-          <Text style={styles.resultTitle}>
-            Result: {classifierResult.result}
-          </Text>
-          <Text style={styles.resultBody}>
-            Reward Eligibility: {classifierResult.rewardEligibility}
-          </Text>
-          <Text style={styles.sectionKicker}>Signal checklist</Text>
-          <View style={styles.signalList}>
-            {classifierSignalRows(classifierResult.signals).map(
-              ([label, value]) => (
+      <View style={[styles.routeDetailCard, { flex: 1 }]}>
+        <Text style={styles.routeOptionName}>Trip in Progress</Text>
+        <Text style={styles.routeNoteText}>{getRouteAccessPointLabel(route, route.originAccessPointId)} {arrow} {getRouteAccessPointLabel(route, route.destinationAccessPointId)}</Text>
+        
+        <ProgressIndicator activeIndex={activeIndex} route={route} />
+
+        <View style={styles.activeStatusBox}>
+          <Text style={styles.activeStatusLabel}>CURRENT STATUS</Text>
+          <Text style={styles.activeStatusTitle}>{currentSegment ? segmentStepTitle(currentSegment, activeIndex) : "Trip playback"}</Text>
+          <Text style={styles.activeStatusBody}>{currentStatus}</Text>
+        </View>
+
+        {classifierResult ? (
+          <View style={[styles.verificationResultCard, traceMode === "valid" ? styles.verificationValid : styles.verificationSuspicious]}>
+            <View style={styles.verificationResultHeader}>
+              <Text style={styles.verificationResultTitle}>{classifierResult.result}</Text>
+              <Text style={styles.verificationResultScore}>{classifierResult.confidenceScore}% Score</Text>
+            </View>
+            <Text style={styles.verificationResultBody}>Reward Eligibility: {classifierResult.rewardEligibility}</Text>
+            
+            <View style={styles.signalList}>
+              {classifierSignalRows(classifierResult.signals).map(([label, value]) => (
                 <View style={styles.signalRow} key={label}>
                   <Text style={styles.signalLabel}>{label}</Text>
                   <Text style={styles.signalValue}>{value}</Text>
                 </View>
-              ),
-            )}
+              ))}
+            </View>
           </View>
-          <Text style={styles.sectionKicker}>Explanation</Text>
-          <View style={styles.explanationList}>
-            {classifierResult.explanation.slice(0, 5).map((message) => (
-              <Text style={styles.explanationText} key={message}>
-                {message}
-              </Text>
-            ))}
-          </View>
-        </View>
-      ) : null}
-
-      <View style={styles.actionRow}>
-        {classifierResult ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => onViewRewards(classifierResult, traceMode)}
-            style={styles.primaryAction}
-          >
-            <Text style={styles.primaryActionText}>View Rewards</Text>
-          </Pressable>
         ) : null}
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => runVerification("valid")}
-          style={styles.primaryAction}
-        >
-          <Text style={styles.primaryActionText}>Complete Trip & Verify</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => runVerification("suspicious")}
-          style={styles.warningAction}
-        >
-          <Text style={styles.warningActionText}>Test suspicious trace</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onBackToDetail}
-          style={styles.secondaryAction}
-        >
-          <Text style={styles.secondaryActionText}>Back to Route Detail</Text>
-        </Pressable>
+
+        <View style={{ marginTop: 24, gap: 12 }}>
+          {classifierResult ? (
+            <Pressable accessibilityRole="button" onPress={() => onViewRewards(classifierResult, traceMode)} style={styles.primaryButtonLarge}>
+              <Text style={styles.primaryButtonText}>View Rewards</Text>
+            </Pressable>
+          ) : (
+            <>
+              <Pressable accessibilityRole="button" onPress={() => runVerification("valid")} style={styles.primaryButtonLarge}>
+                <Text style={styles.primaryButtonText}>Complete Trip (Valid Trace)</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" onPress={() => runVerification("suspicious")} style={[styles.primaryButtonLarge, { backgroundColor: "#ef4444" }]}>
+                <Text style={styles.primaryButtonText}>Test Suspicious Trace</Text>
+              </Pressable>
+            </>
+          )}
+        </View>
       </View>
     </ScrollView>
-  );
-}
-
-function RewardMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.metric}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text style={styles.metricValue}>{value}</Text>
-    </View>
   );
 }
 
@@ -780,92 +649,52 @@ function RewardResultScreen({
   onBackToRoutes: () => void;
 }) {
   const rewardResult: RewardResult = useMemo(
-    () =>
-      calculateTripRewards({
-        classifierResult: verifiedTrip.classifierResult,
-        selectedRoute: route,
-        currentUserRewardState: demoUserRewardState,
-      }),
+    () => calculateTripRewards({ classifierResult: verifiedTrip.classifierResult, selectedRoute: route, currentUserRewardState: demoUserRewardState }),
     [route, verifiedTrip.classifierResult],
   );
-  const traceLabel =
-    verifiedTrip.traceMode === "valid"
-      ? "Valid sustainable trip"
-      : "Suspicious trace";
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <AppHeader eyebrow="Reward the Shift" title="Reward the Shift" />
-
-      <View style={[styles.card, styles.rewardHeroCard]}>
-        <Text style={styles.sectionKicker}>Verification result summary</Text>
-        <Text style={styles.detailTitle}>
-          {verifiedTrip.classifierResult.result}
-        </Text>
-        <Text style={styles.traceModeText}>
-          {traceLabel} - Confidence Score:{" "}
-          {verifiedTrip.classifierResult.confidenceScore}%
-        </Text>
-        <Text style={styles.resultBody}>
-          Reward Eligibility: {verifiedTrip.classifierResult.rewardEligibility}
-        </Text>
+    <ScrollView contentContainerStyle={styles.mainContainer} bounces={false}>
+      <View style={styles.modernTopBar}>
+        <View style={{ width: 24 }} />
+        <Text style={styles.modernTopBarTitle}>Trip Summary</Text>
+        <Bell color="#1e3a8a" size={24} />
       </View>
 
-      <View style={styles.metricGrid}>
-        <RewardMetric
-          label="Lakbay Score earned"
-          value={`+${rewardResult.lakbayScoreEarned}`}
-        />
-        <RewardMetric
-          label="campaign Points earned"
-          value={`+${rewardResult.campaignPointsEarned}`}
-        />
-        <RewardMetric
-          label="Updated campaign Points"
-          value={`${rewardResult.updatedCampaignPoints}`}
-        />
-        <RewardMetric
-          label="Updated Lakbay Score"
-          value={`${rewardResult.updatedLakbayScore}`}
-        />
-        <RewardMetric
-          label="Campaign cap remaining"
-          value={`${rewardResult.campaignCapRemaining} points`}
-        />
-        <RewardMetric
-          label="Estimated CO2e avoided"
-          value={
-            route.estimatedCo2eAvoidedKg === null
-              ? "Pending pilot calibration"
-              : `${rewardResult.estimatedCo2eAvoidedKg} kg`
-          }
-        />
+      <View style={styles.successHeaderCard}>
+        <CircleCheckBig color="#16a34a" size={64} style={{ marginBottom: 16 }} />
+        <Text style={styles.successHeaderTitle}>{verifiedTrip.classifierResult.result}</Text>
+        <Text style={styles.successHeaderBody}>{rewardResult.rewardMessage}</Text>
       </View>
 
-      <View style={styles.statusCard}>
-        <Text style={styles.sectionKicker}>Reward message</Text>
-        <Text style={styles.statusBody}>{rewardResult.rewardMessage}</Text>
+      <View style={styles.rewardSummaryGrid}>
+        <View style={styles.rewardSummaryItem}>
+          <Text style={styles.rewardSummaryLabel}>Lakbay Score</Text>
+          <Text style={[styles.rewardSummaryValue, { color: "#2563eb" }]}>+{rewardResult.lakbayScoreEarned}</Text>
+        </View>
+        <View style={styles.rewardSummaryItem}>
+          <Text style={styles.rewardSummaryLabel}>Campaign Points</Text>
+          <Text style={[styles.rewardSummaryValue, { color: "#f59e0b" }]}>+{rewardResult.campaignPointsEarned}</Text>
+        </View>
+        <View style={styles.rewardSummaryItem}>
+          <Text style={styles.rewardSummaryLabel}>CO2 Avoided</Text>
+          <Text style={[styles.rewardSummaryValue, { color: "#16a34a" }]}>{rewardResult.estimatedCo2eAvoidedKg} kg</Text>
+        </View>
       </View>
 
-      <Text style={styles.infoNote}>
-        Lakbay Score is a non-cash progress meter. campaign Points are capped,
-        campaign-based incentives for verified sustainable trip chains.
-      </Text>
+      <View style={styles.activeStatusBox}>
+        <Text style={styles.activeStatusLabel}>UPDATED TOTALS</Text>
+        <Text style={styles.activeStatusTitle}>Lakbay Score: {rewardResult.updatedLakbayScore}</Text>
+        <Text style={styles.activeStatusTitle}>Campaign Points: {rewardResult.updatedCampaignPoints}</Text>
+      </View>
 
-      <View style={styles.actionRow}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onReportAccessBarrier}
-          style={styles.primaryAction}
-        >
-          <Text style={styles.primaryActionText}>Report an Access Barrier</Text>
+      <View style={{ paddingHorizontal: 20, marginTop: 24, gap: 12 }}>
+        <Pressable accessibilityRole="button" onPress={onReportAccessBarrier} style={styles.primaryButtonLarge}>
+          <Text style={styles.primaryButtonText}>Report an Issue on Route</Text>
+          <AlertCircle color="#fff" size={20} style={{ marginLeft: 8 }} />
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onBackToRoutes}
-          style={styles.secondaryAction}
-        >
-          <Text style={styles.secondaryActionText}>Back to Routes</Text>
+        <Pressable accessibilityRole="button" onPress={onBackToRoutes} style={[styles.primaryButtonLarge, { backgroundColor: "#f8fafc", borderWidth: 1, borderColor: "#e2e8f0" }]}>
+          <Text style={[styles.primaryButtonText, { color: "#1e3a8a" }]}>Back to Routes</Text>
         </Pressable>
       </View>
     </ScrollView>
@@ -1206,47 +1035,71 @@ function HomeScreen({
   onCompareRoutes: () => void;
 }) {
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <AppHeader
-        eyebrow="Guide the Trip. Verify the Shift. Improve Access."
-        subtitle="A Verified Multimodal Mode-Shift Platform for Metro Manila"
-      />
+    <ScrollView contentContainerStyle={styles.mainContainer} bounces={false}>
+      <View style={styles.modernTopBar}>
+        <View style={{ width: 24 }} />
+        <Text style={styles.modernTopBarTitle}>LakbayPoints</Text>
+        <Bell color="#1e3a8a" size={24} />
+      </View>
 
-      <View style={[styles.card, styles.homeHeroCard]}>
-        <Text style={styles.sectionKicker}>Phase 0A pilot</Text>
-        <Text style={styles.detailTitle}>Welcome to LakbayPoints</Text>
-        <Text style={styles.statusBody}>
+      <View style={styles.successHeaderCard}>
+        <Text style={styles.successHeaderTitle}>Welcome to LakbayPoints</Text>
+        <Text style={styles.successHeaderBody}>
           Review the static multimodal pilot journey, compare qualified route
           options, and continue to prototype verification.
         </Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionKicker}>Recommended journey</Text>
-        <Text style={styles.detailTitle}>{route.name}</Text>
-        <Text style={styles.detailChain}>{readableTripChain(route)}</Text>
-        <MetricGrid route={route} />
-      </View>
+      <View style={[styles.routeOptionCard, { marginTop: 24 }]}>
+        <View style={styles.routeOptionHeader}>
+          <View style={styles.routeOptionTitleRow}>
+            <Text style={styles.routeOptionName}>Recommended journey</Text>
+          </View>
+          <Text style={styles.routeOptionChain}>{readableTripChain(route)}</Text>
+        </View>
 
-      <Text style={styles.infoNote}>
-        {route.dataStatusLabel}. {route.disclaimer}
-      </Text>
+        <View style={styles.routeMetricsGrid}>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>Time</Text>
+            <Text style={styles.routeMetricValue}>{formatRouteTime(route)}</Text>
+          </View>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>Fare</Text>
+            <Text style={styles.routeMetricValue}>{formatRouteFare(route)}</Text>
+          </View>
+          <View style={styles.routeMetricItem}>
+            <Text style={styles.routeMetricLabel}>CO2 Avoided</Text>
+            <Text style={[styles.routeMetricValue, { color: "#16a34a" }]}>{formatRouteCo2e(route)}</Text>
+          </View>
+          {route.lakbayScoreReward ? (
+            <View style={styles.routeMetricItem}>
+              <Text style={styles.routeMetricLabel}>Lakbay Score</Text>
+              <Text style={[styles.routeMetricValue, { color: "#2563eb" }]}>+{route.lakbayScoreReward}</Text>
+            </View>
+          ) : null}
+        </View>
 
-      <View style={styles.actionRow}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onPlanTrip}
-          style={styles.primaryAction}
-        >
-          <Text style={styles.primaryActionText}>Plan the Pilot Trip</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onCompareRoutes}
-          style={styles.secondaryAction}
-        >
-          <Text style={styles.secondaryActionText}>Compare Route Options</Text>
-        </Pressable>
+        <View style={styles.routeNoteGroup}>
+          <AlertCircle color="#64748b" size={14} />
+          <Text style={styles.routeNoteText}>{route.disclaimer}</Text>
+        </View>
+
+        <View style={{ gap: 12 }}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onPlanTrip}
+            style={styles.primaryButtonLarge}
+          >
+            <Text style={styles.primaryButtonText}>Plan the Pilot Trip</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onCompareRoutes}
+            style={[styles.primaryButtonLarge, { backgroundColor: "#f8fafc", borderWidth: 1, borderColor: "#e2e8f0" }]}
+          >
+            <Text style={[styles.primaryButtonText, { color: "#1e3a8a" }]}>Compare Route Options</Text>
+          </Pressable>
+        </View>
       </View>
     </ScrollView>
   );
@@ -1395,6 +1248,7 @@ export default function App() {
           <PlanTripScreen
             route={route}
             onCompareRoutes={() => setScreen("comparison")}
+            onBeginPlayback={() => setScreen("playback")}
           />
         ) : null}
       </View>
@@ -2249,5 +2103,395 @@ const styles = StyleSheet.create({
     color: "#475569",
     fontSize: 11,
     marginLeft: 6,
+  },
+  mainContainer: {
+    flexGrow: 1,
+    backgroundColor: "#f8fafc",
+  },
+  modernTopBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 16,
+    backgroundColor: "#fff",
+  },
+  modernTopBarTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1e3a8a",
+  },
+  corridorBlock: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  corridorInputArea: {
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: "#fff",
+  },
+  corridorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  dotOrigin: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 3,
+    borderColor: "#3b82f6",
+    marginRight: 12,
+  },
+  dotDest: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#f59e0b",
+    marginRight: 12,
+  },
+  corridorText: {
+    fontSize: 15,
+    color: "#0f172a",
+    fontWeight: "600",
+  },
+  corridorDivider: {
+    height: 1,
+    backgroundColor: "#e2e8f0",
+    marginLeft: 24,
+    marginVertical: 4,
+  },
+  routeOptionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  routeOptionCardRecommended: {
+    borderColor: "#bfdbfe",
+    borderWidth: 2,
+  },
+  routeOptionHeader: {
+    marginBottom: 16,
+  },
+  routeOptionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  routeOptionName: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  recommendedChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fef3c7",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  recommendedChipText: {
+    color: "#b45309",
+    fontSize: 10,
+    fontWeight: "700",
+    marginLeft: 4,
+  },
+  routeOptionChain: {
+    fontSize: 13,
+    color: "#64748b",
+  },
+  routeMetricsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 16,
+  },
+  routeMetricItem: {
+    width: "47%",
+    padding: 12,
+    backgroundColor: "#f8fafc",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+  },
+  routeMetricLabel: {
+    fontSize: 11,
+    color: "#64748b",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  routeMetricValue: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  routeNoteGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    backgroundColor: "#f8fafc",
+    padding: 12,
+    borderRadius: 8,
+  },
+  routeNoteText: {
+    fontSize: 12,
+    color: "#475569",
+    marginLeft: 8,
+    flex: 1,
+  },
+  primaryButton: {
+    backgroundColor: "#1e3a8a",
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    marginRight: 6,
+  },
+  primaryButtonLarge: {
+    backgroundColor: "#1e3a8a",
+    paddingVertical: 16,
+    borderRadius: 16,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  routeMapArea: {
+    height: 180,
+    position: "relative",
+  },
+  routeMapOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  routeDetailCard: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    marginTop: -20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  routeDetailCardTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#0f172a",
+    marginBottom: 16,
+  },
+  timelineContainer: {
+    marginVertical: 24,
+  },
+  timelineRow: {
+    flexDirection: "row",
+  },
+  timelineLeft: {
+    width: 32,
+    alignItems: "center",
+    marginRight: 12,
+  },
+  timelineIconNode: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    backgroundColor: "#e2e8f0",
+    marginVertical: -4,
+    zIndex: 1,
+  },
+  timelineContent: {
+    flex: 1,
+    paddingBottom: 24,
+  },
+  timelineHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+    flexWrap: "wrap",
+  },
+  timelineTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+  timelineSub: {
+    fontSize: 13,
+    color: "#64748b",
+  },
+  timelineTimeRight: {
+    marginLeft: 12,
+  },
+  timelineTimeText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#475569",
+    paddingTop: 4,
+  },
+  playbackProgressWrap: {
+    marginVertical: 24,
+  },
+  playbackProgressTrack: {
+    height: 6,
+    backgroundColor: "#e2e8f0",
+    borderRadius: 3,
+    position: "absolute",
+    top: 13,
+    left: 16,
+    right: 16,
+  },
+  playbackProgressFill: {
+    height: "100%",
+    backgroundColor: "#2563eb",
+    borderRadius: 3,
+  },
+  playbackProgressSteps: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  playbackProgressStep: {
+    alignItems: "center",
+  },
+  playbackProgressDot: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#e2e8f0",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#fff",
+  },
+  playbackProgressDotActive: {
+    backgroundColor: "#2563eb",
+  },
+  activeStatusBox: {
+    backgroundColor: "#f8fafc",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  activeStatusLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#64748b",
+    marginBottom: 8,
+  },
+  activeStatusTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0f172a",
+    marginBottom: 4,
+  },
+  activeStatusBody: {
+    fontSize: 14,
+    color: "#475569",
+  },
+  verificationResultCard: {
+    marginTop: 24,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  verificationValid: {
+    backgroundColor: "#f0fdf4",
+    borderColor: "#bbf7d0",
+  },
+  verificationSuspicious: {
+    backgroundColor: "#fef2f2",
+    borderColor: "#fecaca",
+  },
+  verificationResultHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  verificationResultTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  verificationResultScore: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#16a34a",
+  },
+  verificationResultBody: {
+    fontSize: 14,
+    color: "#475569",
+    marginBottom: 16,
+  },
+  successHeaderCard: {
+    backgroundColor: "#fff",
+    padding: 32,
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+  },
+  successHeaderTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#0f172a",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  successHeaderBody: {
+    fontSize: 14,
+    color: "#64748b",
+    textAlign: "center",
+  },
+  rewardSummaryGrid: {
+    flexDirection: "row",
+    padding: 20,
+    gap: 12,
+  },
+  rewardSummaryItem: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  rewardSummaryLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#64748b",
+    marginBottom: 8,
+  },
+  rewardSummaryValue: {
+    fontSize: 20,
+    fontWeight: "800",
   },
 });
