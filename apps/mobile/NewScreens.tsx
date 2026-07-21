@@ -83,6 +83,12 @@ export function RewardsOverviewScreen({
           <Text style={styles.pointsValueGreen}>+{demoUserRewardState.verifiedTrips * 15}</Text>
           <Text style={styles.pointsSub}>Points Earned</Text>
         </View>
+        <View style={styles.pointsDivider} />
+        <View style={styles.pointsColumn}>
+          <Text style={styles.pointsLabel}>Eco Impact</Text>
+          <Text style={styles.pointsValueGreen}>{demoUserRewardState.estimatedCo2eAvoidedKg}kg</Text>
+          <Text style={styles.pointsSub}>CO2 Avoided</Text>
+        </View>
       </View>
 
       <View style={styles.streakCard}>
@@ -528,12 +534,12 @@ const styles = StyleSheet.create({
   },
   pointsValue: {
     color: "#0f172a",
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "800",
   },
   pointsValueGreen: {
     color: "#16a34a",
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "800",
   },
   pointsSub: {
