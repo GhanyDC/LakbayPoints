@@ -25,13 +25,13 @@ import {
   type DimensionValue,
   BackHandler,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import MapView from "react-native-maps";
 import {
   calculateTripRewards,
@@ -1177,8 +1177,9 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <StatusBar style="dark" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.screen}>
+        <StatusBar style="dark" />
       <View style={{ flex: 1 }}>
         {screen === "home" ? (
           <HomeScreen
@@ -1253,7 +1254,8 @@ export default function App() {
         ) : null}
       </View>
       <BottomTabBar activeTab={activeTab} onTabSelect={handleTabSelect} />
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

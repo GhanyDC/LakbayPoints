@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable, Image } from "react-native";
 import {
   demoUserRewardState,
   formatRouteCo2e,
@@ -34,7 +34,7 @@ import {
   ChevronRight,
   Bus,
 } from "lucide-react-native";
-import MapView from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 
 export function RewardsOverviewScreen({
   onPlanTrip,
@@ -173,6 +173,19 @@ export function RewardsOverviewScreen({
   );
 }
 
+const WAYPOINTS = [
+  { latitude: 14.5843, longitude: 121.0573 }, // MMDA Head Office
+  { latitude: 14.5847, longitude: 121.0567 }, // EDSA corner Julia Vargas
+  { latitude: 14.5888, longitude: 121.0583 }, // Ortigas Station
+  { latitude: 14.5956, longitude: 121.0586 }, // EDSA Corinthian
+  { latitude: 14.6083, longitude: 121.0560 }, // Santolan Station
+  { latitude: 14.6150, longitude: 121.0535 }, // EDSA P. Tuazon
+  { latitude: 14.6186, longitude: 121.0519 }, // Cubao Station
+  { latitude: 14.6265, longitude: 121.0475 }, // EDSA Nepa Q-Mart
+  { latitude: 14.6346, longitude: 121.0435 }, // GMA Kamuning Station
+  { latitude: 14.6355, longitude: 121.0430 }, // Studio 7 DICT
+];
+
 export function PlanTripScreen({
   route,
   onCompareRoutes,
@@ -190,6 +203,83 @@ export function PlanTripScreen({
   );
 
   const [selectedTab, setSelectedTab] = React.useState("best");
+
+  const fastestSegments = [
+    {
+      id: "f-walk1",
+      mode: "walk",
+      displayMode: "Walk",
+      label: "Walk (162 m) towards P. Victor Street",
+      travelTimeMin: 2,
+      distanceKm: 0.162,
+    },
+    {
+      id: "f-jeep",
+      mode: "puv",
+      displayMode: "JEEP",
+      label: "T357: Guadalupe Market-L. Guinto via P. Gil",
+      travelTimeMin: 6,
+      farePhp: 13,
+      from: "Epifanio de los Santos Avenue, Makati City",
+      to: "Dr Jose P. Rizal Ave., Makati City",
+    },
+    {
+      id: "f-walk2",
+      mode: "walk",
+      displayMode: "Walk",
+      label: "Walk (691 m) towards Matamis Street",
+      travelTimeMin: 9,
+      distanceKm: 0.691,
+    }
+  ];
+
+  const walkableSegments = [
+    {
+      id: "w-walk1",
+      mode: "walk",
+      displayMode: "Walk",
+      label: "Walk to City of Mandaluyong Science High School",
+      travelTimeMin: 14,
+      distanceKm: 1.1,
+    }
+  ];
+
+  const activeSegments = selectedTab === "fastest" ? fastestSegments : (selectedTab === "walkable" ? walkableSegments : route.segments);
+
+  const [walk1Coords, setWalk1Coords] = React.useState<{latitude: number, longitude: number}[]>(WAYPOINTS.slice(0, 3));
+  const [walk2Coords, setWalk2Coords] = React.useState<{latitude: number, longitude: number}[]>(WAYPOINTS.slice(8, 10));
+
+  React.useEffect(() => {
+    const fetchRoute = async (points: typeof WAYPOINTS) => {
+      try {
+        const coordsStr = points.map(p => `${p.longitude},${p.latitude}`).join(';');
+        const url = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const geometry = data.routes[0].geometry;
+          if (geometry && geometry.coordinates) {
+            return geometry.coordinates.map((c: [number, number]) => ({
+              latitude: c[1],
+              longitude: c[0]
+            }));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch route:", e);
+      }
+      return points;
+    };
+
+    const loadRoutes = async () => {
+      const w1 = await fetchRoute(WAYPOINTS.slice(0, 3));
+      // Walk 2: Cubao Station (index 6) to Studio 7 (index 9)
+      const w2 = await fetchRoute([WAYPOINTS[6], WAYPOINTS[9]]);
+      setWalk1Coords(w1);
+      setWalk2Coords(w2);
+    };
+    loadRoutes();
+  }, []);
 
   const getSegmentIcon = (mode: string) => {
     switch (mode) {
@@ -250,25 +340,25 @@ export function PlanTripScreen({
           <Text style={[styles.routeTabSub, selectedTab === "fastest" && styles.routeTabSubActive]}>44 min</Text>
         </Pressable>
         <Pressable 
-          style={[styles.routeTab, selectedTab === "least_walk" && styles.routeTabActive]}
-          onPress={() => setSelectedTab("least_walk")}
+          style={[styles.routeTab, selectedTab === "walkable" && styles.routeTabActive]}
+          onPress={() => setSelectedTab("walkable")}
         >
-          <Text style={[styles.routeTabTitle, selectedTab === "least_walk" && styles.routeTabTitleActive]}>Least Walk</Text>
-          <Text style={[styles.routeTabSub, selectedTab === "least_walk" && styles.routeTabSubActive]}>1.1 km</Text>
+          <Text style={[styles.routeTabTitle, selectedTab === "walkable" && styles.routeTabTitleActive]}>Walkable</Text>
+          <Text style={[styles.routeTabSub, selectedTab === "walkable" && styles.routeTabSubActive]}>1.1 km</Text>
         </Pressable>
       </ScrollView>
 
       <View style={styles.mapArea}>
-        <MapView
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={{
-            latitude: 14.5818,
-            longitude: 121.0531,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
-          scrollEnabled={false}
-          zoomEnabled={false}
+        <Image 
+          source={
+            selectedTab === "fastest" 
+              ? require('./assets/fastest.png') 
+              : selectedTab === "walkable" 
+                ? require('./assets/walkable.png') 
+                : require('./assets/best-route.png')
+          } 
+          style={{ width: '100%', height: '100%' }}
+          resizeMode="cover"
         />
         
         {/* Mock heatmap density bar */}
@@ -285,34 +375,25 @@ export function PlanTripScreen({
             <Text style={styles.densityLabelText}>High</Text>
           </View>
         </View>
-        
-        {/* Mock pins */}
-        <View style={[styles.mapOverlayPin, { top: 120, left: 60 }]}>
-          <View style={styles.mapPinIconContainer}>
-            <Train color="#1e3a8a" size={14} />
-          </View>
-          <Text style={styles.mapPinLabel}>Guadalupe Station</Text>
-        </View>
-        
-        <View style={[styles.mapOverlayPin, { top: 50, right: 60 }]}>
-          <View style={styles.mapPinIconContainer}>
-            <Train color="#1e3a8a" size={14} />
-          </View>
-          <Text style={styles.mapPinLabel}>Cubao Station</Text>
-        </View>
       </View>
 
       <View style={styles.bottomRouteCard}>
         <View style={styles.routeHeaderRow}>
           <View>
-            <Text style={styles.routeHeaderTitle}>Recommended Route</Text>
-            <Text style={styles.routeHeaderSub}>Incl. 12 min walk • {route.segments.length - 1} transfer</Text>
+            <Text style={styles.routeHeaderTitle}>
+              {selectedTab === "fastest" ? "Fastest Route" : selectedTab === "walkable" ? "Walkable Route" : "Recommended Route"}
+            </Text>
+            <Text style={styles.routeHeaderSub}>
+              {selectedTab === "fastest" ? "Incl. 11 min walk • 1 transfer" : selectedTab === "walkable" ? "Incl. 14 min walk • Direct" : `Incl. 12 min walk • ${route.segments.length - 1} transfer`}
+            </Text>
           </View>
-          <Text style={styles.routeTimeBig}>{formatRouteTime(route)}</Text>
+          <Text style={styles.routeTimeBig}>
+            {selectedTab === "fastest" ? "17 min" : selectedTab === "walkable" ? "14 min" : formatRouteTime(route)}
+          </Text>
         </View>
 
         <View style={styles.timelineList}>
-          {route.segments.map((segment, index) => {
+          {activeSegments.map((segment, index) => {
             const isWalk = segment.mode === "walk";
             const segmentColor = isWalk ? "#2563eb" : "#1e3a8a";
             return (
@@ -339,7 +420,15 @@ export function PlanTripScreen({
                         </View>
                         <Text style={styles.timelineActionText} numberOfLines={1}>{segment.label}</Text>
                       </View>
-                      <Text style={styles.timelineMetaText}>{segment.travelTimeMin} min • Every 3-4 min</Text>
+                      <Text style={styles.timelineMetaText}>
+                        {segment.travelTimeMin} min {segment.farePhp ? `• P ${segment.farePhp.toFixed(2)}` : '• Every 3-4 min'}
+                      </Text>
+                      {segment.from && (
+                        <View style={{ marginTop: 8, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: "#e2e8f0" }}>
+                          <Text style={{ fontSize: 12, color: "#475569" }}><Text style={{fontWeight: "600"}}>GET ON</Text>   {segment.from}</Text>
+                          <Text style={{ fontSize: 12, color: "#475569", marginTop: 4 }}><Text style={{fontWeight: "600"}}>GET OFF</Text>  {segment.to}</Text>
+                        </View>
+                      )}
                     </>
                   )}
                   {index < route.segments.length - 1 && <View style={styles.timelineSpacing} />}
@@ -374,13 +463,22 @@ export function PlanTripScreen({
         </View>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={onBeginPlayback}
-        style={[styles.primaryButtonLarge, { marginHorizontal: 16, marginBottom: 16 }]}
-      >
-        <Text style={styles.primaryButtonText}>Begin Trip Playback</Text>
-      </Pressable>
+      <View style={{ marginHorizontal: 16, marginBottom: 32, gap: 12 }}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBeginPlayback}
+          style={styles.primaryButtonLarge}
+        >
+          <Text style={styles.primaryButtonText}>Begin Trip Playback</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onCompareRoutes}
+          style={[styles.primaryButtonLarge, { backgroundColor: "#f8fafc", borderWidth: 1, borderColor: "#e2e8f0" }]}
+        >
+          <Text style={[styles.primaryButtonText, { color: "#1e3a8a" }]}>Compare Route Options</Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 }
@@ -702,7 +800,7 @@ const styles = StyleSheet.create({
   /* Plan Trip Styles */
   planContent: {
     flexGrow: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#fff",
   },
   planTopBar: {
     flexDirection: "row",
@@ -815,8 +913,8 @@ const styles = StyleSheet.create({
     color: "#e0e7ff",
   },
   mapArea: {
-    height: 320,
-    position: "relative",
+    height: 220,
+    alignSelf: 'stretch',
     marginHorizontal: 16,
     borderRadius: 16,
     overflow: "hidden",
@@ -825,29 +923,29 @@ const styles = StyleSheet.create({
   densityLegend: {
     position: "absolute",
     bottom: 12,
-    right: 16,
+    right: 12,
     backgroundColor: "#fff",
-    padding: 8,
+    padding: 6,
     borderRadius: 8,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 3,
-    width: 140,
+    width: 110,
   },
   densityLegendTitle: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "700",
     color: "#334155",
-    marginBottom: 4,
+    marginBottom: 2,
     textAlign: "center",
   },
   densityGradientRow: {
     flexDirection: "row",
-    height: 6,
-    borderRadius: 3,
+    height: 4,
+    borderRadius: 2,
     overflow: "hidden",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   densityBlock: {
     flex: 1,
