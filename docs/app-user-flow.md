@@ -51,16 +51,19 @@ screen.
 
 ### Step 4: Start Trip / Playback
 
-For the current prototype, use sample trace playback and show the selected
-route's segment labels. Playback progression and final route-bound trace data
-remain pending stabilization.
+Playback is a deterministic prototype simulation using the generated valid or
+suspicious final-route trace. It begins on segment 1 (index 0), advances through
+all five shared route segments in order, updates the progress/current status,
+and does not expose verification until the fifth segment. Restart returns to
+segment 1 and clears the prior result. No live GPS or map is implied.
 
 ### Step 5: Verify the Shift
 
 Show the rule-based classifier's confidence score, result label, reward
-eligibility, signal checklist, and explanation. The existing classifier rules
-and fixtures still target the earlier corridor and must be migrated in a later
-task; do not treat the final route binding as complete.
+eligibility, signal checklist, and explanation. Verification resolves the exact
+selected sustainable route and consumes its final-route profile. Invalid data,
+unknown routes, the private baseline, the future preview, missing walking legs,
+and suspicious movement fail closed with no reward.
 
 ### Step 6: Reward Result
 
@@ -80,7 +83,10 @@ result for that session.
 
 The user can submit a prototype report for sidewalk obstruction, unsafe
 crossing, flooding, illegal parking/loading obstruction, or damaged walkway or
-access path.
+access path. Selectable locations cover MRT-3 Araneta-Cubao, MRT-3 Guadalupe,
+Guadalupe Ferry, Hulo Ferry, and the Hulo office last-mile access area. The
+confirmation says: **Submitted to the LakbayPoints prototype review queue for
+demonstration.** It does not imply a live MMDA integration.
 
 ### Step 8: Agency Dashboard Preview
 

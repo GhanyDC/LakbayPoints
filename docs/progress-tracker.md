@@ -17,11 +17,11 @@ Update this file after every meaningful change.
 | Mobile route comparison | Done | TBD | Shared recommended route plus pending private baseline and non-live Phase 2 preview |
 | Route detail | Done | TBD | Uses the same shared access points, segments, statuses, and totals |
 | Mobile navigation state | Done | TBD | Typed destinations keep retained tab labels, selected state, screen transitions, and Android back behavior aligned |
-| Trip playback | Partial | TBD | Displays final route labels; progression and final route-bound traces remain pending |
-| Classifier | Partial | TBD | Rule-based prototype exists, but route binding and hardening still target legacy corridor assumptions |
-| GPS traces | Partial | TBD | Valid and suspicious fixtures exist for the legacy corridor; final route fixtures are pending |
-| Reward logic | Partial | TBD | Shared calculation exists; boundary stabilization remains pending |
-| Reward result screen | Partial | TBD | Existing prototype screen is connected; calibrated CO2e and reward boundaries remain pending |
+| Trip playback | Done | TBD | Deterministic five-segment progression starts at index 0, gates verification, supports valid/suspicious fixtures, and restarts |
+| Classifier | Done | TBD | Final-route profile, fail-closed runtime validation, ordered access/dwell checks, and credible walking requirements are automated |
+| GPS traces | Done | TBD | Generated final-route valid and suspicious fixtures cover the five-segment chain and are JSON/TypeScript parity-tested |
+| Reward logic | Done | TBD | Finite/non-negative normalization, campaign-cap invariants, Reduced policy, pending CO2e, and full-trip count policy are tested |
+| Reward result screen | Done | TBD | Verification-derived results use hardened shared rewards; CO2e remains visibly pending calibration |
 | Rewards tab cleanup | Done | TBD | Verification-gated overview uses shared seed/route data; unsupported gamification and reward catalog were removed |
 | Access report form | Done | TBD | Prototype mobile form and confirmation flow exist |
 | Seed access-barrier reports | Done | TBD | Approximate prototype/sample reports are seeded |
@@ -32,6 +32,27 @@ Update this file after every meaningful change.
 | Demo script | Not started | TBD | |
 
 ## Change Log
+
+### 2026-07-22
+
+- Replaced the active earlier-corridor traces with generated prototype valid
+  and suspicious fixtures for the complete Cubao-to-Hulo journey.
+- Added the exact final-route verification profile with ordered access points,
+  proximity/speed thresholds, strict chronology, required dwell, and both
+  walking-leg requirements.
+- Removed route fallback and made malformed, unknown, private, future,
+  mismatched, missing-walk, and suspicious inputs fail closed with no reward.
+- Hardened reward normalization, cap enforcement, Reduced accounting, pending
+  CO2e behavior, numeric rounding, full-trip counting, and calculation purity.
+- Implemented deterministic five-segment playback, verification gating,
+  generated valid/suspicious choices, and restart without changing StyleSheet
+  values or the approved visual system.
+- Updated report locations to all final-route access areas and replaced
+  live-queue implications with LakbayPoints prototype review-queue wording.
+- Expanded automated coverage to 37 shared-logic and 14 mobile tests with no
+  snapshots or visual-style updates.
+- Physical-device Expo Go QA, screenshots/video, and calibrated CO2e remain
+  open limitations.
 
 ### 2026-07-19
 
@@ -83,7 +104,7 @@ Update this file after every meaningful change.
 ### 2026-07-10
 
 - Added shared access-barrier report types for category, severity, status, and report records.
-- Added prototype/sample access-barrier report seed data for the Guadalupe to Cubao corridor.
+- Added prototype/sample access-barrier report seed data for the earlier pilot corridor.
 - Added the mobile Report Access Barriers form, validation, confirmation screen, and MMDA dashboard preview placeholder.
 
 ### 2026-07-08
@@ -100,7 +121,7 @@ Update this file after every meaningful change.
 
 ### 2026-07-07
 
-- Added static Guadalupe to Cubao route data for the private baseline, recommended sustainable trip, and Phase 2 preview.
+- Added static earlier-corridor route data for the private baseline, recommended sustainable trip, and Phase 2 preview.
 - Added shared route types and exported demo route options.
 - Replaced the mobile starter screen with the route comparison screen.
 - Set up the npm workspace monorepo foundation.
@@ -123,9 +144,9 @@ Update this file after every meaningful change.
 - [x] Can show ferry fare and CO2e as pending
 - [x] Every retained bottom tab reaches its named destination
 - [x] Rewards remains verification-gated and contains no reward catalog
-- [ ] Has final route-bound playback progression and GPS fixtures
-- [ ] Has classifier rules hardened and bound to the final route
-- [ ] Has reward boundaries stabilized
+- [x] Has final route-bound playback progression and GPS fixtures
+- [x] Has classifier rules hardened and bound to the final route
+- [x] Has reward boundaries stabilized
 - [x] Can submit an access-barrier report
 - [ ] Can view report in dashboard
 - [ ] Can update report status
@@ -139,7 +160,7 @@ Update this file after every meaningful change.
 | Risk | Mitigation |
 |---|---|
 | Scope creep | Only build approved MVP loop |
-| Classifier overclaiming | Mark final route binding and hardening as pending |
+| Classifier overclaiming | Keep rule-engine limitations visible and require labeled physical-pilot calibration before production use |
 | Rewards appear guaranteed | Label route rewards as potential, verification-required, and capped |
 | Prototype appears officially operated | Use neutral agency-preview language and avoid ownership/endorsement claims |
 | Static data appears live | Show data status, review date, disclaimer, and pending calibration labels |
@@ -147,4 +168,7 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Reject malformed and ineligible trip traces before classifier route binding.
+1. Complete and record physical-device Expo Go QA with screenshots/video.
+2. Rehearse the 5-7 minute demonstration and limitations narrative.
+3. Calibrate route thresholds and CO2e only from approved pilot evidence.
+4. Begin Phase 0B dashboard work only after accepting the final audit decision.
