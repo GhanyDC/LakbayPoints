@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LakbayPoints MMDA Dashboard",
+  title: "LakbayPoints Agency Mobility Insights",
   description:
-    "Competition MVP dashboard foundation for verified mode-shift corridor insights.",
+    "Simulated Phase 0B pilot dashboard for verified multimodal mobility insights.",
 };
 
 export default function RootLayout({
