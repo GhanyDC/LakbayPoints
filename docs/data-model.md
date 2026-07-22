@@ -197,3 +197,72 @@ Access-barrier reports retain category, severity, description, coordinates,
 status, and timestamp fields. Seeded coordinates are approximate prototype
 data for the final route's access areas and are not evidence of a live agency
 workflow.
+
+## Phase 0B Dashboard Data Foundation
+
+The authoritative Phase 0B dashboard seed is
+`packages/shared/src/dashboard-seed.ts`. Dashboard applications consume it
+through the public `@lakbaypoints/shared` exports. The previous standalone
+five-report JSON seed was removed so report and hotspot data cannot drift from
+the typed source.
+
+Dashboard contracts are defined in
+`packages/shared/src/dashboard-types.ts`. They compose the existing report
+category, severity, status, classifier-result, and reward-eligibility types
+rather than redefining those unions. The contracts cover:
+
+- deterministic data provenance and the required simulated-data disclosure;
+- participant, trip-verification, trip-chain, and confidence summaries;
+- the per-participant campaign-cap model;
+- report locations, reports, and hotspot summaries;
+- six future overview metrics, including nullable CO2e; and
+- typed local report-status transition results.
+
+The approved aggregate seed is:
+
+| Measure | Simulated value |
+|---|---:|
+| Participants | 120 |
+| Repeat participants | 84 (70%) |
+| Total trip attempts | 360 |
+| Fully verified trips | 288 (80%) |
+| Partially verified trips | 36 |
+| Suspicious or rejected trips | 36 |
+| Individual campaign cap | 100 Points |
+| Total campaign allocation | 12,000 Points |
+| Campaign Points issued | 8,640 (72% utilization) |
+| Access-barrier reports | 25 |
+
+A repeat participant has at least two fully verified qualifying pilot-route
+trips during the simulated campaign window. Total campaign allocation is
+derived as 120 participants multiplied by the 100-Point individual cap. Points
+are simulated capped incentives with no redemption, wallet, payment, merchant,
+settlement, ticket, or financial-value model.
+
+The 25 deterministic reports cover only the five final-route access areas.
+Their exact status distribution is 4 Submitted, 8 Under Review, 6 Verified, 4
+Assigned, and 3 Resolved. The narrated record is the single High-severity unsafe
+crossing report at the MRT-3 Araneta-Cubao access area and is labeled as a
+simulated mobile prototype submission.
+
+Pure aggregation and seed-validation helpers live in
+`packages/shared/src/dashboard-analytics.ts`. Validation reports predictable
+errors instead of throwing for ordinary invalid seed input. It reconciles
+participant, trip, campaign, report, hotspot, disclosure, route, and CO2e
+invariants. CO2e remains `null` with the display `Pending pilot calibration`.
+
+The local-only report workflow is in
+`packages/shared/src/report-workflow.ts`:
+
+`Submitted -> Under Review -> Verified -> Assigned -> Resolved`
+
+The helper accepts a same-status no-op and only the immediate next forward
+status. Backward or skipped transitions and unknown report IDs return typed
+failures. Input reports are not mutated. No backend, persistence, agency
+dispatch, enforcement, or live MMDA integration exists.
+
+Required dashboard disclosure:
+
+> All metrics, reports, trip results, and campaign values shown in this
+> dashboard are deterministic simulated prototype data for the MMITS
+> demonstration. No live MMDA system or commuter data is connected.
