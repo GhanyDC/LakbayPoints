@@ -70,6 +70,9 @@ describe("Phase 0A navigation and Rewards overview", () => {
     fireEvent.press(view.getByText("Compare Route Options"));
     fireEvent.press(view.getByText("Start Trip"));
     fireEvent.press(view.getByText("Begin Trip Playback"));
+    for (let segment = 1; segment < 5; segment += 1) {
+      fireEvent.press(view.getByText("Continue Playback"));
+    }
     fireEvent.press(view.getByText("Complete Trip & Verify"));
     fireEvent.press(view.getByText("View Rewards"));
 

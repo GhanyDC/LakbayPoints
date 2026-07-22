@@ -149,17 +149,51 @@ fare TBC. `estimatedCo2eAvoidedKg` is `null` and its methodology status remains
 
 ## GPS Trace and Classifier
 
-`GpsTracePoint` and `ClassifierResult` remain shared prototype types. The
-current rule-based classifier and sample traces still reflect the previous
-corridor assumptions. Binding those rules, station points, and fixtures to the
-final multimodal route is explicitly pending and is not part of this route-data
-migration.
+`GpsTracePoint` accepts a timestamp, finite valid latitude/longitude, optional
+finite non-negative speed, and an optional supported activity. Runtime
+validation rejects malformed data safely before scoring and requires strictly
+increasing timestamps.
+
+`RouteVerificationProfile` binds verification to one exact route ID. It owns:
+
+- the eligible route type and ordered segment modes;
+- expected start, end, and transfer/access locations;
+- start, transfer, and end proximity thresholds;
+- walking, public-road-transport, MRT, and ferry speed ranges;
+- minimum trace-point and chronology requirements;
+- dwell and both walking-leg requirements; and
+- impossible-speed and teleport thresholds.
+
+The active final-route profile is exported from
+`packages/shared/src/verification-profiles.ts`. It supports coarse ordered
+access checks and does not claim full GIS map matching.
+
+`ClassifierResult` contains a confidence score, verification label, reward
+eligibility, signal checklist, and explanation. Invalid traces and unknown,
+private, future, or profile-ineligible routes fail closed with confidence 0 and
+reward eligibility `None`.
 
 ## Rewards and Reports
 
 Lakbay Score is a non-cash progress value. Campaign Points are capped campaign
-incentives. Existing reward-boundary stabilization remains pending.
+incentives. Reward calculation is pure and normalizes every numeric input:
+
+- Lakbay Score, campaign Points, cap, verified-trip count, route rewards, and
+  CO2e must be finite and non-negative;
+- existing campaign Points are clamped into `0..cap`, and updated Points never
+  exceed the normalized cap;
+- Full verification earns the configured Lakbay Score and remaining capped
+  campaign Points and increments the fully verified trip count;
+- Reduced verification earns half the configured Lakbay Score, zero campaign
+  Points, zero pending CO2e, and does not increment the fully verified count;
+- Unverified and Suspicious results earn zero; and
+- CO2e credit remains zero while methodology calibration is pending.
+
+Whole Score/Point/count values and two-decimal CO2e totals use consistent
+rounding at the calculation boundary. Repeated calculation does not mutate the
+input state or create duplicate awards.
 
 Access-barrier reports retain category, severity, description, coordinates,
 status, and timestamp fields. Seeded coordinates are approximate prototype
-data and are not evidence of a live agency workflow.
+data for the final route's access areas and are not evidence of a live agency
+workflow.
