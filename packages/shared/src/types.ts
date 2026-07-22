@@ -103,6 +103,59 @@ export type GpsTracePoint = {
   activity?: GpsTraceActivity;
 };
 
+export type RouteVerificationAccessLocation = {
+  accessPointId: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type RouteVerificationSpeedRange = {
+  minKph: number;
+  maxKph: number;
+};
+
+export type RouteVerificationDwellRequirement = {
+  accessPointId: string;
+  minimumMinutes: number;
+};
+
+export type RouteVerificationWalkingRequirement = {
+  segmentId: string;
+  minimumSupportingPoints: number;
+  minimumPositionChangeKm: number;
+};
+
+export type RouteVerificationProfile = {
+  routeId: string;
+  eligibleRouteType: "sustainable";
+  orderedSegmentModes: TransportMode[];
+  expectedStartAccessZone: RouteVerificationAccessLocation;
+  expectedEndAccessZone: RouteVerificationAccessLocation;
+  expectedTransferAccessLocations: RouteVerificationAccessLocation[];
+  proximityThresholds: {
+    startKm: number;
+    endKm: number;
+    transferKm: number;
+  };
+  allowedMovementSpeedRanges: Record<
+    "walking" | "publicRoadTransport" | "mrt" | "ferry",
+    RouteVerificationSpeedRange
+  >;
+  minimumTracePointCount: number;
+  chronologyRequirements: {
+    validIsoCompatibleTimestamps: true;
+    strictlyIncreasing: true;
+  };
+  dwellRequirements: RouteVerificationDwellRequirement[];
+  walkingRequirements: RouteVerificationWalkingRequirement[];
+  impossibleMovementThresholds: {
+    reportedSpeedKph: number;
+    computedSpeedKph: number;
+    teleportDistanceKm: number;
+    teleportMaximumMinutes: number;
+  };
+};
+
 export type RewardEligibility = "Full" | "Reduced" | "None";
 
 export type VerificationResultLabel =
@@ -130,19 +183,9 @@ export type ClassifierResult = {
   explanation: string[];
 };
 
-export type StationAccessPoint = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-};
-
 export type ClassifySustainableTripChainInput = {
   selectedRoute: RouteOption | string;
   gpsTrace: GpsTracePoint[];
-  expectedRoute?: RouteOption;
-  routeOptions?: RouteOption[];
-  stationAccessPoints?: StationAccessPoint[];
   activityLabels?: GpsTraceActivity[];
 };
 

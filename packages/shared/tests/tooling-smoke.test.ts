@@ -4,8 +4,8 @@ import test from "node:test";
 import {
   classifySustainableTripChain,
   phase0ARouteOptions,
-  suspiciousTraceRejected,
-  validSustainableGuadalupeCubaoTrace,
+  suspiciousPhase0AMultimodalTrace,
+  validPhase0AMultimodalTrace,
 } from "../src/index";
 
 test("shared test harness runs the current classifier fixtures", () => {
@@ -17,11 +17,11 @@ test("shared test harness runs the current classifier fixtures", () => {
 
   const validResult = classifySustainableTripChain({
     selectedRoute: route,
-    gpsTrace: validSustainableGuadalupeCubaoTrace,
+    gpsTrace: validPhase0AMultimodalTrace,
   });
   const suspiciousResult = classifySustainableTripChain({
     selectedRoute: route,
-    gpsTrace: suspiciousTraceRejected,
+    gpsTrace: suspiciousPhase0AMultimodalTrace,
   });
 
   assert.equal(validResult.rewardEligibility, "Full");
