@@ -4,7 +4,7 @@ Update this file after every meaningful change.
 
 ## Current Phase
 
-**Phase 0B: Agency Dashboard - Workstream 1 Data Foundation**
+**Phase 0B: Agency Dashboard - Workstream 2 Dashboard Overview**
 
 ## Build Status
 
@@ -29,16 +29,31 @@ Update this file after every meaningful change.
 | Dashboard aggregations | Done | TBD | Pure overview, rate, report, hotspot, trip-chain, lookup, and validation helpers are exported from shared |
 | Report workflow helpers | Done | TBD | Pure local-only Submitted-to-Resolved forward workflow with typed no-op and failure outcomes |
 | Dashboard foundation tests | Done | TBD | 66 new shared tests cover the approved seed, analytics, validation, and workflow boundaries |
-| Dashboard layout | Not started | TBD | Agency preview only; no live integration |
+| Dashboard layout | Done | TBD | Responsive server-rendered agency-prototype shell with persistent simulated-data disclosure and final-route context |
 | Report queue UI | Not started | TBD | Shared reports and workflow are ready; no table or status control exists yet |
 | Dashboard hotspot schematic UI | Not started | TBD | Shared five-location hotspot summaries are ready; no map or schematic exists yet |
-| Analytics cards UI | Not started | TBD | Shared overview/trip/campaign metrics are ready; no cards or charts exist yet |
+| Analytics cards UI | In progress | TBD | Six shared-derived overview cards are complete; trip and campaign detail presentation remains for later workstreams |
 | Demo script | Not started | TBD | |
 
 ## Change Log
 
 ### 2026-07-23
 
+- Replaced the obsolete dashboard starter with a responsive, semantic agency
+  mobility insights shell using neutral simulated-pilot identity.
+- Added the exact persistent deterministic-data/no-live-MMDA disclosure,
+  product message, final shared route context, seed version, and review date.
+- Rendered the six approved overview metrics in pitch order from
+  `deriveDashboardOverview`, with supporting rates and totals formatted from
+  the canonical seed rather than duplicated in JSX.
+- Kept Estimated CO2e Avoided non-numeric as `Pending pilot calibration` and
+  labeled Campaign Points as simulated incentives with no redemption or
+  financial value.
+- Added 25 dashboard presentation tests using Node, `tsx`, and React server
+  rendering, without a browser-test or DOM-test framework.
+- Preserved the Workstream 2 boundary: no report queue/status control, hotspot
+  schematic, trip/campaign detail, client state, backend, authentication, or
+  mobile change was introduced.
 - Added additive Phase 0B dashboard contracts without changing Phase 0A route,
   classifier, reward, report, or mobile behavior.
 - Established `packages/shared/src/dashboard-seed.ts` as the canonical typed
@@ -176,7 +191,7 @@ Update this file after every meaningful change.
 - [x] Can submit an access-barrier report
 - [ ] Can view report in dashboard
 - [ ] Can update report status
-- [ ] Can show basic dashboard metrics
+- [x] Can show basic dashboard metrics
 - [ ] Has backup screenshots/video
 - [ ] Has rehearsed 5–7 minute script
 - [ ] Has known limitations slide
@@ -194,9 +209,9 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Begin Phase 0B Workstream 2: dashboard layout, persistent simulated-data
-   disclosures, and overview metrics using only public shared exports.
-2. Keep report queue controls, hotspot presentation, and trip/campaign detail
-   UI in their later approved workstreams.
+1. Begin Phase 0B Workstream 3: access-barrier report queue, selected-report
+   detail, and local status-transition workflow.
+2. Keep hotspot presentation and trip/campaign detail UI in their later
+   approved workstreams.
 3. Complete and record physical-device Expo Go QA with screenshots/video.
 4. Calibrate route thresholds and CO2e only from approved pilot evidence.

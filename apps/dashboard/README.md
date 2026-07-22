@@ -11,7 +11,7 @@ ledger, or carbon-accounting system.
 > dashboard are deterministic simulated prototype data for the MMITS
 > demonstration. No live MMDA system or commuter data is connected.
 
-## Workstream 1 Data Foundation
+## Implemented Phase 0B Foundation and Overview
 
 The dashboard can consume the following public exports from
 `@lakbaypoints/shared`:
@@ -47,14 +47,49 @@ It permits a same-status no-op or the immediate next forward status only.
 Backward and skipped transitions fail safely without mutating the canonical
 seed. No backend or live integration exists.
 
-## Presentation Status
+Workstream 2 now presents the shared foundation as one server-rendered agency
+prototype page with:
 
-Workstream 1 supplies data only. The existing starter page has not been
-restyled or behaviorally changed. These remain pending:
+- the exact persistent simulated-data disclosure near the top of the page;
+- the LakbayPoints agency mobility title, pilot subtitle, product message,
+  final route context, seed version, and review date;
+- six overview cards in the approved pitch order, with values and supporting
+  rates derived from `deriveDashboardOverview` and the canonical seed;
+- `Pending pilot calibration` for CO2e, without a numeric environmental claim;
+- a three-column wide, two-column medium, and one-column narrow layout; and
+- a visible method and limitations note covering deterministic data, future
+  local-only status changes, reload reset behavior, pending CO2e, and the lack
+  of backend or live MMDA integration.
 
-- dashboard layout and persistent disclosure UI;
-- overview metric cards;
+No dashboard component duplicates the approved aggregate totals. Presentation
+formatting lives in `apps/dashboard/lib/dashboard-overview.ts` and consumes only
+public `@lakbaypoints/shared` exports.
+
+## Run and Verify
+
+From the repository root:
+
+```powershell
+npm run dev -w @lakbaypoints/dashboard
+npm run test -w @lakbaypoints/dashboard
+npm run lint -w @lakbaypoints/dashboard
+npm run typecheck -w @lakbaypoints/dashboard
+npm run build -w @lakbaypoints/dashboard
+```
+
+Dashboard tests use Node's test runner, `tsx`, and React server rendering. They
+cover the six shared-derived metrics, disclosure and product copy, semantic
+order, pending CO2e behavior, route metadata, local/reset limitations, and the
+absence of controls or sections reserved for later workstreams.
+
+## Remaining Presentation Scope
+
+Workstream 2 intentionally does not include:
+
 - report queue and status-control UI;
 - hotspot schematic;
-- trip and campaign presentation; and
+- trip or campaign detail presentation; and
 - end-to-end dashboard demonstration state.
+
+The next implementation task is **Phase 0B Workstream 3 — access-barrier report
+queue, selected-report detail, and local status-transition workflow.**
