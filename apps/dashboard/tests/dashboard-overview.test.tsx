@@ -185,6 +185,18 @@ test("rendered page has exactly one level-one heading", () => {
   assert.equal(markup.match(/<\/h1>/g)?.length, 1);
 });
 
+test("rendered page includes the approved title and subtitle", () => {
+  assert.match(markup, /LakbayPoints Agency Mobility Insights/);
+  assert.match(markup, /Simulated Phase 0B Pilot Dashboard/);
+});
+
+test("rendered page includes every approved metric result", () => {
+  for (const value of ["288", "25", "8", "8,640", "84"]) {
+    assert.ok(markup.includes(`>${value}</p>`));
+  }
+  assert.match(markup, />Pending pilot calibration<\/p>/);
+});
+
 test("rendered page exposes six semantic metric list items", () => {
   assert.equal(markup.match(/class="metric-card /g)?.length, 6);
   assert.match(markup, /<ol[^>]+aria-label="Phase 0B overview metrics"/);
@@ -222,6 +234,21 @@ test("rendered page contains no report workflow controls", () => {
   assert.doesNotMatch(markup, /Move to Under Review|Reset simulated demo/);
 });
 
+test("rendered copy makes no operational or official claim", () => {
+  assert.doesNotMatch(
+    markup,
+    /official dashboard|real-time|agency dispatch|enforcement control|operational integration/i,
+  );
+});
+
+test("rendered page has no financial or carbon-credit controls", () => {
+  assert.doesNotMatch(
+    markup,
+    /wallet|cash control|carbon-credit|payment control/i,
+  );
+  assert.doesNotMatch(markup, /<button|<form|<input|<select/);
+});
+
 test("rendered page contains no future workstream sections", () => {
   assert.doesNotMatch(
     markup,
@@ -234,4 +261,8 @@ test("obsolete dashboard starter copy is absent", () => {
     markup,
     /MMDA Dashboard|EDSA-MRT3 Guadalupe to Cubao|dashboard foundation/i,
   );
+});
+
+test("server rendering is deterministic across repeated runs", () => {
+  assert.equal(renderToStaticMarkup(<DashboardPage />), markup);
 });
