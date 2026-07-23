@@ -128,9 +128,11 @@ export function RewardsOverviewScreen({
 export function PlanTripScreen({
   route,
   onCompareRoutes,
+  onBeginPlayback,
 }: {
   route: RouteOption;
   onCompareRoutes: () => void;
+  onBeginPlayback?: () => void;
 }) {
   const totals = getRouteTotals(route);
   const origin = getRouteAccessPointLabel(route, route.originAccessPointId);
@@ -262,6 +264,16 @@ export function PlanTripScreen({
         </Text>
       </View>
 
+      {onBeginPlayback ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBeginPlayback}
+          style={[styles.compareButton, styles.playbackButton]}
+        >
+          <Text style={styles.compareButtonText}>Begin Trip Playback</Text>
+        </Pressable>
+      ) : null}
+
       <Pressable
         accessibilityRole="button"
         onPress={onCompareRoutes}
@@ -302,7 +314,12 @@ export function BottomTabBar({
     <View accessibilityRole="tablist" style={styles.tabBar}>
       {bottomTabItems.map(({ name, label, Icon }) => {
         const selected = activeTab === name;
-        const color = selected ? "#1e3a8a" : "#64748b";
+        const isRewardsSelected = selected && name === "rewards";
+        const color = isRewardsSelected
+          ? "#f59e0b"
+          : selected
+            ? "#1e3a8a"
+            : "#64748b";
 
         return (
           <Pressable
@@ -318,7 +335,13 @@ export function BottomTabBar({
               fill={name === "rewards" && selected ? color : "transparent"}
               size={24}
             />
-            <Text style={[styles.tabLabel, selected && styles.tabLabelActive]}>
+            <Text
+              style={[
+                styles.tabLabel,
+                selected && styles.tabLabelActive,
+                isRewardsSelected && styles.tabLabelRewardsActive,
+              ]}
+            >
               {label}
             </Text>
           </Pressable>
@@ -729,6 +752,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
   },
+  playbackButton: {
+    marginBottom: 12,
+  },
   compareButtonText: {
     color: "#fff",
     fontSize: 15,
@@ -764,5 +790,8 @@ const styles = StyleSheet.create({
   tabLabelActive: {
     color: "#1e3a8a",
     fontWeight: "700",
+  },
+  tabLabelRewardsActive: {
+    color: "#f59e0b",
   },
 });
