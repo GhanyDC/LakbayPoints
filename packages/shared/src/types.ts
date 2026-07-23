@@ -239,7 +239,11 @@ export type AccessBarrierCategory =
   | "unsafe_crossing"
   | "flooding"
   | "illegal_parking_or_loading_obstruction"
-  | "damaged_walkway_or_access_path";
+  | "damaged_walkway_or_access_path"
+  | "illegal_parking"
+  | "road_crash"
+  | "pothole"
+  | "other";
 
 export type ReportSeverity = "Low" | "Medium" | "High";
 

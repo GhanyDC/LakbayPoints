@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable, Image } from "react-native";
 import {
   demoUserRewardState,
   formatRouteCo2e,
@@ -18,119 +18,182 @@ import {
   User,
   Bell,
   Star,
+  Flame,
+  Footprints,
+  Train,
+  MapPin,
+  Lock,
+  CreditCard,
+  QrCode,
+  Percent,
+  Ticket,
+  CircleCheckBig,
+  ArrowUpDown,
+  Users,
+  ShieldCheck,
+  ChevronRight,
+  Bus,
 } from "lucide-react-native";
+import MapView, { Marker, Polyline } from "react-native-maps";
 
 export function RewardsOverviewScreen({
   onPlanTrip,
 }: {
   onPlanTrip: () => void;
 }) {
-  const campaignCapRemaining = Math.max(
-    0,
-    demoUserRewardState.campaignPointsCap - demoUserRewardState.campaignPoints,
-  );
+  const xp = demoUserRewardState.campaignPoints;
+  const xpCap = demoUserRewardState.campaignPointsCap;
+  const progressPercent = Math.min(100, (xp / xpCap) * 100);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
-        <Text style={styles.topBarTitle}>Rewards Overview</Text>
-        <Bell color="#0f766e" size={24} />
+        <View style={{ width: 24 }} />
+        <Text style={styles.topBarTitle}>My Rewards</Text>
+        <Bell color="#1e3a8a" size={24} />
       </View>
 
-      <View style={styles.rewardStatusCard}>
-        <Text style={styles.rewardStatusLabel}>Verification required</Text>
-        <Text style={styles.rewardStatusTitle}>
-          No verified trip selected in this session
-        </Text>
-        <Text style={styles.rewardStatusBody}>
-          Potential rewards become results only after the trip verification
-          flow. This overview does not issue rewards.
-        </Text>
-      </View>
-
-      <View style={styles.rewardBalanceGrid}>
-        <View style={styles.rewardBalanceCard}>
-          <Text style={styles.rewardBalanceLabel}>Lakbay Score</Text>
-          <Text style={styles.rewardBalanceValue}>
-            {demoUserRewardState.lakbayScore}
-          </Text>
-          <Text style={styles.rewardBalanceNote}>
-            Seeded non-cash prototype balance
-          </Text>
+      <View style={styles.levelCard}>
+        <View style={styles.levelHeader}>
+          <Text style={styles.levelTitle}>EDSA Explorer</Text>
+          <View style={styles.levelBadge}>
+            <Text style={styles.levelBadgeText}>Level 12</Text>
+          </View>
         </View>
-        <View style={styles.rewardBalanceCard}>
-          <Text style={styles.rewardBalanceLabel}>campaign Points</Text>
-          <Text style={styles.rewardBalanceValue}>
-            {demoUserRewardState.campaignPoints} /{" "}
-            {demoUserRewardState.campaignPointsCap}
-          </Text>
-          <Text style={styles.rewardBalanceNote}>
-            {campaignCapRemaining} Points below the campaign cap
-          </Text>
+        <Text style={styles.levelProgressText}>
+          {xp} / {xpCap} XP to Level 13
+        </Text>
+        <View style={styles.progressBarTrack}>
+          <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
         </View>
-        <View style={styles.rewardBalanceCardWide}>
-          <Text style={styles.rewardBalanceLabel}>Verified trip history</Text>
-          <Text style={styles.rewardBalanceValue}>
-            {demoUserRewardState.verifiedTrips}
-          </Text>
-          <Text style={styles.rewardBalanceNote}>
-            Seeded demonstration history, not a live account record
-          </Text>
+        <View style={styles.levelIconContainer}>
+          <Star color="#fff" fill="#fff" size={32} />
         </View>
       </View>
 
-      <View style={styles.rewardPotentialSummary}>
-        <Text style={styles.rewardPotentialSummaryLabel}>
-          Current route potential
-        </Text>
-        <Text style={styles.rewardPotentialSummaryTitle}>
-          {phase0APilotRoute.name}
-        </Text>
-        <Text style={styles.rewardPotentialSummaryValue}>
-          +{phase0APilotRoute.lakbayScoreReward} Lakbay Score · up to +
-          {phase0APilotRoute.campaignPointsReward} campaign Points
-        </Text>
-        <Text style={styles.rewardPotentialSummaryNote}>
-          Subject to full trip verification. The campaign cap applies.
-        </Text>
+      <View style={styles.pointsCard}>
+        <View style={styles.pointsColumn}>
+          <Text style={styles.pointsLabel}>Lakbay Points</Text>
+          <Text style={styles.pointsValue}>{demoUserRewardState.lakbayScore}</Text>
+          <Text style={styles.pointsSub}>Total Points</Text>
+        </View>
+        <View style={styles.pointsDivider} />
+        <View style={styles.pointsColumn}>
+          <Text style={styles.pointsLabel}>This Week</Text>
+          <Text style={styles.pointsValueGreen}>+{demoUserRewardState.verifiedTrips * 15}</Text>
+          <Text style={styles.pointsSub}>Points Earned</Text>
+        </View>
+        <View style={styles.pointsDivider} />
+        <View style={styles.pointsColumn}>
+          <Text style={styles.pointsLabel}>Eco Impact</Text>
+          <Text style={styles.pointsValueGreen}>{demoUserRewardState.estimatedCo2eAvoidedKg}kg</Text>
+          <Text style={styles.pointsSub}>CO2 Avoided</Text>
+        </View>
       </View>
 
-      <View style={styles.rewardRulesCard}>
-        <Text style={styles.rewardRulesTitle}>How Phase 0A rewards work</Text>
-        <Text style={styles.rewardRule}>• Lakbay Score is non-cash.</Text>
-        <Text style={styles.rewardRule}>
-          • Campaign Points are capped incentives for verified trips.
-        </Text>
-        <Text style={styles.rewardRule}>
-          • Suspicious or unverified trips receive no reward.
-        </Text>
-        <Text style={styles.rewardRule}>
-          • Only the defined score and capped campaign Points are in scope.
-        </Text>
+      <View style={styles.streakCard}>
+        <View style={styles.streakIconWrap}>
+          <Flame color="#f59e0b" fill="#f59e0b" size={24} />
+        </View>
+        <View style={styles.streakTextWrap}>
+          <Text style={styles.streakTitle}>{demoUserRewardState.verifiedTrips}-Day Commute Streak</Text>
+          <Text style={styles.streakBody}>Keep it up! 1 more day to earn <Text style={styles.streakHighlight}>50</Text> bonus points.</Text>
+        </View>
+        <View style={styles.streakCircle}>
+          <Text style={styles.streakCircleText}>{demoUserRewardState.verifiedTrips}</Text>
+          <View style={styles.streakCircleLine} />
+          <Text style={styles.streakCircleText}>7</Text>
+        </View>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={onPlanTrip}
-        style={styles.rewardPlanButton}
-      >
-        <Text style={styles.rewardPlanButtonText}>Plan a Trip to Verify</Text>
-      </Pressable>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Achievement Badges</Text>
+        <Text style={styles.viewAllText}>View All</Text>
+      </View>
+      
+      <View style={styles.badgesGrid}>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#2563eb' }]}>
+            <Footprints color="#2563eb" size={24} />
+            <View style={styles.badgeCheck}><CircleCheckBig color="#fff" fill="#16a34a" size={14} /></View>
+          </View>
+          <Text style={styles.badgeLabel}>First Step</Text>
+        </View>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#16a34a' }]}>
+            <Train color="#16a34a" size={24} />
+            <View style={styles.badgeCheck}><CircleCheckBig color="#fff" fill="#16a34a" size={14} /></View>
+          </View>
+          <Text style={styles.badgeLabel}>Transit Rider</Text>
+        </View>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#f59e0b' }]}>
+            <MapPin color="#f59e0b" size={24} />
+            <View style={styles.badgeCheck}><CircleCheckBig color="#fff" fill="#16a34a" size={14} /></View>
+          </View>
+          <Text style={styles.badgeLabel}>Explorer</Text>
+        </View>
+        <View style={styles.badgeItem}>
+          <View style={[styles.badgeHexagon, { borderColor: '#9ca3af' }]}>
+            <Lock color="#9ca3af" size={24} />
+          </View>
+          <Text style={styles.badgeLabel}>Commuter Pro</Text>
+          <Text style={styles.badgeSub}>Level 15</Text>
+        </View>
+      </View>
 
-      <Text style={styles.rewardDisclaimer}>
-        Static seeded demonstration data. No live account, wallet, or payment
-        integration is connected.
-      </Text>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Redeem Rewards</Text>
+        <Text style={styles.viewAllText}>View All</Text>
+      </View>
+
+      <View style={styles.redeemGrid}>
+        <View style={styles.redeemCard}>
+          <CreditCard color="#1e3a8a" size={28} />
+          <Text style={styles.redeemLabel}>Transit Credits</Text>
+          <Text style={styles.redeemPts}>100 pts</Text>
+        </View>
+        <View style={styles.redeemCard}>
+          <QrCode color="#1e3a8a" size={28} />
+          <Text style={styles.redeemLabel}>QR Ticket</Text>
+          <Text style={styles.redeemPts}>150 pts</Text>
+        </View>
+        <View style={styles.redeemCard}>
+          <Percent color="#f59e0b" size={28} />
+          <Text style={styles.redeemLabel}>Merchant Discount</Text>
+          <Text style={styles.redeemPts}>200 pts</Text>
+        </View>
+        <View style={styles.redeemCard}>
+          <Ticket color="#1e3a8a" size={28} />
+          <Text style={styles.redeemLabel}>Raffle Entry</Text>
+          <Text style={styles.redeemPts}>250 pts</Text>
+        </View>
+      </View>
     </ScrollView>
   );
 }
 
+const WAYPOINTS = [
+  { latitude: 14.5843, longitude: 121.0573 }, // MMDA Head Office
+  { latitude: 14.5847, longitude: 121.0567 }, // EDSA corner Julia Vargas
+  { latitude: 14.5888, longitude: 121.0583 }, // Ortigas Station
+  { latitude: 14.5956, longitude: 121.0586 }, // EDSA Corinthian
+  { latitude: 14.6083, longitude: 121.0560 }, // Santolan Station
+  { latitude: 14.6150, longitude: 121.0535 }, // EDSA P. Tuazon
+  { latitude: 14.6186, longitude: 121.0519 }, // Cubao Station
+  { latitude: 14.6265, longitude: 121.0475 }, // EDSA Nepa Q-Mart
+  { latitude: 14.6346, longitude: 121.0435 }, // GMA Kamuning Station
+  { latitude: 14.6355, longitude: 121.0430 }, // Studio 7 DICT
+];
+
 export function PlanTripScreen({
   route,
   onCompareRoutes,
+  onBeginPlayback,
 }: {
   route: RouteOption;
   onCompareRoutes: () => void;
+  onBeginPlayback: () => void;
 }) {
   const totals = getRouteTotals(route);
   const origin = getRouteAccessPointLabel(route, route.originAccessPointId);
@@ -139,140 +202,283 @@ export function PlanTripScreen({
     route.destinationAccessPointId,
   );
 
+  const [selectedTab, setSelectedTab] = React.useState("best");
+
+  const fastestSegments = [
+    {
+      id: "f-walk1",
+      mode: "walk",
+      displayMode: "Walk",
+      label: "Walk (162 m) towards P. Victor Street",
+      travelTimeMin: 2,
+      distanceKm: 0.162,
+    },
+    {
+      id: "f-jeep",
+      mode: "puv",
+      displayMode: "JEEP",
+      label: "T357: Guadalupe Market-L. Guinto via P. Gil",
+      travelTimeMin: 6,
+      farePhp: 13,
+      from: "Epifanio de los Santos Avenue, Makati City",
+      to: "Dr Jose P. Rizal Ave., Makati City",
+    },
+    {
+      id: "f-walk2",
+      mode: "walk",
+      displayMode: "Walk",
+      label: "Walk (691 m) towards Matamis Street",
+      travelTimeMin: 9,
+      distanceKm: 0.691,
+    }
+  ];
+
+  const walkableSegments = [
+    {
+      id: "w-walk1",
+      mode: "walk",
+      displayMode: "Walk",
+      label: "Walk to City of Mandaluyong Science High School",
+      travelTimeMin: 14,
+      distanceKm: 1.1,
+    }
+  ];
+
+  const activeSegments = selectedTab === "fastest" ? fastestSegments : (selectedTab === "walkable" ? walkableSegments : route.segments);
+
+  const [walk1Coords, setWalk1Coords] = React.useState<{latitude: number, longitude: number}[]>(WAYPOINTS.slice(0, 3));
+  const [walk2Coords, setWalk2Coords] = React.useState<{latitude: number, longitude: number}[]>(WAYPOINTS.slice(8, 10));
+
+  React.useEffect(() => {
+    const fetchRoute = async (points: typeof WAYPOINTS) => {
+      try {
+        const coordsStr = points.map(p => `${p.longitude},${p.latitude}`).join(';');
+        const url = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const geometry = data.routes[0].geometry;
+          if (geometry && geometry.coordinates) {
+            return geometry.coordinates.map((c: [number, number]) => ({
+              latitude: c[1],
+              longitude: c[0]
+            }));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch route:", e);
+      }
+      return points;
+    };
+
+    const loadRoutes = async () => {
+      const w1 = await fetchRoute(WAYPOINTS.slice(0, 3));
+      // Walk 2: Cubao Station (index 6) to Studio 7 (index 9)
+      const w2 = await fetchRoute([WAYPOINTS[6], WAYPOINTS[9]]);
+      setWalk1Coords(w1);
+      setWalk2Coords(w2);
+    };
+    loadRoutes();
+  }, []);
+
+  const getSegmentIcon = (mode: string) => {
+    switch (mode) {
+      case "walk":
+        return <Footprints color="#fff" size={14} />;
+      case "mrt_3":
+      case "lrt_1":
+      case "lrt_2":
+        return <Train color="#fff" size={14} />;
+      case "edsa_carousel":
+      case "puv":
+        return <Bus color="#fff" size={14} />;
+      default:
+        return <MapPin color="#fff" size={14} />;
+    }
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.topBar}>
-        <Text style={styles.topBarTitle}>Plan Your Trip</Text>
-        <Bell color="#0f766e" size={24} />
+    <ScrollView contentContainerStyle={styles.planContent} bounces={false}>
+      <View style={styles.planTopBar}>
+        <View style={{ width: 24 }} />
+        <Text style={styles.planTopBarTitle}>Plan Your Trip</Text>
+        <Bell color="#1e3a8a" size={24} />
       </View>
 
-      <Text style={styles.positioning}>
-        A Verified Multimodal Mode-Shift Platform for Metro Manila
-      </Text>
-
-      <View style={styles.tripInputCard}>
-        <View style={styles.tripInputRow}>
-          <View style={styles.inputDotOrigin} />
-          <Text style={styles.tripInputText}>{origin}</Text>
-        </View>
-        <View style={styles.tripInputDivider} />
-        <View style={styles.tripInputRow}>
-          <View style={styles.inputDotDest} />
-          <Text style={styles.tripInputText}>{destination}</Text>
-        </View>
-      </View>
-
-      <View style={styles.prototypeCard}>
-        <Text style={styles.prototypeLabel}>{route.dataStatusLabel}</Text>
-        <Text style={styles.prototypeMeta}>
-          Reviewed {route.lastReviewedDate} · {route.dataVersion}
-        </Text>
-        <Text style={styles.prototypeDisclaimer}>{route.disclaimer}</Text>
-      </View>
-
-      <View style={styles.planMetricGrid}>
-        <View style={styles.planMetric}>
-          <Text style={styles.planMetricLabel}>Total time</Text>
-          <Text style={styles.planMetricValue}>{formatRouteTime(route)}</Text>
-        </View>
-        <View style={styles.planMetric}>
-          <Text style={styles.planMetricLabel}>Distance</Text>
-          <Text style={styles.planMetricValue}>
-            {formatRouteDistance(route)}
-          </Text>
-        </View>
-        <View style={styles.planMetricWide}>
-          <Text style={styles.planMetricLabel}>Known fare</Text>
-          <Text style={styles.planMetricValue}>{formatRouteFare(route)}</Text>
-        </View>
-        <View style={styles.planMetricWide}>
-          <Text style={styles.planMetricLabel}>Estimated CO2e avoided</Text>
-          <Text style={styles.planMetricValue}>{formatRouteCo2e(route)}</Text>
+      <View style={styles.locationBlock}>
+        <View style={styles.locationInputArea}>
+          <View style={styles.locationInputLeft}>
+            <View style={styles.locationRow}>
+              <View style={styles.dotOrigin} />
+              <Text style={styles.locationText} numberOfLines={1}>{origin}</Text>
+            </View>
+            <View style={styles.locationDivider} />
+            <View style={styles.locationRow}>
+              <View style={styles.dotDest} />
+              <Text style={styles.locationText} numberOfLines={1}>{destination}</Text>
+            </View>
+          </View>
+          <Pressable style={styles.swapButton}>
+            <ArrowUpDown color="#64748b" size={20} />
+          </Pressable>
         </View>
       </View>
 
-      <View style={styles.routeDetailsCard}>
-        <View style={styles.routeDetailsHeader}>
-          <View style={styles.routeDetailsHeading}>
-            <Text style={styles.routeDetailsTitle}>{route.name}</Text>
-            <Text style={styles.routeDetailsSub}>
-              {totals.travelTimeMin} min travel · {totals.waitDwellTimeMin} min
-              wait/dwell · {route.segments.length} segments
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.routeTabs}>
+        <Pressable 
+          style={[styles.routeTab, selectedTab === "best" && styles.routeTabActive]}
+          onPress={() => setSelectedTab("best")}
+        >
+          <Text style={[styles.routeTabTitle, selectedTab === "best" && styles.routeTabTitleActive]}>Best Route</Text>
+          <Text style={[styles.routeTabSub, selectedTab === "best" && styles.routeTabSubActive]}>Recommended</Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.routeTab, selectedTab === "fastest" && styles.routeTabActive]}
+          onPress={() => setSelectedTab("fastest")}
+        >
+          <Text style={[styles.routeTabTitle, selectedTab === "fastest" && styles.routeTabTitleActive]}>Fastest</Text>
+          <Text style={[styles.routeTabSub, selectedTab === "fastest" && styles.routeTabSubActive]}>44 min</Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.routeTab, selectedTab === "walkable" && styles.routeTabActive]}
+          onPress={() => setSelectedTab("walkable")}
+        >
+          <Text style={[styles.routeTabTitle, selectedTab === "walkable" && styles.routeTabTitleActive]}>Walkable</Text>
+          <Text style={[styles.routeTabSub, selectedTab === "walkable" && styles.routeTabSubActive]}>1.1 km</Text>
+        </Pressable>
+      </ScrollView>
+
+      <View style={styles.mapArea}>
+        <Image 
+          source={
+            selectedTab === "fastest" 
+              ? require('./assets/fastest.png') 
+              : selectedTab === "walkable" 
+                ? require('./assets/walkable.png') 
+                : require('./assets/best-route.png')
+          } 
+          style={{ width: '100%', height: '100%' }}
+          resizeMode="cover"
+        />
+        
+        {/* Mock heatmap density bar */}
+        <View style={styles.densityLegend}>
+          <Text style={styles.densityLegendTitle}>Commuter Density</Text>
+          <View style={styles.densityGradientRow}>
+            <View style={[styles.densityBlock, { backgroundColor: "#86efac" }]} />
+            <View style={[styles.densityBlock, { backgroundColor: "#fde047" }]} />
+            <View style={[styles.densityBlock, { backgroundColor: "#f97316" }]} />
+            <View style={[styles.densityBlock, { backgroundColor: "#dc2626" }]} />
+          </View>
+          <View style={styles.densityLabels}>
+            <Text style={styles.densityLabelText}>Low</Text>
+            <Text style={styles.densityLabelText}>High</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.bottomRouteCard}>
+        <View style={styles.routeHeaderRow}>
+          <View>
+            <Text style={styles.routeHeaderTitle}>
+              {selectedTab === "fastest" ? "Fastest Route" : selectedTab === "walkable" ? "Walkable Route" : "Recommended Route"}
+            </Text>
+            <Text style={styles.routeHeaderSub}>
+              {selectedTab === "fastest" ? "Incl. 11 min walk • 1 transfer" : selectedTab === "walkable" ? "Incl. 14 min walk • Direct" : `Incl. 12 min walk • ${route.segments.length - 1} transfer`}
             </Text>
           </View>
-          <Text style={styles.routeTotalTime}>{formatRouteTime(route)}</Text>
+          <Text style={styles.routeTimeBig}>
+            {selectedTab === "fastest" ? "17 min" : selectedTab === "walkable" ? "14 min" : formatRouteTime(route)}
+          </Text>
         </View>
 
-        <View style={styles.segmentList}>
-          {route.segments.map((segment, index) => {
-            const segmentOrigin = getRouteAccessPointLabel(
-              route,
-              segment.originAccessPointId,
-            );
-            const segmentDestination = getRouteAccessPointLabel(
-              route,
-              segment.destinationAccessPointId,
-            );
-            const fare =
-              segment.farePhp === null
-                ? (segment.fareDisplay ?? "To be confirmed")
-                : `PHP ${segment.farePhp}`;
-
+        <View style={styles.timelineList}>
+          {activeSegments.map((segment, index) => {
+            const isWalk = segment.mode === "walk";
+            const segmentColor = isWalk ? "#2563eb" : "#1e3a8a";
             return (
-              <View style={styles.segmentRow} key={segment.id}>
-                <View style={styles.segmentIconContainer}>
-                  <View style={styles.segmentIconBg}>
-                    <Text style={styles.segmentIconText}>{index + 1}</Text>
+              <View style={styles.timelineRow} key={segment.id}>
+                <View style={styles.timelineLeft}>
+                  <View style={[styles.timelineIconBg, { backgroundColor: segmentColor }]}>
+                    {getSegmentIcon(segment.mode)}
                   </View>
-                  {index < route.segments.length - 1 ? (
-                    <View style={styles.segmentDash} />
-                  ) : null}
+                  {index < route.segments.length - 1 && (
+                    <View style={styles.timelineLine} />
+                  )}
                 </View>
-                <View style={styles.segmentInfo}>
-                  <Text style={styles.segmentMode}>{segment.displayMode}</Text>
-                  <Text style={styles.segmentName}>{segment.label}</Text>
-                  <Text style={styles.segmentRoute}>
-                    {segmentOrigin} → {segmentDestination}
-                  </Text>
-                  <Text style={styles.segmentDesc}>
-                    {segment.travelTimeMin} min travel ·{" "}
-                    {segment.waitDwellTimeMin} min wait/dwell ·{" "}
-                    {segment.distanceKm?.toFixed(1)} km
-                  </Text>
-                  <Text style={styles.segmentFare}>
-                    Fare: {fare} · {segment.fareStatus.replaceAll("_", " ")}
-                  </Text>
+                <View style={styles.timelineRight}>
+                  {isWalk ? (
+                    <>
+                      <Text style={styles.timelineActionText}>{segment.label}</Text>
+                      <Text style={styles.timelineMetaText}>{segment.travelTimeMin} min ({segment.distanceKm?.toFixed(1) || 0.4} km)</Text>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.timelineTransitRow}>
+                        <View style={[styles.transitBadge, { backgroundColor: segmentColor }]}>
+                          <Text style={styles.transitBadgeText}>{segment.displayMode}</Text>
+                        </View>
+                        <Text style={styles.timelineActionText} numberOfLines={1}>{segment.label}</Text>
+                      </View>
+                      <Text style={styles.timelineMetaText}>
+                        {segment.travelTimeMin} min {segment.farePhp ? `• P ${segment.farePhp.toFixed(2)}` : '• Every 3-4 min'}
+                      </Text>
+                      {segment.from && (
+                        <View style={{ marginTop: 8, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: "#e2e8f0" }}>
+                          <Text style={{ fontSize: 12, color: "#475569" }}><Text style={{fontWeight: "600"}}>GET ON</Text>   {segment.from}</Text>
+                          <Text style={{ fontSize: 12, color: "#475569", marginTop: 4 }}><Text style={{fontWeight: "600"}}>GET OFF</Text>  {segment.to}</Text>
+                        </View>
+                      )}
+                    </>
+                  )}
+                  {index < route.segments.length - 1 && <View style={styles.timelineSpacing} />}
+                </View>
+                <View style={styles.timelineTimeRight}>
+                   <Text style={styles.timelineTimeText}>{segment.travelTimeMin} min</Text>
                 </View>
               </View>
             );
           })}
         </View>
+
+        <View style={styles.chipsRow}>
+          <View style={styles.chipCardYellow}>
+            <Users color="#d97706" size={24} style={{ marginRight: 8 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.chipTitleYellow}>Moderate Crowds</Text>
+              <Text style={styles.chipSubYellow}>Busier than usual on MRT-3. Expect moderate crowd levels.</Text>
+            </View>
+          </View>
+          
+          <View style={styles.chipCardGreen}>
+            <View style={styles.chipGreenIconContainer}>
+               <ShieldCheck color="#fff" size={16} />
+            </View>
+            <View style={{ flex: 1, marginLeft: 8 }}>
+              <Text style={styles.chipSubGreen}>Route Safety</Text>
+              <Text style={styles.chipTitleGreen}>Good</Text>
+            </View>
+            <ChevronRight color="#15803d" size={20} />
+          </View>
+        </View>
       </View>
 
-      <View style={styles.rewardPotentialCard}>
-        <Text style={styles.rewardPotentialTitle}>
-          Potential verified reward
-        </Text>
-        <Text style={styles.rewardPotentialValue}>
-          +{route.lakbayScoreReward} Lakbay Score · up to +
-          {route.campaignPointsReward} campaign Points
-        </Text>
-        <Text style={styles.rewardPotentialNote}>
-          Subject to trip verification; campaign cap applies.
-        </Text>
+      <View style={{ marginHorizontal: 16, marginBottom: 32, gap: 12 }}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBeginPlayback}
+          style={styles.primaryButtonLarge}
+        >
+          <Text style={styles.primaryButtonText}>Begin Trip Playback</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onCompareRoutes}
+          style={[styles.primaryButtonLarge, { backgroundColor: "#f8fafc", borderWidth: 1, borderColor: "#e2e8f0" }]}
+        >
+          <Text style={[styles.primaryButtonText, { color: "#1e3a8a" }]}>Compare Route Options</Text>
+        </Pressable>
       </View>
-
-      <Pressable
-        accessibilityRole="button"
-        onPress={onCompareRoutes}
-        style={styles.compareButton}
-      >
-        <Text style={styles.compareButtonText}>Compare Route Options</Text>
-      </Pressable>
-
-      <Text style={styles.tagline}>
-        Guide the Trip. Verify the Shift. Improve Access.
-      </Text>
     </ScrollView>
   );
 }
@@ -302,7 +508,8 @@ export function BottomTabBar({
     <View accessibilityRole="tablist" style={styles.tabBar}>
       {bottomTabItems.map(({ name, label, Icon }) => {
         const selected = activeTab === name;
-        const color = selected ? "#1e3a8a" : "#64748b";
+        const isRewardsSelected = selected && name === "rewards";
+        const color = isRewardsSelected ? "#f59e0b" : selected ? "#1e3a8a" : "#64748b";
 
         return (
           <Pressable
@@ -318,7 +525,7 @@ export function BottomTabBar({
               fill={name === "rewards" && selected ? color : "transparent"}
               size={24}
             />
-            <Text style={[styles.tabLabel, selected && styles.tabLabelActive]}>
+            <Text style={[styles.tabLabel, selected && styles.tabLabelActive, isRewardsSelected && { color }]}>
               {label}
             </Text>
           </Pressable>
@@ -333,6 +540,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 36,
     paddingTop: 10,
+    backgroundColor: "#f8fafc",
   },
   topBar: {
     flexDirection: "row",
@@ -344,178 +552,300 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#1e3a8a",
-    marginLeft: "auto",
-    marginRight: "auto",
   },
-  rewardStatusCard: {
-    backgroundColor: "#eff6ff",
-    borderColor: "#bfdbfe",
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 18,
+  levelCard: {
+    backgroundColor: "#0f172a",
+    borderRadius: 20,
+    padding: 24,
     marginBottom: 16,
+    position: "relative",
+    overflow: "hidden",
   },
-  rewardStatusLabel: {
-    color: "#1d4ed8",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    marginBottom: 6,
-  },
-  rewardStatusTitle: {
-    color: "#172554",
-    fontSize: 19,
-    fontWeight: "800",
-    lineHeight: 25,
-    marginBottom: 6,
-  },
-  rewardStatusBody: {
-    color: "#334155",
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  rewardBalanceGrid: {
+  levelHeader: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  },
-  rewardBalanceCard: {
-    width: "48%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  rewardBalanceCardWide: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  rewardBalanceLabel: {
-    color: "#475569",
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  rewardBalanceValue: {
-    color: "#1e3a8a",
-    fontSize: 24,
-    fontWeight: "800",
-  },
-  rewardBalanceNote: {
-    color: "#64748b",
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 4,
-  },
-  rewardPotentialSummary: {
-    backgroundColor: "#f0fdf4",
-    borderColor: "#bbf7d0",
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
-  },
-  rewardPotentialSummaryLabel: {
-    color: "#15803d",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    marginBottom: 5,
-  },
-  rewardPotentialSummaryTitle: {
-    color: "#14532d",
-    fontSize: 17,
-    fontWeight: "800",
-    lineHeight: 23,
-    marginBottom: 7,
-  },
-  rewardPotentialSummaryValue: {
-    color: "#166534",
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 21,
-  },
-  rewardPotentialSummaryNote: {
-    color: "#166534",
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 6,
-  },
-  rewardRulesCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
-  },
-  rewardRulesTitle: {
-    color: "#1e3a8a",
-    fontSize: 16,
-    fontWeight: "800",
+    alignItems: "center",
     marginBottom: 8,
   },
-  rewardRule: {
-    color: "#475569",
-    fontSize: 13,
-    lineHeight: 21,
-  },
-  rewardPlanButton: {
-    minHeight: 48,
-    backgroundColor: "#1e3a8a",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-  },
-  rewardPlanButtonText: {
+  levelTitle: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 20,
+    fontWeight: "700",
+    marginRight: 12,
+  },
+  levelBadge: {
+    backgroundColor: "#fde047",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  levelBadgeText: {
+    color: "#1e3a8a",
+    fontSize: 12,
     fontWeight: "800",
   },
-  rewardDisclaimer: {
-    color: "#64748b",
-    fontSize: 11,
-    lineHeight: 17,
-    textAlign: "center",
-    marginTop: 12,
-  },
-
-  /* Plan Trip Styles */
-  positioning: {
-    color: "#0f766e",
+  levelProgressText: {
+    color: "#cbd5e1",
     fontSize: 13,
-    fontWeight: "600",
-    lineHeight: 19,
-    marginBottom: 16,
-    textAlign: "center",
+    marginBottom: 12,
   },
-  tripInputCard: {
+  progressBarTrack: {
+    height: 8,
+    backgroundColor: "#334155",
+    borderRadius: 4,
+    width: "70%",
+  },
+  progressBarFill: {
+    height: 8,
+    backgroundColor: "#facc15",
+    borderRadius: 4,
+  },
+  levelIconContainer: {
+    position: "absolute",
+    right: 20,
+    top: 24,
+    width: 60,
+    height: 70,
+    backgroundColor: "#2563eb",
+    alignItems: "center",
+    justifyContent: "center",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  pointsCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 16,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
   },
-  tripInputRow: {
+  pointsColumn: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  pointsDivider: {
+    width: 1,
+    backgroundColor: "#e2e8f0",
+    marginHorizontal: 16,
+  },
+  pointsLabel: {
+    color: "#1e3a8a",
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  pointsValue: {
+    color: "#0f172a",
+    fontSize: 22,
+    fontWeight: "800",
+  },
+  pointsValueGreen: {
+    color: "#16a34a",
+    fontSize: 22,
+    fontWeight: "800",
+  },
+  pointsSub: {
+    color: "#64748b",
+    fontSize: 12,
+  },
+  streakCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  inputDotOrigin: {
+  streakIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#fef3c7",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
+  streakTextWrap: {
+    flex: 1,
+  },
+  streakTitle: {
+    color: "#1e3a8a",
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  streakBody: {
+    color: "#64748b",
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  streakHighlight: {
+    color: "#2563eb",
+    fontWeight: "700",
+  },
+  streakCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: "#f59e0b",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+  },
+  streakCircleText: {
+    color: "#0f172a",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  streakCircleLine: {
+    width: 16,
+    height: 1,
+    backgroundColor: "#0f172a",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    color: "#1e3a8a",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  viewAllText: {
+    color: "#2563eb",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  badgesGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  badgeItem: {
+    alignItems: "center",
+    width: "23%",
+  },
+  badgeHexagon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    backgroundColor: "#fff",
+    position: "relative",
+  },
+  badgeCheck: {
+    position: "absolute",
+    bottom: -4,
+    right: -4,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+  },
+  badgeLabel: {
+    color: "#0f172a",
+    fontSize: 11,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  badgeSub: {
+    color: "#64748b",
+    fontSize: 10,
+    textAlign: "center",
+  },
+  redeemGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    marginBottom: 16,
+  },
+  redeemCard: {
+    width: "23%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  redeemLabel: {
+    color: "#0f172a",
+    fontSize: 10,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  redeemPts: {
+    color: "#64748b",
+    fontSize: 10,
+  },
+
+  /* Plan Trip Styles */
+  planContent: {
+    flexGrow: 1,
+    backgroundColor: "#fff",
+  },
+  planTopBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 16,
+    backgroundColor: "#fff",
+  },
+  planTopBarTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1e3a8a",
+  },
+  locationBlock: {
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  locationInputArea: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 5,
+    elevation: 1,
+  },
+  locationInputLeft: {
+    flex: 1,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  dotOrigin: {
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -523,230 +853,295 @@ const styles = StyleSheet.create({
     borderColor: "#3b82f6",
     marginRight: 12,
   },
-  inputDotDest: {
+  dotDest: {
     width: 12,
     height: 12,
     borderRadius: 6,
     backgroundColor: "#f59e0b",
     marginRight: 12,
   },
-  tripInputText: {
-    flex: 1,
+  locationText: {
     fontSize: 15,
-    color: "#111827",
+    color: "#0f172a",
     fontWeight: "600",
   },
-  tripInputDivider: {
+  locationDivider: {
     height: 1,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#e2e8f0",
     marginLeft: 24,
     marginVertical: 4,
   },
-  prototypeCard: {
-    backgroundColor: "#ecfeff",
-    borderColor: "#a5f3fc",
+  swapButton: {
+    padding: 12,
+    marginLeft: 8,
+  },
+  routeTabs: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    backgroundColor: "#fff",
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  routeTab: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginRight: 12,
+    alignItems: "center",
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#fff",
   },
-  prototypeLabel: {
-    color: "#155e75",
-    fontSize: 13,
+  routeTabActive: {
+    backgroundColor: "#1e3a8a",
+    borderColor: "#1e3a8a",
+  },
+  routeTabTitle: {
+    fontSize: 14,
     fontWeight: "700",
-    marginBottom: 4,
+    color: "#0f172a",
+    marginBottom: 2,
   },
-  prototypeMeta: {
-    color: "#0e7490",
+  routeTabTitleActive: {
+    color: "#fff",
+  },
+  routeTabSub: {
     fontSize: 11,
-    marginBottom: 6,
+    color: "#64748b",
   },
-  prototypeDisclaimer: {
-    color: "#164e63",
-    fontSize: 12,
-    lineHeight: 18,
+  routeTabSubActive: {
+    color: "#e0e7ff",
   },
-  planMetricGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  planMetric: {
-    width: "48%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  planMetricWide: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-  },
-  planMetricLabel: {
-    color: "#6b7280",
-    fontSize: 11,
-    marginBottom: 4,
-  },
-  planMetricValue: {
-    color: "#1e3a8a",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  routeDetailsCard: {
-    backgroundColor: "#fff",
+  mapArea: {
+    height: 220,
+    alignSelf: 'stretch',
+    marginHorizontal: 16,
     borderRadius: 16,
-    padding: 16,
+    overflow: "hidden",
     marginBottom: 16,
+  },
+  densityLegend: {
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    backgroundColor: "#fff",
+    padding: 6,
+    borderRadius: 8,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 10,
+    elevation: 3,
+    width: 110,
+  },
+  densityLegendTitle: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: "#334155",
+    marginBottom: 2,
+    textAlign: "center",
+  },
+  densityGradientRow: {
+    flexDirection: "row",
+    height: 4,
+    borderRadius: 2,
+    overflow: "hidden",
+    marginBottom: 2,
+  },
+  densityBlock: {
+    flex: 1,
+  },
+  densityLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  densityLabelText: {
+    fontSize: 9,
+    color: "#64748b",
+  },
+  mapOverlayPin: {
+    position: "absolute",
+    alignItems: "center",
+  },
+  mapPinIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    marginBottom: 4,
+  },
+  mapPinLabel: {
+    backgroundColor: "#fff",
+    color: "#1e3a8a",
+    fontSize: 11,
+    fontWeight: "700",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 2,
   },
-  routeDetailsHeader: {
+  bottomRouteCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  routeHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: 20,
   },
-  routeDetailsHeading: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  routeDetailsTitle: {
+  routeHeaderTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#1e3a8a",
+    fontWeight: "700",
+    color: "#0f172a",
     marginBottom: 4,
   },
-  routeDetailsSub: {
+  routeHeaderSub: {
     fontSize: 12,
-    color: "#6b7280",
-    lineHeight: 17,
+    color: "#64748b",
   },
-  routeTotalTime: {
-    fontSize: 18,
-    fontWeight: "bold",
+  routeTimeBig: {
+    fontSize: 22,
+    fontWeight: "800",
     color: "#1e3a8a",
   },
-  segmentList: {
-    paddingLeft: 4,
+  timelineList: {
+    marginBottom: 20,
   },
-  segmentRow: {
+  timelineRow: {
     flexDirection: "row",
-    marginBottom: 22,
-    alignItems: "flex-start",
   },
-  segmentIconContainer: {
+  timelineLeft: {
     alignItems: "center",
-    marginRight: 14,
-    width: 26,
+    width: 32,
+    marginRight: 16,
   },
-  segmentIconBg: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#0f766e",
+  timelineIconBg: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
-  segmentIconText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  segmentDash: {
-    position: "absolute",
-    top: 26,
-    bottom: -28,
+  timelineLine: {
     width: 2,
-    backgroundColor: "#d1d5db",
-  },
-  segmentInfo: {
     flex: 1,
+    backgroundColor: "#1e3a8a",
+    borderStyle: "dashed",
+    opacity: 0.3,
   },
-  segmentMode: {
-    color: "#0f766e",
-    fontSize: 12,
-    fontWeight: "700",
+  timelineRight: {
+    flex: 1,
+    paddingBottom: 16,
+  },
+  timelineActionText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0f172a",
     marginBottom: 2,
   },
-  segmentName: {
-    fontSize: 14,
-    color: "#111827",
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  segmentRoute: {
+  timelineMetaText: {
     fontSize: 12,
-    color: "#374151",
-    lineHeight: 17,
-    marginBottom: 4,
+    color: "#64748b",
   },
-  segmentDesc: {
-    fontSize: 11,
-    color: "#6b7280",
-    lineHeight: 16,
-  },
-  segmentFare: {
-    fontSize: 11,
-    color: "#6b7280",
-    lineHeight: 16,
-    textTransform: "capitalize",
-  },
-  rewardPotentialCard: {
-    backgroundColor: "#f0fdf4",
-    borderColor: "#bbf7d0",
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
-  },
-  rewardPotentialTitle: {
-    color: "#166534",
-    fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  rewardPotentialValue: {
-    color: "#14532d",
-    fontSize: 14,
-    fontWeight: "700",
-    lineHeight: 20,
-  },
-  rewardPotentialNote: {
-    color: "#166534",
-    fontSize: 11,
-    marginTop: 4,
-  },
-  compareButton: {
-    backgroundColor: "#1e3a8a",
-    borderRadius: 12,
-    paddingVertical: 15,
+  timelineTransitRow: {
+    flexDirection: "row",
     alignItems: "center",
+    marginBottom: 4,
   },
-  compareButtonText: {
+  transitBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  transitBadgeText: {
     color: "#fff",
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: 10,
+    fontWeight: "800",
   },
-  tagline: {
-    color: "#0f766e",
+  timelineTimeRight: {
+    marginLeft: 12,
+  },
+  timelineTimeText: {
     fontSize: 12,
     fontWeight: "600",
-    textAlign: "center",
-    marginTop: 14,
+    color: "#475569",
+    paddingTop: 4,
+  },
+  timelineSpacing: {
+    height: 4,
+  },
+  chipsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  chipCardYellow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fef3c7",
+    padding: 12,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  chipTitleYellow: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#b45309",
+    marginBottom: 2,
+  },
+  chipSubYellow: {
+    fontSize: 9,
+    color: "#92400e",
+    lineHeight: 12,
+  },
+  chipCardGreen: {
+    flex: 0.8,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    padding: 12,
+    borderRadius: 12,
+  },
+  chipGreenIconContainer: {
+    backgroundColor: "#f59e0b",
+    padding: 4,
+    borderRadius: 12,
+  },
+  chipTitleGreen: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#16a34a",
+  },
+  chipSubGreen: {
+    fontSize: 10,
+    color: "#64748b",
   },
   tabBar: {
     flexDirection: "row",
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: "#e5e7eb",
-    paddingBottom: 24,
+    paddingBottom: 0,
     paddingTop: 8,
   },
   tabItem: {
@@ -764,5 +1159,19 @@ const styles = StyleSheet.create({
   tabLabelActive: {
     color: "#1e3a8a",
     fontWeight: "700",
+  },
+  primaryButtonLarge: {
+    backgroundColor: "#1e3a8a",
+    paddingVertical: 16,
+    borderRadius: 16,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    marginRight: 6,
   },
 });
