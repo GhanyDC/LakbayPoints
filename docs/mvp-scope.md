@@ -79,10 +79,12 @@ ferry fare remains pending confirmation.
 
 ## Current Stabilization Boundary
 
-The product route source and route-facing screens now use the final journey.
-The existing classifier trace and corridor rules are not yet bound to that
-journey. Classifier hardening, reward-boundary fixes, and playback progression
-remain separate stabilization tasks and must not be presented as complete.
+The product route source, route-facing screens, generated traces, classifier
+profile, rewards, and deterministic playback now use the final journey.
+Verification remains a coarse rule-based prototype rather than full GIS map
+matching or field-calibrated mode detection. Physical-device QA remains
+required; dashboard implementation and all live integrations remain outside
+this stabilization task.
 
 ## Future Only
 

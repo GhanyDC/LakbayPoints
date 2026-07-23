@@ -1,95 +1,99 @@
 # Sustainable Trip Chain Classifier Rules
 
-## Purpose
+## Purpose and Limitation
 
-The Sustainable Trip Chain Classifier verifies whether a completed trip reasonably matches the selected sustainable route.
+The Phase 0A Sustainable Trip Chain Classifier is a deterministic, rule-based
+confidence engine. It verifies whether a generated prototype trace reasonably
+matches the selected sustainable route. It is not full GIS map matching, live
+GPS capture, or a trained mode-detection model.
 
-This is a **rule-based confidence engine** for MVP. It is not a fully trained AI model.
+> The prototype does not rely on one signal and does not claim perfect mode
+> detection. A formal pilot must collect labeled, consented local traces to
+> calibrate thresholds and measure false-positive and false-negative rates.
 
-## Judge-Safe Explanation
+## Eligible Route and Verification Profile
 
-> For the MVP, LakbayPoints uses a rule-based confidence engine. It does not rely on one signal and does not claim perfect mode detection. It checks whether the completed trip reasonably matches a sustainable trip chain using multiple signals. The formal pilot will collect labeled local traces to refine the classifier and later support a trained model.
+Classification fails closed unless the selected route:
 
-## Inputs
+- exists in the shared route catalog;
+- has type `sustainable`;
+- has reward eligibility `verification_required`; and
+- has an exact `RouteVerificationProfile` keyed by its route ID.
 
-- selected route
-- GPS trace points
-- station / terminal access points
-- expected speed bands
-- expected route geometry
-- optional phone activity labels
+The active profile is `phase-0a-multimodal-pilot-route`. It expects this order:
 
-## Signals
+1. public-road transport from Cubao Home/Access Zone to MRT-3 Araneta-Cubao;
+2. MRT-3 from Araneta-Cubao to Guadalupe;
+3. walk from Guadalupe MRT to Guadalupe Ferry;
+4. ferry from Guadalupe Ferry to Hulo Ferry; and
+5. walk from Hulo Ferry to Hulo Office Demo Destination.
 
-### 1. Route Match
+The profile stores the expected start, end, and four transfer/access locations;
+prototype proximity thresholds; plausible movement-speed ranges; minimum point
+count; strict chronology requirements; required dwell; both walking
+requirements; and impossible-movement thresholds. This is coarse route-bound
+verification, not street-level or river-geometry map matching.
 
-Checks whether GPS trace stays close to the selected route.
+Unknown route IDs, private baselines, future previews, and routes without an
+eligible profile return 0 confidence and `None` reward eligibility. There is no
+sustainable-route fallback.
 
-Suggested MVP rule:
-- pass if majority of points are within a reasonable corridor buffer;
-- fail if route deviates significantly without explanation.
+## Input Validation
 
-### 2. Speed Pattern Validity
+Validation runs before scoring. A trace is rejected safely when:
 
-Checks whether speeds are plausible for walking and transit segments.
+- the trace is not an array or has fewer than the profile's 20 points;
+- a point is null or malformed;
+- a timestamp is missing, unparseable, duplicated, reversed, or otherwise not
+  strictly increasing;
+- latitude or longitude is non-finite or outside valid coordinate ranges;
+- an optional speed is non-finite or negative; or
+- an activity is outside `walking`, `still`, `in_vehicle`, and `unknown`.
 
-Suggested bands:
-- walking: 0–7 kph
-- road public transport / MRT corridor movement: realistic corridor speeds
-- suspicious: sudden large jumps or impossible speeds
+Invalid trace data does not throw. It returns `Unverified trip`, confidence 0,
+reward eligibility `None`, and an explanation beginning with
+`Invalid trace data`.
 
-### 3. Walking Segments
+## Route-Bound Signals
 
-Checks whether first-mile and last-mile movement resembles walking.
+### Route match and proximity
 
-Signals:
-- activity label = walking, if available;
-- low speed;
-- short-distance route segment near origin/destination.
+The trace must visit the start, four transfer/access points, and destination in
+the profile's order. The first and last points and every required transfer must
+also be within their profile thresholds.
 
-### 4. Dwell Time
+### Speed pattern
 
-Checks whether the trace shows still/slow activity near expected station, terminal, or transfer points.
+Each segment needs movement within the profile range for its mode family.
+Reported speeds and point-to-point computed speeds are checked. Excessive speed
+or a multi-kilometer jump in a short interval marks impossible movement.
 
-Purpose:
-- supports public transport transfer plausibility.
+### Walking evidence
 
-### 5. Station / Terminal Proximity
+Both walking legs are required independently:
 
-Checks whether trip starts, transfers, or ends near known access points.
+- MRT-3 Guadalupe to Guadalupe Ferry; and
+- Hulo Ferry to Hulo Office Demo Destination.
 
-### 6. Phone Activity Recognition
+A point with activity `still` or speed 0 is never walking. Evidence requires a
+sequence of at least three supporting points, non-zero movement in the walking
+range or explicit walking activity, and meaningful position change. A stopped
+private vehicle therefore cannot satisfy either walking requirement.
 
-Optional support signal:
-- walking
-- still
-- in_vehicle
-- unknown
+### Dwell and transfers
 
-This strengthens the classifier but should not be the only basis for rewards.
+The profile requires low-speed/still dwell near MRT-3 Araneta-Cubao, MRT-3
+Guadalupe, and Guadalupe Ferry. Missing required dwell makes the pattern
+suspicious.
 
-### 7. Impossible Movement Check
+### Activity recognition
 
-Flags:
-- teleport-like GPS jumps;
-- impossible speed;
-- trace too short;
-- missing route segments;
-- start/end mismatch.
-
-### 8. Suspicious Pattern
-
-Examples:
-- private-vehicle-like direct route while claiming transit route;
-- no walking access segments;
-- GPS jump from origin to destination;
-- route completed unrealistically fast.
+Walking, still, and in-vehicle labels provide a supporting signal only. They do
+not independently establish a verified trip.
 
 ## Scoring
 
-Suggested MVP score:
-
-```txt
+```text
 Route match:                25 points
 Speed pattern validity:     15 points
 Walking segments:           15 points
@@ -100,36 +104,23 @@ No suspicious movement:     10 points
 Total:                     100 points
 ```
 
-## Result Thresholds
-
-| Score | Result | Reward |
+| Score | Result | Reward eligibility |
 |---:|---|---|
-| 80–100 | Verified sustainable trip chain | Full Lakbay Score + eligible campaign points |
-| 60–79 | Partially verified trip | Lakbay Score only or reduced points |
-| Below 60 | Unverified trip | No redeemable points |
-| Suspicious | Possible spoofing / invalid trip | No reward, flagged |
+| 80-100 | Verified sustainable trip chain | Full |
+| 60-79 | Partially verified trip | Reduced |
+| Below 60 | Unverified trip | None |
+| Suspicious override | Suspicious pattern | None |
 
-## Required Demo Traces
+Prototype confidence is capped at 95 for non-suspicious results and 45 for a
+suspicious pattern.
 
-Create two traces:
+## Generated Prototype Fixtures
 
-1. `valid_sustainable_guadalupe_cubao.json`
-   - should return Verified sustainable trip chain
-   - target confidence: 80–95
+- `valid_phase_0a_multimodal_trace.json` covers all five route segments and
+  returns 95%, Verified, Full.
+- `suspicious_phase_0a_multimodal_trace.json` follows the access sequence but
+  contains an impossible off-route teleport and returns 45%, Suspicious, None.
 
-2. `suspicious_trace_rejected.json`
-   - should return Suspicious pattern or Unverified trip
-   - target confidence: below 60
-
-## Implemented MVP Simplifications
-
-The current classifier implementation is intentionally lightweight for the competition MVP:
-
-- uses approximate demo coordinates for the EDSA-MRT3 Guadalupe to Cubao corridor;
-- checks whether most trace points stay inside a simple pilot-corridor bounding area;
-- checks station/access proximity against seeded MRT3 access points;
-- checks speed patterns using reported speed plus computed point-to-point speed;
-- treats very short traces, teleport-like jumps, impossible speeds, and missing walking segments as suspicious;
-- uses phone activity labels only as a supporting signal, not as the sole basis for rewards.
-
-This is not real map matching, real GPS tracking, a full NCR routing engine, or a trained ML model.
+The same fixtures are exported as `validPhase0AMultimodalTrace` and
+`suspiciousPhase0AMultimodalTrace`. They are generated demonstration data, not
+collected trips or evidence of field accuracy.

@@ -1,0 +1,198 @@
+[
+  {
+    "timestamp": "2026-07-20T00:00:00.000Z",
+    "latitude": 14.6375,
+    "longitude": 121.0315,
+    "speedKph": 12,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:03:00.000Z",
+    "latitude": 14.633,
+    "longitude": 121.0362,
+    "speedKph": 15,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:06:00.000Z",
+    "latitude": 14.6285,
+    "longitude": 121.041,
+    "speedKph": 18,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:09:00.000Z",
+    "latitude": 14.624,
+    "longitude": 121.046,
+    "speedKph": 18,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:12:00.000Z",
+    "latitude": 14.6196,
+    "longitude": 121.051,
+    "speedKph": 10,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:14:00.000Z",
+    "latitude": 14.6196,
+    "longitude": 121.051,
+    "speedKph": 0,
+    "activity": "still"
+  },
+  {
+    "timestamp": "2026-07-20T00:17:00.000Z",
+    "latitude": 14.6196,
+    "longitude": 121.051,
+    "speedKph": 0,
+    "activity": "still"
+  },
+  {
+    "timestamp": "2026-07-20T00:20:00.000Z",
+    "latitude": 14.609,
+    "longitude": 121.052,
+    "speedKph": 30,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:24:00.000Z",
+    "latitude": 14.5,
+    "longitude": 121.15,
+    "speedKph": 180,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:28:00.000Z",
+    "latitude": 14.583,
+    "longitude": 121.0535,
+    "speedKph": 30,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:32:00.000Z",
+    "latitude": 14.5705,
+    "longitude": 121.048,
+    "speedKph": 32,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:34:00.000Z",
+    "latitude": 14.5664,
+    "longitude": 121.0455,
+    "speedKph": 20,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T00:36:00.000Z",
+    "latitude": 14.5664,
+    "longitude": 121.0455,
+    "speedKph": 0,
+    "activity": "still"
+  },
+  {
+    "timestamp": "2026-07-20T00:39:00.000Z",
+    "latitude": 14.5664,
+    "longitude": 121.0455,
+    "speedKph": 0,
+    "activity": "still"
+  },
+  {
+    "timestamp": "2026-07-20T00:42:00.000Z",
+    "latitude": 14.5655,
+    "longitude": 121.0436,
+    "speedKph": 4,
+    "activity": "walking"
+  },
+  {
+    "timestamp": "2026-07-20T00:46:00.000Z",
+    "latitude": 14.5642,
+    "longitude": 121.0415,
+    "speedKph": 4.5,
+    "activity": "walking"
+  },
+  {
+    "timestamp": "2026-07-20T00:50:00.000Z",
+    "latitude": 14.563,
+    "longitude": 121.0393,
+    "speedKph": 4.2,
+    "activity": "walking"
+  },
+  {
+    "timestamp": "2026-07-20T00:54:00.000Z",
+    "latitude": 14.5617,
+    "longitude": 121.0372,
+    "speedKph": 4,
+    "activity": "walking"
+  },
+  {
+    "timestamp": "2026-07-20T00:59:00.000Z",
+    "latitude": 14.5617,
+    "longitude": 121.0372,
+    "speedKph": 0,
+    "activity": "still"
+  },
+  {
+    "timestamp": "2026-07-20T01:04:00.000Z",
+    "latitude": 14.5617,
+    "longitude": 121.0372,
+    "speedKph": 0,
+    "activity": "still"
+  },
+  {
+    "timestamp": "2026-07-20T01:07:00.000Z",
+    "latitude": 14.564,
+    "longitude": 121.033,
+    "speedKph": 12,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T01:10:00.000Z",
+    "latitude": 14.5665,
+    "longitude": 121.029,
+    "speedKph": 14,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T01:13:00.000Z",
+    "latitude": 14.569,
+    "longitude": 121.025,
+    "speedKph": 13,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T01:16:00.000Z",
+    "latitude": 14.571,
+    "longitude": 121.021,
+    "speedKph": 12,
+    "activity": "in_vehicle"
+  },
+  {
+    "timestamp": "2026-07-20T01:20:00.000Z",
+    "latitude": 14.573,
+    "longitude": 121.0225,
+    "speedKph": 4,
+    "activity": "walking"
+  },
+  {
+    "timestamp": "2026-07-20T01:24:00.000Z",
+    "latitude": 14.575,
+    "longitude": 121.024,
+    "speedKph": 4.1,
+    "activity": "walking"
+  },
+  {
+    "timestamp": "2026-07-20T01:28:00.000Z",
+    "latitude": 14.577,
+    "longitude": 121.0255,
+    "speedKph": 4,
+    "activity": "walking"
+  },
+  {
+    "timestamp": "2026-07-20T01:31:00.000Z",
+    "latitude": 14.579,
+    "longitude": 121.027,
+    "speedKph": 4.2,
+    "activity": "walking"
+  }
+]

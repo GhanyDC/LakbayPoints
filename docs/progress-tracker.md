@@ -4,7 +4,7 @@ Update this file after every meaningful change.
 
 ## Current Phase
 
-**Phase 0A: Challenge MVP Stabilization**
+**Phase 0B: Agency Dashboard - Workstream 2 Dashboard Overview**
 
 ## Build Status
 
@@ -17,21 +17,83 @@ Update this file after every meaningful change.
 | Mobile route comparison | Done | TBD | Shared recommended route plus pending private baseline and non-live Phase 2 preview |
 | Route detail | Done | TBD | Uses the same shared access points, segments, statuses, and totals |
 | Mobile navigation state | Done | TBD | Typed destinations keep retained tab labels, selected state, screen transitions, and Android back behavior aligned |
-| Trip playback | Partial | TBD | Displays final route labels; progression and final route-bound traces remain pending |
-| Classifier | Partial | TBD | Rule-based prototype exists, but route binding and hardening still target legacy corridor assumptions |
-| GPS traces | Partial | TBD | Valid and suspicious fixtures exist for the legacy corridor; final route fixtures are pending |
-| Reward logic | Partial | TBD | Shared calculation exists; boundary stabilization remains pending |
-| Reward result screen | Partial | TBD | Existing prototype screen is connected; calibrated CO2e and reward boundaries remain pending |
+| Trip playback | Done | TBD | Deterministic five-segment progression starts at index 0, gates verification, supports valid/suspicious fixtures, and restarts |
+| Classifier | Done | TBD | Final-route profile, fail-closed runtime validation, ordered access/dwell checks, and credible walking requirements are automated |
+| GPS traces | Done | TBD | Generated final-route valid and suspicious fixtures cover the five-segment chain and are JSON/TypeScript parity-tested |
+| Reward logic | Done | TBD | Finite/non-negative normalization, campaign-cap invariants, Reduced policy, pending CO2e, and full-trip count policy are tested |
+| Reward result screen | Done | TBD | Verification-derived results use hardened shared rewards; CO2e remains visibly pending calibration |
 | Rewards tab cleanup | Done | TBD | Verification-gated overview uses shared seed/route data; unsupported gamification and reward catalog were removed |
 | Access report form | Done | TBD | Prototype mobile form and confirmation flow exist |
-| Seed access-barrier reports | Done | TBD | Approximate prototype/sample reports are seeded |
-| Dashboard layout | Not started | TBD | Agency preview only; no live integration |
-| Report queue | Not started | TBD | |
-| Dashboard map | Not started | TBD | |
-| Analytics cards | Not started | TBD | |
+| Dashboard data contracts | Done | TBD | Shared additive contracts compose existing route, report, classifier, and reward types |
+| Dashboard canonical seed | Done | TBD | One typed source owns 120 participants, 360 trip attempts, campaign aggregates, 25 reports, and pending CO2e |
+| Dashboard aggregations | Done | TBD | Pure overview, rate, report, hotspot, trip-chain, lookup, and validation helpers are exported from shared |
+| Report workflow helpers | Done | TBD | Pure local-only Submitted-to-Resolved forward workflow with typed no-op and failure outcomes |
+| Dashboard foundation tests | Done | TBD | 66 new shared tests cover the approved seed, analytics, validation, and workflow boundaries |
+| Dashboard layout | Done | TBD | Responsive server-rendered agency-prototype shell with persistent simulated-data disclosure and final-route context |
+| Report queue UI | Not started | TBD | Shared reports and workflow are ready; no table or status control exists yet |
+| Dashboard hotspot schematic UI | Not started | TBD | Shared five-location hotspot summaries are ready; no map or schematic exists yet |
+| Analytics cards UI | In progress | TBD | Six shared-derived overview cards are complete; trip and campaign detail presentation remains for later workstreams |
 | Demo script | Not started | TBD | |
 
 ## Change Log
+
+### 2026-07-23
+
+- Replaced the obsolete dashboard starter with a responsive, semantic agency
+  mobility insights shell using neutral simulated-pilot identity.
+- Added the exact persistent deterministic-data/no-live-MMDA disclosure,
+  product message, final shared route context, seed version, and review date.
+- Rendered the six approved overview metrics in pitch order from
+  `deriveDashboardOverview`, with supporting rates and totals formatted from
+  the canonical seed rather than duplicated in JSX.
+- Kept Estimated CO2e Avoided non-numeric as `Pending pilot calibration` and
+  labeled Campaign Points as simulated incentives with no redemption or
+  financial value.
+- Added 25 dashboard presentation tests using Node, `tsx`, and React server
+  rendering, without a browser-test or DOM-test framework.
+- Preserved the Workstream 2 boundary: no report queue/status control, hotspot
+  schematic, trip/campaign detail, client state, backend, authentication, or
+  mobile change was introduced.
+- Added additive Phase 0B dashboard contracts without changing Phase 0A route,
+  classifier, reward, report, or mobile behavior.
+- Established `packages/shared/src/dashboard-seed.ts` as the canonical typed
+  source for 120 simulated participants, 360 trip attempts, a 12,000-Point
+  allocation with 8,640 Points issued, and exactly 25 access-barrier reports.
+- Defined repeat participation as at least two fully verified qualifying trips;
+  the seed derives 84 repeat participants as 70% of 120.
+- Added pure overview, rate, campaign, report, hotspot, trip-chain, narrated
+  report, and validation helpers in `dashboard-analytics.ts`.
+- Added a non-mutating local workflow for Submitted -> Under Review -> Verified
+  -> Assigned -> Resolved with typed success, no-op, invalid, and not-found
+  outcomes.
+- Replaced the unused five-report JSON seed with the single public shared
+  TypeScript source and added 66 data-foundation tests.
+- Preserved pending CO2e as null and embedded the required deterministic
+  simulated-data/no-live-MMDA disclosure.
+- Dashboard layout, overview cards, queue controls, hotspot schematic,
+  trip/campaign presentation, and end-to-end demo remain pending Workstream 2
+  and later workstreams.
+
+### 2026-07-22
+
+- Replaced the active earlier-corridor traces with generated prototype valid
+  and suspicious fixtures for the complete Cubao-to-Hulo journey.
+- Added the exact final-route verification profile with ordered access points,
+  proximity/speed thresholds, strict chronology, required dwell, and both
+  walking-leg requirements.
+- Removed route fallback and made malformed, unknown, private, future,
+  mismatched, missing-walk, and suspicious inputs fail closed with no reward.
+- Hardened reward normalization, cap enforcement, Reduced accounting, pending
+  CO2e behavior, numeric rounding, full-trip counting, and calculation purity.
+- Implemented deterministic five-segment playback, verification gating,
+  generated valid/suspicious choices, and restart without changing StyleSheet
+  values or the approved visual system.
+- Updated report locations to all final-route access areas and replaced
+  live-queue implications with LakbayPoints prototype review-queue wording.
+- Expanded automated coverage to 37 shared-logic and 14 mobile tests with no
+  snapshots or visual-style updates.
+- Physical-device Expo Go QA, screenshots/video, and calibrated CO2e remain
+  open limitations.
 
 ### 2026-07-19
 
@@ -83,7 +145,7 @@ Update this file after every meaningful change.
 ### 2026-07-10
 
 - Added shared access-barrier report types for category, severity, status, and report records.
-- Added prototype/sample access-barrier report seed data for the Guadalupe to Cubao corridor.
+- Added prototype/sample access-barrier report seed data for the earlier pilot corridor.
 - Added the mobile Report Access Barriers form, validation, confirmation screen, and MMDA dashboard preview placeholder.
 
 ### 2026-07-08
@@ -100,7 +162,7 @@ Update this file after every meaningful change.
 
 ### 2026-07-07
 
-- Added static Guadalupe to Cubao route data for the private baseline, recommended sustainable trip, and Phase 2 preview.
+- Added static earlier-corridor route data for the private baseline, recommended sustainable trip, and Phase 2 preview.
 - Added shared route types and exported demo route options.
 - Replaced the mobile starter screen with the route comparison screen.
 - Set up the npm workspace monorepo foundation.
@@ -123,13 +185,13 @@ Update this file after every meaningful change.
 - [x] Can show ferry fare and CO2e as pending
 - [x] Every retained bottom tab reaches its named destination
 - [x] Rewards remains verification-gated and contains no reward catalog
-- [ ] Has final route-bound playback progression and GPS fixtures
-- [ ] Has classifier rules hardened and bound to the final route
-- [ ] Has reward boundaries stabilized
+- [x] Has final route-bound playback progression and GPS fixtures
+- [x] Has classifier rules hardened and bound to the final route
+- [x] Has reward boundaries stabilized
 - [x] Can submit an access-barrier report
 - [ ] Can view report in dashboard
 - [ ] Can update report status
-- [ ] Can show basic dashboard metrics
+- [x] Can show basic dashboard metrics
 - [ ] Has backup screenshots/video
 - [ ] Has rehearsed 5–7 minute script
 - [ ] Has known limitations slide
@@ -139,7 +201,7 @@ Update this file after every meaningful change.
 | Risk | Mitigation |
 |---|---|
 | Scope creep | Only build approved MVP loop |
-| Classifier overclaiming | Mark final route binding and hardening as pending |
+| Classifier overclaiming | Keep rule-engine limitations visible and require labeled physical-pilot calibration before production use |
 | Rewards appear guaranteed | Label route rewards as potential, verification-required, and capped |
 | Prototype appears officially operated | Use neutral agency-preview language and avoid ownership/endorsement claims |
 | Static data appears live | Show data status, review date, disclaimer, and pending calibration labels |
@@ -147,4 +209,9 @@ Update this file after every meaningful change.
 
 ## Next Actions
 
-1. Reject malformed and ineligible trip traces before classifier route binding.
+1. Begin Phase 0B Workstream 3: access-barrier report queue, selected-report
+   detail, and local status-transition workflow.
+2. Keep hotspot presentation and trip/campaign detail UI in their later
+   approved workstreams.
+3. Complete and record physical-device Expo Go QA with screenshots/video.
+4. Calibrate route thresholds and CO2e only from approved pilot evidence.

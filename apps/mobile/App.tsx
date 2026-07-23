@@ -45,7 +45,7 @@ import {
   getRouteChainLabel,
   phase0APilotRoute,
   phase0ARouteOptions,
-  suspiciousTraceRejected,
+  suspiciousPhase0AMultimodalTrace,
   type AccessBarrierCategory,
   type AccessBarrierReport,
   type ClassifierResult,
@@ -54,7 +54,7 @@ import {
   type ReportSeverity,
   type RouteOption,
   type RouteSegment,
-  validSustainableGuadalupeCubaoTrace,
+  validPhase0AMultimodalTrace,
 } from "@lakbaypoints/shared";
 import {
   BottomTabBar,
@@ -205,24 +205,29 @@ const reportSeverityOptions: ReportSeverity[] = ["Low", "Medium", "High"];
 
 const demoReportLocations: DemoReportLocation[] = [
   {
-    label: "Guadalupe Station access area",
+    label: "MRT-3 Araneta-Cubao access area",
+    latitude: 14.6196,
+    longitude: 121.051,
+  },
+  {
+    label: "MRT-3 Guadalupe access area",
     latitude: 14.5664,
     longitude: 121.0455,
   },
   {
-    label: "Shaw Boulevard access area",
-    latitude: 14.5818,
-    longitude: 121.0531,
+    label: "Guadalupe Ferry access area",
+    latitude: 14.5617,
+    longitude: 121.0372,
   },
   {
-    label: "Ortigas Station access area",
-    latitude: 14.5868,
-    longitude: 121.056,
+    label: "Hulo Ferry access area",
+    latitude: 14.571,
+    longitude: 121.021,
   },
   {
-    label: "Cubao Station access area",
-    latitude: 14.6196,
-    longitude: 121.051,
+    label: "Hulo office last-mile access area",
+    latitude: 14.579,
+    longitude: 121.027,
   },
 ];
 
@@ -550,7 +555,7 @@ function TripPlaybackScreen({
   const [traceMode, setTraceMode] = useState<TraceMode>("valid");
   const [classifierResult, setClassifierResult] = useState<ClassifierResult | null>(null);
   const resultVisible = classifierResult !== null;
-  const activeIndex = resultVisible ? route.segments.length - 1 : 1;
+  const playbackComplete = activeIndex === route.segments.length - 1;
   const currentSegment = route.segments[activeIndex];
   const currentStatus = playbackSteps[activeIndex]?.status ?? "Trip segment in progress";
   const runVerification = (mode: TraceMode) => {
@@ -559,6 +564,19 @@ function TripPlaybackScreen({
     setClassifierResult(
       classifySustainableTripChain({ selectedRoute: route, gpsTrace }),
     );
+  };
+  const handlePrimaryPlaybackAction = () => {
+    if (resultVisible) {
+      setActiveIndex(0);
+      setClassifierResult(null);
+      setTraceMode("valid");
+      return;
+    }
+    if (playbackComplete) {
+      runVerification("valid");
+      return;
+    }
+    setActiveIndex((currentIndex) => currentIndex + 1);
   };
 
   return (
@@ -934,8 +952,8 @@ function ReportConfirmationScreen({
 
       <View style={[styles.card, styles.reportIntroCard]}>
         <Text style={styles.statusBody}>
-          Your report has been added to the prototype agency dashboard queue for
-          validation in this prototype.
+          Submitted to the LakbayPoints prototype review queue for
+          demonstration.
         </Text>
       </View>
 

@@ -1,44 +1,26 @@
-import styles from "./page.module.css";
-
-const starterItems = [
-  {
-    label: "MVP Corridor",
-    text: "EDSA-MRT3 Guadalupe to Cubao",
-  },
-  {
-    label: "Dashboard Scope",
-    text: "Static foundation, no live API",
-  },
-  {
-    label: "Next Build Step",
-    text: "Route data and comparison screen",
-  },
-];
+import { DashboardHeader } from "./components/dashboard-header";
+import { DashboardShell } from "./components/dashboard-shell";
+import { MethodLimitations } from "./components/method-limitations";
+import { OverviewGrid } from "./components/overview-grid";
+import { PrototypeDisclosure } from "./components/prototype-disclosure";
+import { dashboardOverviewViewModel } from "../lib/dashboard-overview";
 
 export default function DashboardPage() {
-  return (
-    <main className={styles.page}>
-      <section className={styles.shell}>
-        <header className={styles.header}>
-          <p className={styles.eyebrow}>MMDA Dashboard</p>
-          <h1 className={styles.title}>
-            LakbayPoints verified mode-shift dashboard foundation
-          </h1>
-          <p className={styles.subtitle}>
-            Starter page for the competition MVP. This app is ready for static
-            route data, corridor reports, and demo metrics in later tasks.
-          </p>
-        </header>
+  const viewModel = dashboardOverviewViewModel;
 
-        <div className={styles.statusGrid}>
-          {starterItems.map((item) => (
-            <article className={styles.statusCard} key={item.label}>
-              <p className={styles.statusLabel}>{item.label}</p>
-              <p className={styles.statusText}>{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+  return (
+    <DashboardShell>
+      <PrototypeDisclosure statement={viewModel.disclosure} />
+      <DashboardHeader
+        productMessage={viewModel.productMessage}
+        reviewedDate={viewModel.reviewedDate}
+        routeContext={viewModel.routeContext}
+        seedVersion={viewModel.seedVersion}
+        subtitle={viewModel.subtitle}
+        title={viewModel.title}
+      />
+      <OverviewGrid metrics={viewModel.metrics} />
+      <MethodLimitations />
+    </DashboardShell>
   );
 }

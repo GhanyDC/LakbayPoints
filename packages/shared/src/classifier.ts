@@ -1,11 +1,17 @@
 import { phase0ARouteOptions } from "./routes";
+import { getRouteVerificationProfile } from "./verification-profiles";
 import type {
   ClassifierResult,
   ClassifierSignalChecklist,
   ClassifySustainableTripChainInput,
+  GpsTraceActivity,
   GpsTracePoint,
   RewardEligibility,
-  StationAccessPoint,
+  RouteOption,
+  RouteVerificationAccessLocation,
+  RouteVerificationProfile,
+  RouteVerificationSpeedRange,
+  TransportMode,
   VerificationResultLabel,
 } from "./types";
 
@@ -19,63 +25,25 @@ const scoreWeights = {
   noSuspiciousMovement: 10,
 } as const;
 
-const defaultStationAccessPoints: StationAccessPoint[] = [
-  {
-    id: "guadalupe-mrt3",
-    name: "Guadalupe MRT3",
-    latitude: 14.5664,
-    longitude: 121.0455,
-  },
-  {
-    id: "boni-mrt3",
-    name: "Boni MRT3",
-    latitude: 14.5735,
-    longitude: 121.048,
-  },
-  {
-    id: "shaw-boulevard-mrt3",
-    name: "Shaw Boulevard MRT3",
-    latitude: 14.5818,
-    longitude: 121.0531,
-  },
-  {
-    id: "ortigas-mrt3",
-    name: "Ortigas MRT3",
-    latitude: 14.5868,
-    longitude: 121.056,
-  },
-  {
-    id: "santolan-annapolis-mrt3",
-    name: "Santolan-Annapolis MRT3",
-    latitude: 14.608,
-    longitude: 121.0562,
-  },
-  {
-    id: "araneta-center-cubao-mrt3",
-    name: "Araneta Center-Cubao MRT3",
-    latitude: 14.6196,
-    longitude: 121.051,
-  },
-];
+const supportedActivities: ReadonlySet<GpsTraceActivity> = new Set([
+  "walking",
+  "still",
+  "in_vehicle",
+  "unknown",
+]);
 
-const guadalupeAccessPoint = defaultStationAccessPoints[0];
-const cubaoAccessPoint =
-  defaultStationAccessPoints[defaultStationAccessPoints.length - 1];
+type Coordinate = Pick<GpsTracePoint, "latitude" | "longitude">;
 
 function toRadians(value: number) {
   return (value * Math.PI) / 180;
 }
 
-function distanceKm(
-  a: GpsTracePoint | StationAccessPoint,
-  b: GpsTracePoint | StationAccessPoint,
-) {
+function distanceKm(a: Coordinate, b: Coordinate) {
   const earthRadiusKm = 6371;
   const latitudeDelta = toRadians(b.latitude - a.latitude);
   const longitudeDelta = toRadians(b.longitude - a.longitude);
   const startLatitude = toRadians(a.latitude);
   const endLatitude = toRadians(b.latitude);
-
   const haversine =
     Math.sin(latitudeDelta / 2) ** 2 +
     Math.cos(startLatitude) *
@@ -86,82 +54,376 @@ function distanceKm(
 }
 
 function minutesBetween(a: GpsTracePoint, b: GpsTracePoint) {
-  const startTime = new Date(a.timestamp).getTime();
-  const endTime = new Date(b.timestamp).getTime();
-
-  if (!Number.isFinite(startTime) || !Number.isFinite(endTime)) {
-    return 0;
-  }
-
-  return Math.max(0, (endTime - startTime) / 60000);
+  return (Date.parse(b.timestamp) - Date.parse(a.timestamp)) / 60000;
 }
 
-function isNearAnyStation(
-  point: GpsTracePoint,
-  accessPoints: StationAccessPoint[],
-  thresholdKm: number,
-) {
-  return accessPoints.some(
-    (accessPoint) => distanceKm(point, accessPoint) <= thresholdKm,
+function buildRejectedResult(explanation: string): ClassifierResult {
+  return {
+    confidenceScore: 0,
+    result: "Unverified trip",
+    rewardEligibility: "None",
+    signals: {
+      routeMatch: false,
+      speedPatternValid: false,
+      walkingSegmentsDetected: false,
+      stationDwellDetected: false,
+      proximityValid: false,
+      impossibleMovementDetected: false,
+      suspiciousPattern: true,
+      activityRecognitionSupport: false,
+    },
+    explanation: [explanation],
+  };
+}
+
+function resolveEligibleRoute(input: ClassifySustainableTripChainInput):
+  | {
+      route: RouteOption;
+      profile: RouteVerificationProfile;
+    }
+  | { error: string } {
+  const selectedRouteId =
+    typeof input.selectedRoute === "string"
+      ? input.selectedRoute
+      : input.selectedRoute?.id;
+
+  if (!selectedRouteId) {
+    return { error: "Selected route is missing or invalid." };
+  }
+
+  const catalogRoute = phase0ARouteOptions.find(
+    (candidate) => candidate.id === selectedRouteId,
+  );
+  if (!catalogRoute) {
+    return { error: `Selected route ${selectedRouteId} is unknown.` };
+  }
+
+  const selectedRoute =
+    typeof input.selectedRoute === "string"
+      ? catalogRoute
+      : input.selectedRoute;
+  if (selectedRoute.type !== "sustainable") {
+    return { error: "Selected route is not a sustainable route." };
+  }
+  if (selectedRoute.rewardEligibility !== "verification_required") {
+    return { error: "Selected route is not eligible for verification." };
+  }
+  if (
+    catalogRoute.type !== "sustainable" ||
+    catalogRoute.rewardEligibility !== "verification_required"
+  ) {
+    return { error: "Selected route is not eligible for verification." };
+  }
+
+  const profile = getRouteVerificationProfile(catalogRoute.id);
+  if (!profile || profile.eligibleRouteType !== catalogRoute.type) {
+    return { error: "Selected route has no eligible verification profile." };
+  }
+
+  return { route: catalogRoute, profile };
+}
+
+function validateTrace(
+  traceInput: unknown,
+  profile: RouteVerificationProfile,
+): { trace: GpsTracePoint[] } | { error: string } {
+  if (!Array.isArray(traceInput)) {
+    return { error: "Invalid trace data: GPS trace must be an array." };
+  }
+  if (traceInput.length < profile.minimumTracePointCount) {
+    return {
+      error: `Invalid trace data: at least ${profile.minimumTracePointCount} points are required.`,
+    };
+  }
+
+  let previousTimestamp = Number.NEGATIVE_INFINITY;
+  for (let index = 0; index < traceInput.length; index += 1) {
+    const point = traceInput[index] as Partial<GpsTracePoint> | null;
+    if (!point || typeof point !== "object") {
+      return {
+        error: `Invalid trace data: point ${index + 1} is null or malformed.`,
+      };
+    }
+
+    if (typeof point.timestamp !== "string") {
+      return {
+        error: `Invalid trace data: point ${index + 1} has no valid timestamp.`,
+      };
+    }
+    const timestamp = Date.parse(point.timestamp);
+    if (!Number.isFinite(timestamp)) {
+      return {
+        error: `Invalid trace data: point ${index + 1} has a malformed timestamp.`,
+      };
+    }
+    if (timestamp <= previousTimestamp) {
+      return {
+        error: `Invalid trace data: timestamps must be strictly increasing at point ${index + 1}.`,
+      };
+    }
+    previousTimestamp = timestamp;
+
+    if (
+      typeof point.latitude !== "number" ||
+      !Number.isFinite(point.latitude) ||
+      point.latitude < -90 ||
+      point.latitude > 90
+    ) {
+      return {
+        error: `Invalid trace data: point ${index + 1} has an invalid latitude.`,
+      };
+    }
+    if (
+      typeof point.longitude !== "number" ||
+      !Number.isFinite(point.longitude) ||
+      point.longitude < -180 ||
+      point.longitude > 180
+    ) {
+      return {
+        error: `Invalid trace data: point ${index + 1} has an invalid longitude.`,
+      };
+    }
+    if (
+      point.speedKph !== undefined &&
+      (typeof point.speedKph !== "number" ||
+        !Number.isFinite(point.speedKph) ||
+        point.speedKph < 0)
+    ) {
+      return {
+        error: `Invalid trace data: point ${index + 1} has an invalid speed.`,
+      };
+    }
+    if (
+      point.activity !== undefined &&
+      !supportedActivities.has(point.activity)
+    ) {
+      return {
+        error: `Invalid trace data: point ${index + 1} has an unsupported activity.`,
+      };
+    }
+  }
+
+  return { trace: traceInput as GpsTracePoint[] };
+}
+
+function validateActivityLabels(activityLabels: unknown) {
+  if (activityLabels === undefined) {
+    return true;
+  }
+  return (
+    Array.isArray(activityLabels) &&
+    activityLabels.every((activity) => supportedActivities.has(activity))
   );
 }
 
-function isWalkingLike(point: GpsTracePoint) {
-  return point.activity === "walking" || (point.speedKph ?? 99) <= 7;
+function getAccessSequence(profile: RouteVerificationProfile) {
+  return [
+    profile.expectedStartAccessZone,
+    ...profile.expectedTransferAccessLocations,
+    profile.expectedEndAccessZone,
+  ];
 }
 
-function resolveRoute(input: ClassifySustainableTripChainInput) {
-  if (typeof input.selectedRoute !== "string") {
-    return input.selectedRoute;
+function getLocationThreshold(
+  location: RouteVerificationAccessLocation,
+  profile: RouteVerificationProfile,
+) {
+  if (
+    location.accessPointId === profile.expectedStartAccessZone.accessPointId
+  ) {
+    return profile.proximityThresholds.startKm;
+  }
+  if (location.accessPointId === profile.expectedEndAccessZone.accessPointId) {
+    return profile.proximityThresholds.endKm;
+  }
+  return profile.proximityThresholds.transferKm;
+}
+
+function isNearLocation(
+  point: GpsTracePoint,
+  location: RouteVerificationAccessLocation,
+  profile: RouteVerificationProfile,
+) {
+  return distanceKm(point, location) <= getLocationThreshold(location, profile);
+}
+
+function findOrderedAccessIndexes(
+  trace: GpsTracePoint[],
+  profile: RouteVerificationProfile,
+): number[] | null {
+  const indexes: number[] = [];
+  let searchFrom = 0;
+
+  for (const location of getAccessSequence(profile)) {
+    const relativeIndex = trace
+      .slice(searchFrom)
+      .findIndex((point) => isNearLocation(point, location, profile));
+    if (relativeIndex < 0) {
+      return null;
+    }
+    const absoluteIndex = searchFrom + relativeIndex;
+    indexes.push(absoluteIndex);
+    searchFrom = absoluteIndex;
   }
 
-  const options = input.routeOptions ?? phase0ARouteOptions;
+  return indexes;
+}
+
+function routeStructureMatches(
+  route: RouteOption,
+  profile: RouteVerificationProfile,
+) {
+  const accessSequence = getAccessSequence(profile).map(
+    (location) => location.accessPointId,
+  );
+  const routeAccessSequence = [
+    route.originAccessPointId,
+    ...route.segments.map((segment) => segment.destinationAccessPointId),
+  ];
 
   return (
-    input.expectedRoute ??
-    options.find((route) => route.id === input.selectedRoute) ??
-    options.find((route) => route.type === "sustainable")
+    route.originAccessPointId ===
+      profile.expectedStartAccessZone.accessPointId &&
+    route.destinationAccessPointId ===
+      profile.expectedEndAccessZone.accessPointId &&
+    route.segments.length === profile.orderedSegmentModes.length &&
+    route.segments.every(
+      (segment, index) => segment.mode === profile.orderedSegmentModes[index],
+    ) &&
+    routeAccessSequence.length === accessSequence.length &&
+    routeAccessSequence.every(
+      (accessPointId, index) => accessPointId === accessSequence[index],
+    )
   );
 }
 
-function hasCorridorShape(trace: GpsTracePoint[]) {
-  const pointsInPilotCorridor = trace.filter(
-    (point) =>
-      point.latitude >= 14.555 &&
-      point.latitude <= 14.628 &&
-      point.longitude >= 121.038 &&
-      point.longitude <= 121.062,
-  );
-  const ratioInCorridor =
-    pointsInPilotCorridor.length / Math.max(trace.length, 1);
-  const firstPoint = trace[0];
-  const lastPoint = trace[trace.length - 1];
-  const northboundProgress =
-    firstPoint && lastPoint
-      ? lastPoint.latitude - firstPoint.latitude >= 0.035
-      : false;
-
-  return ratioInCorridor >= 0.8 && northboundProgress;
-}
-
-function getComputedSpeeds(trace: GpsTracePoint[]) {
+function getComputedMovement(trace: GpsTracePoint[]) {
   const computedSpeeds: number[] = [];
-  const jumpDistances: number[] = [];
+  const jumps: Array<{ distance: number; elapsedMinutes: number }> = [];
 
   for (let index = 1; index < trace.length; index += 1) {
     const previousPoint = trace[index - 1];
     const point = trace[index];
     const elapsedMinutes = minutesBetween(previousPoint, point);
     const distance = distanceKm(previousPoint, point);
+    computedSpeeds.push(distance / (elapsedMinutes / 60));
+    jumps.push({ distance, elapsedMinutes });
+  }
 
-    jumpDistances.push(distance);
+  return { computedSpeeds, jumps };
+}
 
-    if (elapsedMinutes > 0) {
-      computedSpeeds.push(distance / (elapsedMinutes / 60));
+function getSpeedRangeForMode(
+  mode: TransportMode,
+  profile: RouteVerificationProfile,
+): RouteVerificationSpeedRange | undefined {
+  switch (mode) {
+    case "walk":
+      return profile.allowedMovementSpeedRanges.walking;
+    case "public_road_transport":
+    case "jeepney":
+    case "bus":
+      return profile.allowedMovementSpeedRanges.publicRoadTransport;
+    case "mrt":
+      return profile.allowedMovementSpeedRanges.mrt;
+    case "ferry":
+      return profile.allowedMovementSpeedRanges.ferry;
+    default:
+      return undefined;
+  }
+}
+
+function pointSupportsWalking(
+  point: GpsTracePoint,
+  walkingRange: RouteVerificationSpeedRange,
+) {
+  if (point.activity === "still" || point.speedKph === 0) {
+    return false;
+  }
+  if (point.activity === "walking") {
+    return (
+      point.speedKph === undefined ||
+      (point.speedKph >= walkingRange.minKph &&
+        point.speedKph <= walkingRange.maxKph)
+    );
+  }
+  return (
+    point.activity !== "in_vehicle" &&
+    point.speedKph !== undefined &&
+    point.speedKph >= walkingRange.minKph &&
+    point.speedKph <= walkingRange.maxKph
+  );
+}
+
+function hasCredibleWalkingEvidence(
+  traceWindow: GpsTracePoint[],
+  minimumSupportingPoints: number,
+  minimumPositionChangeKm: number,
+  profile: RouteVerificationProfile,
+) {
+  const walkingRange = profile.allowedMovementSpeedRanges.walking;
+  let longestRun: GpsTracePoint[] = [];
+  let currentRun: GpsTracePoint[] = [];
+
+  for (const point of traceWindow) {
+    if (pointSupportsWalking(point, walkingRange)) {
+      currentRun.push(point);
+      if (currentRun.length > longestRun.length) {
+        longestRun = [...currentRun];
+      }
+    } else {
+      currentRun = [];
     }
   }
 
-  return { computedSpeeds, jumpDistances };
+  if (longestRun.length < Math.max(2, minimumSupportingPoints)) {
+    return false;
+  }
+
+  return (
+    distanceKm(longestRun[0], longestRun[longestRun.length - 1]) >=
+    minimumPositionChangeKm
+  );
+}
+
+function hasMovementInRange(
+  traceWindow: GpsTracePoint[],
+  range: RouteVerificationSpeedRange,
+) {
+  return traceWindow.some(
+    (point) =>
+      point.speedKph !== undefined &&
+      point.speedKph >= range.minKph &&
+      point.speedKph <= range.maxKph,
+  );
+}
+
+function hasRequiredDwell(
+  trace: GpsTracePoint[],
+  profile: RouteVerificationProfile,
+) {
+  const locations = getAccessSequence(profile);
+
+  return profile.dwellRequirements.every((requirement) => {
+    const location = locations.find(
+      (candidate) => candidate.accessPointId === requirement.accessPointId,
+    );
+    if (!location) {
+      return false;
+    }
+    const slowPoints = trace.filter(
+      (point) =>
+        isNearLocation(point, location, profile) &&
+        (point.activity === "still" || (point.speedKph ?? Infinity) <= 2),
+    );
+    if (slowPoints.length < 2) {
+      return false;
+    }
+    return (
+      minutesBetween(slowPoints[0], slowPoints[slowPoints.length - 1]) >=
+      requirement.minimumMinutes
+    );
+  });
 }
 
 function scoreSignals(signals: ClassifierSignalChecklist) {
@@ -188,114 +450,121 @@ function getResult(
   rewardEligibility: RewardEligibility;
 } {
   if (suspiciousPattern) {
-    return {
-      result: "Suspicious pattern",
-      rewardEligibility: "None",
-    };
+    return { result: "Suspicious pattern", rewardEligibility: "None" };
   }
-
   if (score >= 80) {
     return {
       result: "Verified sustainable trip chain",
       rewardEligibility: "Full",
     };
   }
-
   if (score >= 60) {
-    return {
-      result: "Partially verified trip",
-      rewardEligibility: "Reduced",
-    };
+    return { result: "Partially verified trip", rewardEligibility: "Reduced" };
   }
-
-  return {
-    result: "Unverified trip",
-    rewardEligibility: "None",
-  };
+  return { result: "Unverified trip", rewardEligibility: "None" };
 }
 
 export function classifySustainableTripChain(
   input: ClassifySustainableTripChainInput,
 ): ClassifierResult {
-  const route = resolveRoute(input);
-  const trace = input.gpsTrace;
-  const accessPoints = input.stationAccessPoints ?? defaultStationAccessPoints;
+  const routeResolution = resolveEligibleRoute(input);
+  if ("error" in routeResolution) {
+    return buildRejectedResult(routeResolution.error);
+  }
+
+  const { route, profile } = routeResolution;
+  const traceValidation = validateTrace(input.gpsTrace, profile);
+  if ("error" in traceValidation) {
+    return buildRejectedResult(traceValidation.error);
+  }
+  if (!validateActivityLabels(input.activityLabels)) {
+    return buildRejectedResult(
+      "Invalid trace data: activity labels contain an unsupported value.",
+    );
+  }
+
+  const trace = traceValidation.trace;
   const explanation: string[] = [];
-
-  if (!route) {
-    return {
-      confidenceScore: 0,
-      result: "Unverified trip",
-      rewardEligibility: "None",
-      signals: {
-        routeMatch: false,
-        speedPatternValid: false,
-        walkingSegmentsDetected: false,
-        stationDwellDetected: false,
-        proximityValid: false,
-        impossibleMovementDetected: false,
-        suspiciousPattern: true,
-        activityRecognitionSupport: false,
-      },
-      explanation: [
-        "No selected sustainable route was available for verification.",
-      ],
-    };
-  }
-
-  if (trace.length < 8) {
-    explanation.push("Trace is too short to verify all trip-chain segments.");
-  }
-
-  const firstWindow = trace.slice(0, 3);
-  const lastWindow = trace.slice(Math.max(trace.length - 3, 0));
+  const structureMatches = routeStructureMatches(route, profile);
+  const accessIndexes = findOrderedAccessIndexes(trace, profile);
+  const routeMatch = structureMatches && accessIndexes !== null;
+  const accessSequence = getAccessSequence(profile);
   const firstPoint = trace[0];
   const lastPoint = trace[trace.length - 1];
-  const middleWindow = trace.slice(2, Math.max(trace.length - 2, 2));
-  const { computedSpeeds, jumpDistances } = getComputedSpeeds(trace);
+  const proximityValid =
+    isNearLocation(firstPoint, profile.expectedStartAccessZone, profile) &&
+    isNearLocation(lastPoint, profile.expectedEndAccessZone, profile) &&
+    profile.expectedTransferAccessLocations.every((location) =>
+      trace.some((point) => isNearLocation(point, location, profile)),
+    );
+  const stationDwellDetected = hasRequiredDwell(trace, profile);
+  const { computedSpeeds, jumps } = getComputedMovement(trace);
   const reportedSpeeds = trace
     .map((point) => point.speedKph)
-    .filter((speed): speed is number => typeof speed === "number");
+    .filter((speed): speed is number => speed !== undefined);
   const maxReportedSpeed = Math.max(0, ...reportedSpeeds);
   const maxComputedSpeed = Math.max(0, ...computedSpeeds);
-  const maxJumpDistance = Math.max(0, ...jumpDistances);
+  const maxJumpDistance = Math.max(0, ...jumps.map((jump) => jump.distance));
   const impossibleMovementDetected =
-    maxReportedSpeed > 90 ||
-    maxComputedSpeed > 120 ||
-    jumpDistances.some((distance, index) => {
-      const elapsedMinutes = minutesBetween(trace[index], trace[index + 1]);
+    maxReportedSpeed > profile.impossibleMovementThresholds.reportedSpeedKph ||
+    maxComputedSpeed > profile.impossibleMovementThresholds.computedSpeedKph ||
+    jumps.some(
+      ({ distance, elapsedMinutes }) =>
+        distance > profile.impossibleMovementThresholds.teleportDistanceKm &&
+        elapsedMinutes <=
+          profile.impossibleMovementThresholds.teleportMaximumMinutes,
+    );
 
-      return distance > 3 && elapsedMinutes <= 3;
+  const walkingSegmentsDetected =
+    accessIndexes !== null &&
+    profile.walkingRequirements.every((requirement) => {
+      const segmentIndex = route.segments.findIndex(
+        (segment) => segment.id === requirement.segmentId,
+      );
+      if (segmentIndex < 0) {
+        return false;
+      }
+      return hasCredibleWalkingEvidence(
+        trace.slice(
+          accessIndexes[segmentIndex],
+          accessIndexes[segmentIndex + 1] + 1,
+        ),
+        requirement.minimumSupportingPoints,
+        requirement.minimumPositionChangeKm,
+        profile,
+      );
     });
-  const routeMatch = hasCorridorShape(trace);
-  const firstMileWalking = firstWindow.some(isWalkingLike);
-  const lastMileWalking = lastWindow.some(isWalkingLike);
-  const walkingSegmentsDetected = firstMileWalking && lastMileWalking;
-  const transitLikeMovement = middleWindow.some(
-    (point) => point.activity === "in_vehicle" || (point.speedKph ?? 0) >= 12,
-  );
+
+  const movementSegmentsValid =
+    accessIndexes !== null &&
+    route.segments.every((segment, index) => {
+      const range = getSpeedRangeForMode(segment.mode, profile);
+      if (!range) {
+        return false;
+      }
+      const traceWindow = trace.slice(
+        accessIndexes[index],
+        accessIndexes[index + 1] + 1,
+      );
+      if (segment.mode === "walk") {
+        const requirement = profile.walkingRequirements.find(
+          (candidate) => candidate.segmentId === segment.id,
+        );
+        return Boolean(
+          requirement &&
+          hasCredibleWalkingEvidence(
+            traceWindow,
+            requirement.minimumSupportingPoints,
+            requirement.minimumPositionChangeKm,
+            profile,
+          ),
+        );
+      }
+      return hasMovementInRange(traceWindow, range);
+    });
+
   const speedPatternValid =
-    !impossibleMovementDetected &&
-    firstMileWalking &&
-    lastMileWalking &&
-    transitLikeMovement &&
-    maxReportedSpeed <= 75 &&
-    maxComputedSpeed <= 90;
-  const startsNearGuadalupe =
-    firstPoint && distanceKm(firstPoint, guadalupeAccessPoint) <= 0.8;
-  const endsNearCubao =
-    lastPoint && distanceKm(lastPoint, cubaoAccessPoint) <= 0.9;
-  const hasStationTouch = trace.some((point) =>
-    isNearAnyStation(point, accessPoints, 0.65),
-  );
-  const proximityValid = Boolean(
-    startsNearGuadalupe && endsNearCubao && hasStationTouch,
-  );
-  const stationDwellDetected = trace.some(
-    (point) =>
-      isNearAnyStation(point, accessPoints, 0.45) &&
-      (point.activity === "still" || (point.speedKph ?? 99) <= 2),
-  );
+    !impossibleMovementDetected && movementSegmentsValid;
   const traceActivities = [
     ...trace.map((point) => point.activity).filter(Boolean),
     ...(input.activityLabels ?? []),
@@ -303,12 +572,14 @@ export function classifySustainableTripChain(
   const activityRecognitionSupport =
     traceActivities.includes("walking") &&
     traceActivities.includes("in_vehicle") &&
-    (traceActivities.includes("still") || traceActivities.includes("unknown"));
+    traceActivities.includes("still");
   const suspiciousPattern =
-    trace.length < 8 ||
     impossibleMovementDetected ||
+    !routeMatch ||
+    !proximityValid ||
+    !stationDwellDetected ||
     !walkingSegmentsDetected ||
-    !transitLikeMovement;
+    !movementSegmentsValid;
 
   const signals: ClassifierSignalChecklist = {
     routeMatch,
@@ -321,71 +592,46 @@ export function classifySustainableTripChain(
     activityRecognitionSupport,
   };
 
-  if (routeMatch) {
-    explanation.push(
-      "Trace stays within the Guadalupe to Cubao pilot corridor.",
-    );
-  } else {
-    explanation.push(
-      "Trace does not sufficiently match the pilot corridor shape.",
-    );
-  }
-
-  if (speedPatternValid) {
-    explanation.push(
-      "Speed pattern supports walking access and transit corridor movement.",
-    );
-  } else {
-    explanation.push("Speed pattern is incomplete or outside MVP thresholds.");
-  }
-
-  if (walkingSegmentsDetected) {
-    explanation.push(
-      "First-mile and last-mile walking-like segments were detected.",
-    );
-  } else {
-    explanation.push(
-      "First-mile or last-mile walking-like segment is missing.",
-    );
-  }
-
-  if (proximityValid) {
-    explanation.push(
-      "Trace begins and ends near expected station/access areas.",
-    );
-  } else {
-    explanation.push(
-      "Station/access proximity is incomplete for the selected route.",
-    );
-  }
-
-  if (stationDwellDetected) {
-    explanation.push(
-      "Low-speed dwell near a station/access point supports transfer behavior.",
-    );
-  } else {
-    explanation.push("No clear station dwell or transfer pause was detected.");
-  }
-
-  if (activityRecognitionSupport) {
-    explanation.push(
-      "Phone activity labels support the trip-chain interpretation.",
-    );
-  } else {
-    explanation.push(
-      "Phone activity labels are limited or do not support all segments.",
-    );
-  }
-
-  if (impossibleMovementDetected) {
-    explanation.push(
-      `Suspicious movement detected: max speed ${Math.round(
-        Math.max(maxReportedSpeed, maxComputedSpeed),
-      )} kph, max jump ${maxJumpDistance.toFixed(1)} km.`,
-    );
-  } else {
-    explanation.push("No impossible movement was detected by MVP thresholds.");
-  }
+  explanation.push(
+    routeMatch
+      ? "Trace visits the final route's start, transfers, and destination in the required order."
+      : "Trace does not match the final route's ordered access and transfer locations.",
+  );
+  explanation.push(
+    speedPatternValid
+      ? "Reported and computed movement fit the route profile's prototype speed ranges."
+      : "Movement is incomplete or outside the selected route profile's speed ranges.",
+  );
+  explanation.push(
+    walkingSegmentsDetected
+      ? "Credible walking movement was detected from Guadalupe MRT to the ferry and from Hulo Ferry to the demo destination."
+      : "One or both required walking segments lack sustained, non-zero movement evidence.",
+  );
+  explanation.push(
+    proximityValid
+      ? "Start, transfer, ferry, and destination access locations are within prototype proximity thresholds."
+      : "Required final-route access proximity is incomplete.",
+  );
+  explanation.push(
+    stationDwellDetected
+      ? "Required dwell near MRT and ferry transfer locations supports the trip chain."
+      : "Required MRT or ferry transfer dwell is missing.",
+  );
+  explanation.push(
+    activityRecognitionSupport
+      ? "Phone activity labels support walking, dwell, and vehicle movement."
+      : "Phone activity labels are limited or do not support all route modes.",
+  );
+  explanation.push(
+    impossibleMovementDetected
+      ? `Suspicious movement detected: max speed ${Math.round(
+          Math.max(maxReportedSpeed, maxComputedSpeed),
+        )} kph, max jump ${maxJumpDistance.toFixed(1)} km.`
+      : "No impossible movement was detected by the route profile thresholds.",
+  );
+  explanation.push(
+    `Verification used the ${profile.routeId} generated-prototype profile with ${accessSequence.length} ordered access locations.`,
+  );
 
   const rawScore = scoreSignals(signals);
   const confidenceScore = suspiciousPattern
@@ -404,5 +650,3 @@ export function classifySustainableTripChain(
     explanation,
   };
 }
-
-export { defaultStationAccessPoints };

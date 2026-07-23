@@ -8,7 +8,7 @@ Primary Phase 0A flow:
 1. Plan the shared five-segment Cubao-to-Hulo pilot journey
 2. Compare the recommended route with pending/non-live alternatives
 3. Inspect the shared segment breakdown
-4. Run prototype trip verification
+4. Run deterministic five-segment prototype playback and verification
 5. View eligible reward results
 6. Report an access barrier
 
@@ -30,5 +30,22 @@ and Android hardware back follows explicit prototype destinations.
 
 The Rewards overview uses shared seeded balances and route reward potential.
 XP, levels, streaks, reward products, wallets, payments, and live-account claims
-are not part of the active interface. Classifier final-route binding, reward
-boundary hardening, and playback progression remain separate Phase 0A work.
+are not part of the active interface.
+
+Playback starts on the first shared route segment, progresses deterministically
+through all five, gates verification until completion, and supports restart.
+Both generated prototype trace choices remain available. The classifier uses
+the selected route's final verification profile and fails closed on malformed
+or ineligible inputs. It is a coarse rule-based demonstration, not live GPS,
+full GIS map matching, or perfect mode detection.
+
+Reward calculation normalizes hostile numeric inputs, keeps campaign Points
+within the cap, gives Reduced results half Lakbay Score and zero campaign
+Points, and leaves CO2e at zero while calibration is pending. Report locations
+match the final route access areas and submissions remain local/session-only
+prototype behavior.
+
+Automated component tests cover playback, valid/suspicious verification,
+restart, and report locations. A physical-device walkthrough is still required
+to confirm target-device rendering, taps, font scaling, orientation, and Expo
+Go behavior.
